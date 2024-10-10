@@ -107,7 +107,7 @@ This will start the server on `http://localhost:5713)`.
    GET /api/schedule
    ```
 
-## API Endpoints
+## Example API Endpoints
 
 | Method | Endpoint                 | Description                            |
 |--------|--------------------------|----------------------------------------|
@@ -124,16 +124,11 @@ This will start the server on `http://localhost:5713)`.
 - **MySQL**: Relational database
 - **JWT**: Authentication
 - **BCrypt**: Password hashing
+- **Joi**: Validating api requests 
 
 ## Contributing
 
-Contributions are welcome! If you'd like to contribute to this project, please follow these steps:
-
-1. Fork the repository.
-2. Create a new branch for your feature (`git checkout -b feature/new-feature`).
-3. Commit your changes (`git commit -m 'Add new feature'`).
-4. Push the branch (`git push origin feature/new-feature`).
-5. Open a pull request.
+Contributions will be made available once the project releases v1.0.0
 
 ## License
 
