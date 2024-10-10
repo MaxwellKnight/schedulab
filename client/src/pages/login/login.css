@@ -1,0 +1,72 @@
+.form-container {
+	font-family: "Roboto", sans-serif;
+	display: flex;
+	background-color: #fff;
+	width: 100%;
+	flex-direction: column;
+	min-width: 300px;
+}
+
+.top {
+	display: flex;
+}
+
+.bottom {
+	display: grid;
+}
+
+.top > button {
+	border: none;
+	padding: 1.5rem 3rem;
+	flex: 1;
+	font-size: 1rem;
+	text-transform: uppercase;
+	font-weight: bold;
+	letter-spacing: 1px;
+	background-color: #ffff;
+	color: background-color: hsl(238, 13%, 36%);
+}
+
+input {
+	color: #fff;
+	background: none;
+	border: none;
+	padding: 1rem 1.5rem;
+	background-color: hsl(238, 13%, 36%);
+	font-size: 1rem;	
+	width: 100%;
+}
+
+input::placeholder {
+	color: #fff;
+}
+
+.bottom > .input-fields > div:nth-child(2) {
+		margin-block-start: 1rem;
+}
+
+.bottom > .input-fields { 
+	padding: 3rem 1.5rem 0 1.5rem;	
+}
+
+
+.top > .inactive-button {
+	color: #fff;
+	background-color: hsl(238, 13%, 36%);
+}
+
+.bottom > .action-fields {
+	display: flex;
+	justify-content: center;
+	padding-block: 1rem;
+}
+
+.bottom > .login-btn {
+	border: none;
+	padding-block: 1.5rem;
+	font-size: 1rem;
+	text-transform: uppercase;
+	font-weight: bold;
+	letter-spacing: 5px;
+	background-color: hsl(230, 60%, 68% );
+}

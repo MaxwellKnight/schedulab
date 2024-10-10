@@ -1,0 +1,1421 @@
+{
+	"info": {
+		"_postman_id": "3b096f1b-d48f-4fee-8dac-5d8cfec02227",
+		"name": "Shifty",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "23133253"
+	},
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/users",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Users",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base}}/users",
+									"host": [
+										"{{base}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "4401"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"1131-QyeSS0Y78BF+Fy3ri5RZZXi8Ofo\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Jun 2024 09:59:37 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": 1,\n        \"user_role\": \"chuchon\",\n        \"first_name\": \"John\",\n        \"last_name\": \"Doe\",\n        \"email\": \"john.doe@example.com\",\n        \"student\": 0,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            1\n        ],\n        \"recent_vacations\": [\n            1\n        ]\n    },\n    {\n        \"id\": 2,\n        \"user_role\": \"Staff\",\n        \"first_name\": \"Jane\",\n        \"last_name\": \"Smith\",\n        \"email\": \"jane.smith@example.com\",\n        \"student\": 0,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            2\n        ],\n        \"recent_vacations\": [\n            2\n        ]\n    },\n    {\n        \"id\": 3,\n        \"user_role\": \"Intern\",\n        \"first_name\": \"Alice\",\n        \"last_name\": \"Brown\",\n        \"email\": \"alice.brown@example.com\",\n        \"student\": 1,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            3\n        ],\n        \"recent_vacations\": [\n            3\n        ]\n    },\n    {\n        \"id\": 4,\n        \"user_role\": \"Staff\",\n        \"first_name\": \"Bob\",\n        \"last_name\": \"Johnson\",\n        \"email\": \"bob.johnson@example.com\",\n        \"student\": 0,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            4\n        ],\n        \"recent_vacations\": [\n            4\n        ]\n    },\n    {\n        \"id\": 5,\n        \"user_role\": \"Manager\",\n        \"first_name\": \"Carol\",\n        \"last_name\": \"Taylor\",\n        \"email\": \"carol.taylor@example.com\",\n        \"student\": 0,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            5\n        ],\n        \"recent_vacations\": [\n            5\n        ]\n    },\n    {\n        \"id\": 6,\n        \"user_role\": \"Intern\",\n        \"first_name\": \"David\",\n        \"last_name\": \"Lee\",\n        \"email\": \"david.lee@example.com\",\n        \"student\": 1,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            6\n        ],\n        \"recent_vacations\": [\n            6\n        ]\n    },\n    {\n        \"id\": 7,\n        \"user_role\": \"Staff\",\n        \"first_name\": \"Eve\",\n        \"last_name\": \"Walker\",\n        \"email\": \"eve.walker@example.com\",\n        \"student\": 0,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            7\n        ],\n        \"recent_vacations\": [\n            7\n        ]\n    },\n    {\n        \"id\": 8,\n        \"user_role\": \"Manager\",\n        \"first_name\": \"Frank\",\n        \"last_name\": \"Harris\",\n        \"email\": \"frank.harris@example.com\",\n        \"student\": 0,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            8\n        ],\n        \"recent_vacations\": [\n            8\n        ]\n    },\n    {\n        \"id\": 9,\n        \"user_role\": \"Intern\",\n        \"first_name\": \"Grace\",\n        \"last_name\": \"Clark\",\n        \"email\": \"grace.clark@example.com\",\n        \"student\": 1,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            9\n        ],\n        \"recent_vacations\": [\n            9\n        ]\n    },\n    {\n        \"id\": 10,\n        \"user_role\": \"Staff\",\n        \"first_name\": \"Henry\",\n        \"last_name\": \"Martinez\",\n        \"email\": \"henry.martinez@example.com\",\n        \"student\": 0,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            10\n        ],\n        \"recent_vacations\": [\n            10\n        ]\n    },\n    {\n        \"id\": 11,\n        \"user_role\": \"Manager\",\n        \"first_name\": \"Ivy\",\n        \"last_name\": \"Robinson\",\n        \"email\": \"ivy.robinson@example.com\",\n        \"student\": 0,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            11\n        ],\n        \"recent_vacations\": [\n            11\n        ]\n    },\n    {\n        \"id\": 12,\n        \"user_role\": \"Intern\",\n        \"first_name\": \"Jack\",\n        \"last_name\": \"Lewis\",\n        \"email\": \"jack.lewis@example.com\",\n        \"student\": 1,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            12\n        ],\n        \"recent_vacations\": [\n            12\n        ]\n    },\n    {\n        \"id\": 13,\n        \"user_role\": \"Staff\",\n        \"first_name\": \"Kate\",\n        \"last_name\": \"Young\",\n        \"email\": \"kate.young@example.com\",\n        \"student\": 0,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            13\n        ],\n        \"recent_vacations\": [\n            13\n        ]\n    },\n    {\n        \"id\": 14,\n        \"user_role\": \"Manager\",\n        \"first_name\": \"Liam\",\n        \"last_name\": \"King\",\n        \"email\": \"liam.king@example.com\",\n        \"student\": 0,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            14\n        ],\n        \"recent_vacations\": [\n            14\n        ]\n    },\n    {\n        \"id\": 15,\n        \"user_role\": \"Intern\",\n        \"first_name\": \"Mia\",\n        \"last_name\": \"Scott\",\n        \"email\": \"mia.scott@example.com\",\n        \"student\": 1,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            15\n        ],\n        \"recent_vacations\": [\n            15\n        ]\n    },\n    {\n        \"id\": 16,\n        \"user_role\": \"Staff\",\n        \"first_name\": \"Noah\",\n        \"last_name\": \"Adams\",\n        \"email\": \"noah.adams@example.com\",\n        \"student\": 0,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            16\n        ],\n        \"recent_vacations\": [\n            16\n        ]\n    },\n    {\n        \"id\": 17,\n        \"user_role\": \"Manager\",\n        \"first_name\": \"Olivia\",\n        \"last_name\": \"Baker\",\n        \"email\": \"olivia.baker@example.com\",\n        \"student\": 0,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            17\n        ],\n        \"recent_vacations\": [\n            17\n        ]\n    },\n    {\n        \"id\": 18,\n        \"user_role\": \"Intern\",\n        \"first_name\": \"Paul\",\n        \"last_name\": \"Garcia\",\n        \"email\": \"paul.garcia@example.com\",\n        \"student\": 1,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [\n            18\n        ],\n        \"recent_vacations\": [\n            18\n        ]\n    },\n    {\n        \"id\": 19,\n        \"user_role\": \"Staff\",\n        \"first_name\": \"Quinn\",\n        \"last_name\": \"Lopez\",\n        \"email\": \"quinn.lopez@example.com\",\n        \"student\": 0,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [],\n        \"recent_vacations\": [\n            19\n        ]\n    },\n    {\n        \"id\": 20,\n        \"user_role\": \"Manager\",\n        \"first_name\": \"Rachel\",\n        \"last_name\": \"Perez\",\n        \"email\": \"rachel.perez@example.com\",\n        \"student\": 0,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"recent_shifts\": [],\n        \"recent_vacations\": [\n            20\n        ]\n    },\n    {\n        \"id\": 21,\n        \"user_role\": \"Admin\",\n        \"first_name\": \"Maximilian\",\n        \"last_name\": \"fuckface\",\n        \"email\": \"shit.face@example.com\",\n        \"student\": 0,\n        \"created_at\": \"2024-06-16T08:28:12.000Z\",\n        \"recent_shifts\": [],\n        \"recent_vacations\": []\n    },\n    {\n        \"id\": 24,\n        \"user_role\": \"Admin\",\n        \"first_name\": \"Maxwell\",\n        \"last_name\": \"thegever\",\n        \"email\": \"gever.man@example.com\",\n        \"student\": 1,\n        \"created_at\": null,\n        \"recent_shifts\": [],\n        \"recent_vacations\": []\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/users/1",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"users",
+								"1"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "User",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base}}/users/1",
+									"host": [
+										"{{base}}"
+									],
+									"path": [
+										"users",
+										"1"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "195"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"c3-rElXOSW5Bw5sDn03KpfcHmuaEeY\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Jun 2024 09:15:28 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 1,\n    \"user_role\": \"fuckface\",\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"student\": 0,\n    \"created_at\": \"2024-05-31T21:00:00.000Z\",\n    \"recent_shifts\": [\n        1\n    ],\n    \"recent_vacations\": [\n        1\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_role\": \"admin\",\n    \"first_name\": \"Doris\",\n    \"last_name\": \"Yona\",\n    \"email\": \"shit.faced@example.com\",\n    \"student\": 1,\n    \"created_at\": \"2024-06-01\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base}}/users",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "User",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"user_role\": \"admin\",\n    \"first_name\": \"Doris\",\n    \"last_name\": \"Yona\",\n    \"email\": \"shit.faced@example.com\",\n    \"student\": 1,\n    \"created_at\": \"2024-06-01\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base}}/users",
+									"host": [
+										"{{base}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "34"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"22-XQLPM1JkAWUYOyOd0djlO9UYqYk\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Jun 2024 10:00:15 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"User created\",\n    \"id\": 26\n}"
+						}
+					]
+				},
+				{
+					"name": "Users by shift",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/users/shift/2",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"users",
+								"shift",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/users/8",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"users",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 1,\n    \"user_role\": \"chuchon\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base}}/users/1",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"users",
+								"1"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "New Request",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 1,\n    \"user_role\": \"chuchon\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base}}/users/1",
+									"host": [
+										"{{base}}"
+									],
+									"path": [
+										"users",
+										"1"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "33"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"21-UY3ggFB4fQAUYRz/ji6BoRFb0Gw\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Jun 2024 09:22:22 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"User updated\",\n    \"id\": 1\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Shifts",
+			"item": [
+				{
+					"name": "Shifts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/shifts",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"shifts"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Shifts",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base}}/shifts",
+									"host": [
+										"{{base}}"
+									],
+									"path": [
+										"shifts"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "5417"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"1529-JkF6AlLZ0egZGIXaHWeUhrVHKBg\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Jun 2024 08:35:54 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": 1,\n        \"schedule_id\": 1,\n        \"shift_type\": 1,\n        \"required_count\": 2,\n        \"shift_name\": \"Morning Shift\",\n        \"start_time\": \"2024-06-01T05:00:00.000Z\",\n        \"end_time\": \"2024-06-01T09:00:00.000Z\",\n        \"date\": \"2024-06-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 1,\n                \"email\": \"john.doe@example.com\",\n                \"name\": \"John Doe\"\n            }\n        ]\n    },\n    {\n        \"id\": 2,\n        \"schedule_id\": 1,\n        \"shift_type\": 2,\n        \"required_count\": 2,\n        \"shift_name\": \"Afternoon Shift\",\n        \"start_time\": \"2024-06-01T09:00:00.000Z\",\n        \"end_time\": \"2024-06-01T13:00:00.000Z\",\n        \"date\": \"2024-06-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 2,\n                \"email\": \"jane.smith@example.com\",\n                \"name\": \"Jane Smith\"\n            }\n        ]\n    },\n    {\n        \"id\": 3,\n        \"schedule_id\": 1,\n        \"shift_type\": 3,\n        \"required_count\": 2,\n        \"shift_name\": \"Evening Shift\",\n        \"start_time\": \"2024-06-01T13:00:00.000Z\",\n        \"end_time\": \"2024-06-01T17:00:00.000Z\",\n        \"date\": \"2024-06-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 3,\n                \"email\": \"alice.brown@example.com\",\n                \"name\": \"Alice Brown\"\n            }\n        ]\n    },\n    {\n        \"id\": 4,\n        \"schedule_id\": 1,\n        \"shift_type\": 1,\n        \"required_count\": 2,\n        \"shift_name\": \"Morning Shift\",\n        \"start_time\": \"2024-06-02T05:00:00.000Z\",\n        \"end_time\": \"2024-06-02T09:00:00.000Z\",\n        \"date\": \"2024-06-02\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 4,\n                \"email\": \"bob.johnson@example.com\",\n                \"name\": \"Bob Johnson\"\n            }\n        ]\n    },\n    {\n        \"id\": 5,\n        \"schedule_id\": 1,\n        \"shift_type\": 2,\n        \"required_count\": 2,\n        \"shift_name\": \"Afternoon Shift\",\n        \"start_time\": \"2024-06-02T09:00:00.000Z\",\n        \"end_time\": \"2024-06-02T13:00:00.000Z\",\n        \"date\": \"2024-06-02\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 5,\n                \"email\": \"carol.taylor@example.com\",\n                \"name\": \"Carol Taylor\"\n            }\n        ]\n    },\n    {\n        \"id\": 6,\n        \"schedule_id\": 1,\n        \"shift_type\": 3,\n        \"required_count\": 2,\n        \"shift_name\": \"Evening Shift\",\n        \"start_time\": \"2024-06-02T13:00:00.000Z\",\n        \"end_time\": \"2024-06-02T17:00:00.000Z\",\n        \"date\": \"2024-06-02\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 6,\n                \"email\": \"david.lee@example.com\",\n                \"name\": \"David Lee\"\n            }\n        ]\n    },\n    {\n        \"id\": 7,\n        \"schedule_id\": 2,\n        \"shift_type\": 1,\n        \"required_count\": 2,\n        \"shift_name\": \"Morning Shift\",\n        \"start_time\": \"2024-07-01T05:00:00.000Z\",\n        \"end_time\": \"2024-07-01T09:00:00.000Z\",\n        \"date\": \"2024-07-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 7,\n                \"email\": \"eve.walker@example.com\",\n                \"name\": \"Eve Walker\"\n            }\n        ]\n    },\n    {\n        \"id\": 8,\n        \"schedule_id\": 2,\n        \"shift_type\": 2,\n        \"required_count\": 2,\n        \"shift_name\": \"Afternoon Shift\",\n        \"start_time\": \"2024-07-01T09:00:00.000Z\",\n        \"end_time\": \"2024-07-01T13:00:00.000Z\",\n        \"date\": \"2024-07-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 8,\n                \"email\": \"frank.harris@example.com\",\n                \"name\": \"Frank Harris\"\n            }\n        ]\n    },\n    {\n        \"id\": 9,\n        \"schedule_id\": 2,\n        \"shift_type\": 3,\n        \"required_count\": 2,\n        \"shift_name\": \"Evening Shift\",\n        \"start_time\": \"2024-07-01T13:00:00.000Z\",\n        \"end_time\": \"2024-07-01T17:00:00.000Z\",\n        \"date\": \"2024-07-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 9,\n                \"email\": \"grace.clark@example.com\",\n                \"name\": \"Grace Clark\"\n            }\n        ]\n    },\n    {\n        \"id\": 10,\n        \"schedule_id\": 2,\n        \"shift_type\": 1,\n        \"required_count\": 2,\n        \"shift_name\": \"Morning Shift\",\n        \"start_time\": \"2024-07-02T05:00:00.000Z\",\n        \"end_time\": \"2024-07-02T09:00:00.000Z\",\n        \"date\": \"2024-07-02\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 10,\n                \"email\": \"henry.martinez@example.com\",\n                \"name\": \"Henry Martinez\"\n            }\n        ]\n    },\n    {\n        \"id\": 11,\n        \"schedule_id\": 2,\n        \"shift_type\": 2,\n        \"required_count\": 2,\n        \"shift_name\": \"Afternoon Shift\",\n        \"start_time\": \"2024-07-02T09:00:00.000Z\",\n        \"end_time\": \"2024-07-02T13:00:00.000Z\",\n        \"date\": \"2024-07-02\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 11,\n                \"email\": \"ivy.robinson@example.com\",\n                \"name\": \"Ivy Robinson\"\n            }\n        ]\n    },\n    {\n        \"id\": 12,\n        \"schedule_id\": 2,\n        \"shift_type\": 3,\n        \"required_count\": 2,\n        \"shift_name\": \"Evening Shift\",\n        \"start_time\": \"2024-07-02T13:00:00.000Z\",\n        \"end_time\": \"2024-07-02T17:00:00.000Z\",\n        \"date\": \"2024-07-02\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 12,\n                \"email\": \"jack.lewis@example.com\",\n                \"name\": \"Jack Lewis\"\n            }\n        ]\n    },\n    {\n        \"id\": 13,\n        \"schedule_id\": 3,\n        \"shift_type\": 1,\n        \"required_count\": 2,\n        \"shift_name\": \"Morning Shift\",\n        \"start_time\": \"2024-08-01T05:00:00.000Z\",\n        \"end_time\": \"2024-08-01T09:00:00.000Z\",\n        \"date\": \"2024-08-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 13,\n                \"email\": \"kate.young@example.com\",\n                \"name\": \"Kate Young\"\n            }\n        ]\n    },\n    {\n        \"id\": 14,\n        \"schedule_id\": 3,\n        \"shift_type\": 2,\n        \"required_count\": 2,\n        \"shift_name\": \"Afternoon Shift\",\n        \"start_time\": \"2024-08-01T09:00:00.000Z\",\n        \"end_time\": \"2024-08-01T13:00:00.000Z\",\n        \"date\": \"2024-08-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 14,\n                \"email\": \"liam.king@example.com\",\n                \"name\": \"Liam King\"\n            }\n        ]\n    },\n    {\n        \"id\": 15,\n        \"schedule_id\": 3,\n        \"shift_type\": 3,\n        \"required_count\": 2,\n        \"shift_name\": \"Evening Shift\",\n        \"start_time\": \"2024-08-01T13:00:00.000Z\",\n        \"end_time\": \"2024-08-01T17:00:00.000Z\",\n        \"date\": \"2024-08-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 15,\n                \"email\": \"mia.scott@example.com\",\n                \"name\": \"Mia Scott\"\n            }\n        ]\n    },\n    {\n        \"id\": 16,\n        \"schedule_id\": 3,\n        \"shift_type\": 1,\n        \"required_count\": 2,\n        \"shift_name\": \"Morning Shift\",\n        \"start_time\": \"2024-08-02T05:00:00.000Z\",\n        \"end_time\": \"2024-08-02T09:00:00.000Z\",\n        \"date\": \"2024-08-02\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 16,\n                \"email\": \"noah.adams@example.com\",\n                \"name\": \"Noah Adams\"\n            }\n        ]\n    },\n    {\n        \"id\": 17,\n        \"schedule_id\": 3,\n        \"shift_type\": 2,\n        \"required_count\": 2,\n        \"shift_name\": \"Afternoon Shift\",\n        \"start_time\": \"2024-08-02T09:00:00.000Z\",\n        \"end_time\": \"2024-08-02T13:00:00.000Z\",\n        \"date\": \"2024-08-02\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 17,\n                \"email\": \"olivia.baker@example.com\",\n                \"name\": \"Olivia Baker\"\n            }\n        ]\n    },\n    {\n        \"id\": 18,\n        \"schedule_id\": 3,\n        \"shift_type\": 3,\n        \"required_count\": 2,\n        \"shift_name\": \"Evening Shift\",\n        \"start_time\": \"2024-08-02T13:00:00.000Z\",\n        \"end_time\": \"2024-08-02T17:00:00.000Z\",\n        \"date\": \"2024-08-02\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 18,\n                \"email\": \"paul.garcia@example.com\",\n                \"name\": \"Paul Garcia\"\n            }\n        ]\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Shifts by dates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/shifts/dates/2024-06-01/2024-07-01",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"shifts",
+								"dates",
+								"2024-06-01",
+								"2024-07-01"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Shifts by dates",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base}}/shifts/dates/2024-06-01/2024-07-01",
+									"host": [
+										"{{base}}"
+									],
+									"path": [
+										"shifts",
+										"dates",
+										"2024-06-01",
+										"2024-07-01"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "1803"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"70b-z8ZYxVXDsIqsE8mjjuurxwToSU8\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Jun 2024 10:00:54 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": 4,\n        \"schedule_id\": 1,\n        \"shift_type\": 1,\n        \"required_count\": 2,\n        \"shift_name\": \"Morning Shift\",\n        \"start_time\": \"2024-06-02T05:00:00.000Z\",\n        \"end_time\": \"2024-06-02T09:00:00.000Z\",\n        \"date\": \"2024-06-02\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 4,\n                \"email\": \"bob.johnson@example.com\",\n                \"name\": \"Bob Johnson\"\n            }\n        ]\n    },\n    {\n        \"id\": 5,\n        \"schedule_id\": 1,\n        \"shift_type\": 2,\n        \"required_count\": 2,\n        \"shift_name\": \"Afternoon Shift\",\n        \"start_time\": \"2024-06-02T09:00:00.000Z\",\n        \"end_time\": \"2024-06-02T13:00:00.000Z\",\n        \"date\": \"2024-06-02\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 5,\n                \"email\": \"carol.taylor@example.com\",\n                \"name\": \"Carol Taylor\"\n            }\n        ]\n    },\n    {\n        \"id\": 6,\n        \"schedule_id\": 1,\n        \"shift_type\": 3,\n        \"required_count\": 2,\n        \"shift_name\": \"Evening Shift\",\n        \"start_time\": \"2024-06-02T13:00:00.000Z\",\n        \"end_time\": \"2024-06-02T17:00:00.000Z\",\n        \"date\": \"2024-06-02\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 6,\n                \"email\": \"david.lee@example.com\",\n                \"name\": \"David Lee\"\n            }\n        ]\n    },\n    {\n        \"id\": 7,\n        \"schedule_id\": 2,\n        \"shift_type\": 1,\n        \"required_count\": 2,\n        \"shift_name\": \"Morning Shift\",\n        \"start_time\": \"2024-07-01T05:00:00.000Z\",\n        \"end_time\": \"2024-07-01T09:00:00.000Z\",\n        \"date\": \"2024-07-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 7,\n                \"email\": \"eve.walker@example.com\",\n                \"name\": \"Eve Walker\"\n            }\n        ]\n    },\n    {\n        \"id\": 8,\n        \"schedule_id\": 2,\n        \"shift_type\": 2,\n        \"required_count\": 2,\n        \"shift_name\": \"Afternoon Shift\",\n        \"start_time\": \"2024-07-01T09:00:00.000Z\",\n        \"end_time\": \"2024-07-01T13:00:00.000Z\",\n        \"date\": \"2024-07-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 8,\n                \"email\": \"frank.harris@example.com\",\n                \"name\": \"Frank Harris\"\n            }\n        ]\n    },\n    {\n        \"id\": 9,\n        \"schedule_id\": 2,\n        \"shift_type\": 3,\n        \"required_count\": 2,\n        \"shift_name\": \"Evening Shift\",\n        \"start_time\": \"2024-07-01T13:00:00.000Z\",\n        \"end_time\": \"2024-07-01T17:00:00.000Z\",\n        \"date\": \"2024-07-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 9,\n                \"email\": \"grace.clark@example.com\",\n                \"name\": \"Grace Clark\"\n            }\n        ]\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Shifts by date",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/shifts/date/2024-06-01",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"shifts",
+								"date",
+								"2024-06-01"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Shifts by date",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base}}/shifts/date/2024-06-01",
+									"host": [
+										"{{base}}"
+									],
+									"path": [
+										"shifts",
+										"date",
+										"2024-06-01"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "895"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"37f-/25n6vEl8tl2dOfeYJy3/yGERTY\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Jun 2024 10:01:03 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": 1,\n        \"schedule_id\": 1,\n        \"shift_type\": 1,\n        \"required_count\": 2,\n        \"shift_name\": \"Morning Shift\",\n        \"start_time\": \"2024-06-01T05:00:00.000Z\",\n        \"end_time\": \"2024-06-01T09:00:00.000Z\",\n        \"date\": \"2024-06-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 1,\n                \"email\": \"john.doe@example.com\",\n                \"name\": \"John Doe\"\n            }\n        ]\n    },\n    {\n        \"id\": 2,\n        \"schedule_id\": 1,\n        \"shift_type\": 2,\n        \"required_count\": 2,\n        \"shift_name\": \"Afternoon Shift\",\n        \"start_time\": \"2024-06-01T09:00:00.000Z\",\n        \"end_time\": \"2024-06-01T13:00:00.000Z\",\n        \"date\": \"2024-06-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 2,\n                \"email\": \"jane.smith@example.com\",\n                \"name\": \"Jane Smith\"\n            }\n        ]\n    },\n    {\n        \"id\": 3,\n        \"schedule_id\": 1,\n        \"shift_type\": 3,\n        \"required_count\": 2,\n        \"shift_name\": \"Evening Shift\",\n        \"start_time\": \"2024-06-01T13:00:00.000Z\",\n        \"end_time\": \"2024-06-01T17:00:00.000Z\",\n        \"date\": \"2024-06-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 3,\n                \"email\": \"alice.brown@example.com\",\n                \"name\": \"Alice Brown\"\n            }\n        ]\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Shift by schedule",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/shifts/schedule/1",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"shifts",
+								"schedule",
+								"1"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Shift by schedule",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base}}/shifts/schedule/1",
+									"host": [
+										"{{base}}"
+									],
+									"path": [
+										"shifts",
+										"schedule",
+										"1"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "1795"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"703-2lRdYeB5kqZIvS4iKNuo/R+5AOM\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Jun 2024 10:01:24 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": 1,\n        \"schedule_id\": 1,\n        \"shift_type\": 1,\n        \"required_count\": 2,\n        \"shift_name\": \"Morning Shift\",\n        \"start_time\": \"2024-06-01T05:00:00.000Z\",\n        \"end_time\": \"2024-06-01T09:00:00.000Z\",\n        \"date\": \"2024-06-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 1,\n                \"email\": \"john.doe@example.com\",\n                \"name\": \"John Doe\"\n            }\n        ]\n    },\n    {\n        \"id\": 2,\n        \"schedule_id\": 1,\n        \"shift_type\": 2,\n        \"required_count\": 2,\n        \"shift_name\": \"Afternoon Shift\",\n        \"start_time\": \"2024-06-01T09:00:00.000Z\",\n        \"end_time\": \"2024-06-01T13:00:00.000Z\",\n        \"date\": \"2024-06-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 2,\n                \"email\": \"jane.smith@example.com\",\n                \"name\": \"Jane Smith\"\n            }\n        ]\n    },\n    {\n        \"id\": 3,\n        \"schedule_id\": 1,\n        \"shift_type\": 3,\n        \"required_count\": 2,\n        \"shift_name\": \"Evening Shift\",\n        \"start_time\": \"2024-06-01T13:00:00.000Z\",\n        \"end_time\": \"2024-06-01T17:00:00.000Z\",\n        \"date\": \"2024-06-01\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 3,\n                \"email\": \"alice.brown@example.com\",\n                \"name\": \"Alice Brown\"\n            }\n        ]\n    },\n    {\n        \"id\": 4,\n        \"schedule_id\": 1,\n        \"shift_type\": 1,\n        \"required_count\": 2,\n        \"shift_name\": \"Morning Shift\",\n        \"start_time\": \"2024-06-02T05:00:00.000Z\",\n        \"end_time\": \"2024-06-02T09:00:00.000Z\",\n        \"date\": \"2024-06-02\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 4,\n                \"email\": \"bob.johnson@example.com\",\n                \"name\": \"Bob Johnson\"\n            }\n        ]\n    },\n    {\n        \"id\": 5,\n        \"schedule_id\": 1,\n        \"shift_type\": 2,\n        \"required_count\": 2,\n        \"shift_name\": \"Afternoon Shift\",\n        \"start_time\": \"2024-06-02T09:00:00.000Z\",\n        \"end_time\": \"2024-06-02T13:00:00.000Z\",\n        \"date\": \"2024-06-02\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 5,\n                \"email\": \"carol.taylor@example.com\",\n                \"name\": \"Carol Taylor\"\n            }\n        ]\n    },\n    {\n        \"id\": 6,\n        \"schedule_id\": 1,\n        \"shift_type\": 3,\n        \"required_count\": 2,\n        \"shift_name\": \"Evening Shift\",\n        \"start_time\": \"2024-06-02T13:00:00.000Z\",\n        \"end_time\": \"2024-06-02T17:00:00.000Z\",\n        \"date\": \"2024-06-02\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"users\": [\n            {\n                \"id\": 6,\n                \"email\": \"david.lee@example.com\",\n                \"name\": \"David Lee\"\n            }\n        ]\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Shift",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/shifts/7",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"shifts",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Shift",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/shifts/8",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"shifts",
+								"8"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Schedules",
+			"item": [
+				{
+					"name": "Schedule",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/schedules/1",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"schedules",
+								"1"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Schedule",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base}}/schedules/1",
+									"host": [
+										"{{base}}"
+									],
+									"path": [
+										"schedules",
+										"1"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "1968"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"7b0-78D6tlTKw+Rs9a8OI9D+b167Bbs\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Jun 2024 10:01:39 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"id\": 1,\n    \"start_date\": \"2024-05-31T21:00:00.000Z\",\n    \"end_date\": \"2024-06-29T21:00:00.000Z\",\n    \"shifts\": [\n        {\n            \"id\": 1,\n            \"schedule_id\": 1,\n            \"shift_type\": 1,\n            \"required_count\": 2,\n            \"shift_name\": \"Morning Shift\",\n            \"start_time\": \"2024-06-01T05:00:00.000Z\",\n            \"end_time\": \"2024-06-01T09:00:00.000Z\",\n            \"date\": \"2024-06-01\",\n            \"created_at\": \"2024-05-31T21:00:00.000Z\",\n            \"users\": [\n                {\n                    \"id\": 1,\n                    \"email\": \"john.doe@example.com\",\n                    \"name\": \"John Doe\"\n                }\n            ]\n        },\n        {\n            \"id\": 2,\n            \"schedule_id\": 1,\n            \"shift_type\": 2,\n            \"required_count\": 2,\n            \"shift_name\": \"Afternoon Shift\",\n            \"start_time\": \"2024-06-01T09:00:00.000Z\",\n            \"end_time\": \"2024-06-01T13:00:00.000Z\",\n            \"date\": \"2024-06-01\",\n            \"created_at\": \"2024-05-31T21:00:00.000Z\",\n            \"users\": [\n                {\n                    \"id\": 2,\n                    \"email\": \"jane.smith@example.com\",\n                    \"name\": \"Jane Smith\"\n                }\n            ]\n        },\n        {\n            \"id\": 3,\n            \"schedule_id\": 1,\n            \"shift_type\": 3,\n            \"required_count\": 2,\n            \"shift_name\": \"Evening Shift\",\n            \"start_time\": \"2024-06-01T13:00:00.000Z\",\n            \"end_time\": \"2024-06-01T17:00:00.000Z\",\n            \"date\": \"2024-06-01\",\n            \"created_at\": \"2024-05-31T21:00:00.000Z\",\n            \"users\": [\n                {\n                    \"id\": 3,\n                    \"email\": \"alice.brown@example.com\",\n                    \"name\": \"Alice Brown\"\n                }\n            ]\n        },\n        {\n            \"id\": 4,\n            \"schedule_id\": 1,\n            \"shift_type\": 1,\n            \"required_count\": 2,\n            \"shift_name\": \"Morning Shift\",\n            \"start_time\": \"2024-06-02T05:00:00.000Z\",\n            \"end_time\": \"2024-06-02T09:00:00.000Z\",\n            \"date\": \"2024-06-02\",\n            \"created_at\": \"2024-05-31T21:00:00.000Z\",\n            \"users\": [\n                {\n                    \"id\": 4,\n                    \"email\": \"bob.johnson@example.com\",\n                    \"name\": \"Bob Johnson\"\n                }\n            ]\n        },\n        {\n            \"id\": 5,\n            \"schedule_id\": 1,\n            \"shift_type\": 2,\n            \"required_count\": 2,\n            \"shift_name\": \"Afternoon Shift\",\n            \"start_time\": \"2024-06-02T09:00:00.000Z\",\n            \"end_time\": \"2024-06-02T13:00:00.000Z\",\n            \"date\": \"2024-06-02\",\n            \"created_at\": \"2024-05-31T21:00:00.000Z\",\n            \"users\": [\n                {\n                    \"id\": 5,\n                    \"email\": \"carol.taylor@example.com\",\n                    \"name\": \"Carol Taylor\"\n                }\n            ]\n        },\n        {\n            \"id\": 6,\n            \"schedule_id\": 1,\n            \"shift_type\": 3,\n            \"required_count\": 2,\n            \"shift_name\": \"Evening Shift\",\n            \"start_time\": \"2024-06-02T13:00:00.000Z\",\n            \"end_time\": \"2024-06-02T17:00:00.000Z\",\n            \"date\": \"2024-06-02\",\n            \"created_at\": \"2024-05-31T21:00:00.000Z\",\n            \"users\": [\n                {\n                    \"id\": 6,\n                    \"email\": \"david.lee@example.com\",\n                    \"name\": \"David Lee\"\n                }\n            ]\n        }\n    ],\n    \"remarks\": [],\n    \"notes\": \"June schedule\",\n    \"created_at\": \"2024-05-31T21:00:00.000Z\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Schedules",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/schedules",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"schedules"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Schedules",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base}}/schedules",
+									"host": [
+										"{{base}}"
+									],
+									"path": [
+										"schedules"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "5944"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"1738-0spBiN2n5bcqeU/jweNUM4l3fM0\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Jun 2024 10:02:34 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": 1,\n        \"start_date\": \"2024-05-31T21:00:00.000Z\",\n        \"end_date\": \"2024-06-29T21:00:00.000Z\",\n        \"shifts\": [\n            {\n                \"id\": 1,\n                \"schedule_id\": 1,\n                \"shift_type\": 1,\n                \"required_count\": 2,\n                \"shift_name\": \"Morning Shift\",\n                \"start_time\": \"2024-06-01T05:00:00.000Z\",\n                \"end_time\": \"2024-06-01T09:00:00.000Z\",\n                \"date\": \"2024-06-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 1,\n                        \"email\": \"john.doe@example.com\",\n                        \"name\": \"John Doe\"\n                    }\n                ]\n            },\n            {\n                \"id\": 2,\n                \"schedule_id\": 1,\n                \"shift_type\": 2,\n                \"required_count\": 2,\n                \"shift_name\": \"Afternoon Shift\",\n                \"start_time\": \"2024-06-01T09:00:00.000Z\",\n                \"end_time\": \"2024-06-01T13:00:00.000Z\",\n                \"date\": \"2024-06-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 2,\n                        \"email\": \"jane.smith@example.com\",\n                        \"name\": \"Jane Smith\"\n                    }\n                ]\n            },\n            {\n                \"id\": 3,\n                \"schedule_id\": 1,\n                \"shift_type\": 3,\n                \"required_count\": 2,\n                \"shift_name\": \"Evening Shift\",\n                \"start_time\": \"2024-06-01T13:00:00.000Z\",\n                \"end_time\": \"2024-06-01T17:00:00.000Z\",\n                \"date\": \"2024-06-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 3,\n                        \"email\": \"alice.brown@example.com\",\n                        \"name\": \"Alice Brown\"\n                    }\n                ]\n            },\n            {\n                \"id\": 4,\n                \"schedule_id\": 1,\n                \"shift_type\": 1,\n                \"required_count\": 2,\n                \"shift_name\": \"Morning Shift\",\n                \"start_time\": \"2024-06-02T05:00:00.000Z\",\n                \"end_time\": \"2024-06-02T09:00:00.000Z\",\n                \"date\": \"2024-06-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 4,\n                        \"email\": \"bob.johnson@example.com\",\n                        \"name\": \"Bob Johnson\"\n                    }\n                ]\n            },\n            {\n                \"id\": 5,\n                \"schedule_id\": 1,\n                \"shift_type\": 2,\n                \"required_count\": 2,\n                \"shift_name\": \"Afternoon Shift\",\n                \"start_time\": \"2024-06-02T09:00:00.000Z\",\n                \"end_time\": \"2024-06-02T13:00:00.000Z\",\n                \"date\": \"2024-06-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 5,\n                        \"email\": \"carol.taylor@example.com\",\n                        \"name\": \"Carol Taylor\"\n                    }\n                ]\n            },\n            {\n                \"id\": 6,\n                \"schedule_id\": 1,\n                \"shift_type\": 3,\n                \"required_count\": 2,\n                \"shift_name\": \"Evening Shift\",\n                \"start_time\": \"2024-06-02T13:00:00.000Z\",\n                \"end_time\": \"2024-06-02T17:00:00.000Z\",\n                \"date\": \"2024-06-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 6,\n                        \"email\": \"david.lee@example.com\",\n                        \"name\": \"David Lee\"\n                    }\n                ]\n            }\n        ],\n        \"remarks\": [],\n        \"notes\": \"June schedule\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 2,\n        \"start_date\": \"2024-06-30T21:00:00.000Z\",\n        \"end_date\": \"2024-07-30T21:00:00.000Z\",\n        \"shifts\": [\n            {\n                \"id\": 7,\n                \"schedule_id\": 2,\n                \"shift_type\": 1,\n                \"required_count\": 2,\n                \"shift_name\": \"Morning Shift\",\n                \"start_time\": \"2024-07-01T05:00:00.000Z\",\n                \"end_time\": \"2024-07-01T09:00:00.000Z\",\n                \"date\": \"2024-07-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 7,\n                        \"email\": \"eve.walker@example.com\",\n                        \"name\": \"Eve Walker\"\n                    }\n                ]\n            },\n            {\n                \"id\": 8,\n                \"schedule_id\": 2,\n                \"shift_type\": 2,\n                \"required_count\": 2,\n                \"shift_name\": \"Afternoon Shift\",\n                \"start_time\": \"2024-07-01T09:00:00.000Z\",\n                \"end_time\": \"2024-07-01T13:00:00.000Z\",\n                \"date\": \"2024-07-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 8,\n                        \"email\": \"frank.harris@example.com\",\n                        \"name\": \"Frank Harris\"\n                    }\n                ]\n            },\n            {\n                \"id\": 9,\n                \"schedule_id\": 2,\n                \"shift_type\": 3,\n                \"required_count\": 2,\n                \"shift_name\": \"Evening Shift\",\n                \"start_time\": \"2024-07-01T13:00:00.000Z\",\n                \"end_time\": \"2024-07-01T17:00:00.000Z\",\n                \"date\": \"2024-07-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 9,\n                        \"email\": \"grace.clark@example.com\",\n                        \"name\": \"Grace Clark\"\n                    }\n                ]\n            },\n            {\n                \"id\": 10,\n                \"schedule_id\": 2,\n                \"shift_type\": 1,\n                \"required_count\": 2,\n                \"shift_name\": \"Morning Shift\",\n                \"start_time\": \"2024-07-02T05:00:00.000Z\",\n                \"end_time\": \"2024-07-02T09:00:00.000Z\",\n                \"date\": \"2024-07-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 10,\n                        \"email\": \"henry.martinez@example.com\",\n                        \"name\": \"Henry Martinez\"\n                    }\n                ]\n            },\n            {\n                \"id\": 11,\n                \"schedule_id\": 2,\n                \"shift_type\": 2,\n                \"required_count\": 2,\n                \"shift_name\": \"Afternoon Shift\",\n                \"start_time\": \"2024-07-02T09:00:00.000Z\",\n                \"end_time\": \"2024-07-02T13:00:00.000Z\",\n                \"date\": \"2024-07-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 11,\n                        \"email\": \"ivy.robinson@example.com\",\n                        \"name\": \"Ivy Robinson\"\n                    }\n                ]\n            },\n            {\n                \"id\": 12,\n                \"schedule_id\": 2,\n                \"shift_type\": 3,\n                \"required_count\": 2,\n                \"shift_name\": \"Evening Shift\",\n                \"start_time\": \"2024-07-02T13:00:00.000Z\",\n                \"end_time\": \"2024-07-02T17:00:00.000Z\",\n                \"date\": \"2024-07-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 12,\n                        \"email\": \"jack.lewis@example.com\",\n                        \"name\": \"Jack Lewis\"\n                    }\n                ]\n            }\n        ],\n        \"remarks\": [],\n        \"notes\": \"July schedule\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 3,\n        \"start_date\": \"2024-07-31T21:00:00.000Z\",\n        \"end_date\": \"2024-08-30T21:00:00.000Z\",\n        \"shifts\": [\n            {\n                \"id\": 13,\n                \"schedule_id\": 3,\n                \"shift_type\": 1,\n                \"required_count\": 2,\n                \"shift_name\": \"Morning Shift\",\n                \"start_time\": \"2024-08-01T05:00:00.000Z\",\n                \"end_time\": \"2024-08-01T09:00:00.000Z\",\n                \"date\": \"2024-08-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 13,\n                        \"email\": \"kate.young@example.com\",\n                        \"name\": \"Kate Young\"\n                    }\n                ]\n            },\n            {\n                \"id\": 14,\n                \"schedule_id\": 3,\n                \"shift_type\": 2,\n                \"required_count\": 2,\n                \"shift_name\": \"Afternoon Shift\",\n                \"start_time\": \"2024-08-01T09:00:00.000Z\",\n                \"end_time\": \"2024-08-01T13:00:00.000Z\",\n                \"date\": \"2024-08-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 14,\n                        \"email\": \"liam.king@example.com\",\n                        \"name\": \"Liam King\"\n                    }\n                ]\n            },\n            {\n                \"id\": 15,\n                \"schedule_id\": 3,\n                \"shift_type\": 3,\n                \"required_count\": 2,\n                \"shift_name\": \"Evening Shift\",\n                \"start_time\": \"2024-08-01T13:00:00.000Z\",\n                \"end_time\": \"2024-08-01T17:00:00.000Z\",\n                \"date\": \"2024-08-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 15,\n                        \"email\": \"mia.scott@example.com\",\n                        \"name\": \"Mia Scott\"\n                    }\n                ]\n            },\n            {\n                \"id\": 16,\n                \"schedule_id\": 3,\n                \"shift_type\": 1,\n                \"required_count\": 2,\n                \"shift_name\": \"Morning Shift\",\n                \"start_time\": \"2024-08-02T05:00:00.000Z\",\n                \"end_time\": \"2024-08-02T09:00:00.000Z\",\n                \"date\": \"2024-08-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 16,\n                        \"email\": \"noah.adams@example.com\",\n                        \"name\": \"Noah Adams\"\n                    }\n                ]\n            },\n            {\n                \"id\": 17,\n                \"schedule_id\": 3,\n                \"shift_type\": 2,\n                \"required_count\": 2,\n                \"shift_name\": \"Afternoon Shift\",\n                \"start_time\": \"2024-08-02T09:00:00.000Z\",\n                \"end_time\": \"2024-08-02T13:00:00.000Z\",\n                \"date\": \"2024-08-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 17,\n                        \"email\": \"olivia.baker@example.com\",\n                        \"name\": \"Olivia Baker\"\n                    }\n                ]\n            },\n            {\n                \"id\": 18,\n                \"schedule_id\": 3,\n                \"shift_type\": 3,\n                \"required_count\": 2,\n                \"shift_name\": \"Evening Shift\",\n                \"start_time\": \"2024-08-02T13:00:00.000Z\",\n                \"end_time\": \"2024-08-02T17:00:00.000Z\",\n                \"date\": \"2024-08-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 18,\n                        \"email\": \"paul.garcia@example.com\",\n                        \"name\": \"Paul Garcia\"\n                    }\n                ]\n            }\n        ],\n        \"remarks\": [],\n        \"notes\": \"August schedule\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Schedules by User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/schedules/user/1",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"schedules",
+								"user",
+								"1"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Schedules by User",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base}}/schedules/user/1",
+									"host": [
+										"{{base}}"
+									],
+									"path": [
+										"schedules",
+										"user",
+										"1"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "5944"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"1738-0spBiN2n5bcqeU/jweNUM4l3fM0\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Jun 2024 10:02:20 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": 1,\n        \"start_date\": \"2024-05-31T21:00:00.000Z\",\n        \"end_date\": \"2024-06-29T21:00:00.000Z\",\n        \"shifts\": [\n            {\n                \"id\": 1,\n                \"schedule_id\": 1,\n                \"shift_type\": 1,\n                \"required_count\": 2,\n                \"shift_name\": \"Morning Shift\",\n                \"start_time\": \"2024-06-01T05:00:00.000Z\",\n                \"end_time\": \"2024-06-01T09:00:00.000Z\",\n                \"date\": \"2024-06-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 1,\n                        \"email\": \"john.doe@example.com\",\n                        \"name\": \"John Doe\"\n                    }\n                ]\n            },\n            {\n                \"id\": 2,\n                \"schedule_id\": 1,\n                \"shift_type\": 2,\n                \"required_count\": 2,\n                \"shift_name\": \"Afternoon Shift\",\n                \"start_time\": \"2024-06-01T09:00:00.000Z\",\n                \"end_time\": \"2024-06-01T13:00:00.000Z\",\n                \"date\": \"2024-06-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 2,\n                        \"email\": \"jane.smith@example.com\",\n                        \"name\": \"Jane Smith\"\n                    }\n                ]\n            },\n            {\n                \"id\": 3,\n                \"schedule_id\": 1,\n                \"shift_type\": 3,\n                \"required_count\": 2,\n                \"shift_name\": \"Evening Shift\",\n                \"start_time\": \"2024-06-01T13:00:00.000Z\",\n                \"end_time\": \"2024-06-01T17:00:00.000Z\",\n                \"date\": \"2024-06-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 3,\n                        \"email\": \"alice.brown@example.com\",\n                        \"name\": \"Alice Brown\"\n                    }\n                ]\n            },\n            {\n                \"id\": 4,\n                \"schedule_id\": 1,\n                \"shift_type\": 1,\n                \"required_count\": 2,\n                \"shift_name\": \"Morning Shift\",\n                \"start_time\": \"2024-06-02T05:00:00.000Z\",\n                \"end_time\": \"2024-06-02T09:00:00.000Z\",\n                \"date\": \"2024-06-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 4,\n                        \"email\": \"bob.johnson@example.com\",\n                        \"name\": \"Bob Johnson\"\n                    }\n                ]\n            },\n            {\n                \"id\": 5,\n                \"schedule_id\": 1,\n                \"shift_type\": 2,\n                \"required_count\": 2,\n                \"shift_name\": \"Afternoon Shift\",\n                \"start_time\": \"2024-06-02T09:00:00.000Z\",\n                \"end_time\": \"2024-06-02T13:00:00.000Z\",\n                \"date\": \"2024-06-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 5,\n                        \"email\": \"carol.taylor@example.com\",\n                        \"name\": \"Carol Taylor\"\n                    }\n                ]\n            },\n            {\n                \"id\": 6,\n                \"schedule_id\": 1,\n                \"shift_type\": 3,\n                \"required_count\": 2,\n                \"shift_name\": \"Evening Shift\",\n                \"start_time\": \"2024-06-02T13:00:00.000Z\",\n                \"end_time\": \"2024-06-02T17:00:00.000Z\",\n                \"date\": \"2024-06-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 6,\n                        \"email\": \"david.lee@example.com\",\n                        \"name\": \"David Lee\"\n                    }\n                ]\n            }\n        ],\n        \"remarks\": [],\n        \"notes\": \"June schedule\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 2,\n        \"start_date\": \"2024-06-30T21:00:00.000Z\",\n        \"end_date\": \"2024-07-30T21:00:00.000Z\",\n        \"shifts\": [\n            {\n                \"id\": 7,\n                \"schedule_id\": 2,\n                \"shift_type\": 1,\n                \"required_count\": 2,\n                \"shift_name\": \"Morning Shift\",\n                \"start_time\": \"2024-07-01T05:00:00.000Z\",\n                \"end_time\": \"2024-07-01T09:00:00.000Z\",\n                \"date\": \"2024-07-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 7,\n                        \"email\": \"eve.walker@example.com\",\n                        \"name\": \"Eve Walker\"\n                    }\n                ]\n            },\n            {\n                \"id\": 8,\n                \"schedule_id\": 2,\n                \"shift_type\": 2,\n                \"required_count\": 2,\n                \"shift_name\": \"Afternoon Shift\",\n                \"start_time\": \"2024-07-01T09:00:00.000Z\",\n                \"end_time\": \"2024-07-01T13:00:00.000Z\",\n                \"date\": \"2024-07-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 8,\n                        \"email\": \"frank.harris@example.com\",\n                        \"name\": \"Frank Harris\"\n                    }\n                ]\n            },\n            {\n                \"id\": 9,\n                \"schedule_id\": 2,\n                \"shift_type\": 3,\n                \"required_count\": 2,\n                \"shift_name\": \"Evening Shift\",\n                \"start_time\": \"2024-07-01T13:00:00.000Z\",\n                \"end_time\": \"2024-07-01T17:00:00.000Z\",\n                \"date\": \"2024-07-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 9,\n                        \"email\": \"grace.clark@example.com\",\n                        \"name\": \"Grace Clark\"\n                    }\n                ]\n            },\n            {\n                \"id\": 10,\n                \"schedule_id\": 2,\n                \"shift_type\": 1,\n                \"required_count\": 2,\n                \"shift_name\": \"Morning Shift\",\n                \"start_time\": \"2024-07-02T05:00:00.000Z\",\n                \"end_time\": \"2024-07-02T09:00:00.000Z\",\n                \"date\": \"2024-07-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 10,\n                        \"email\": \"henry.martinez@example.com\",\n                        \"name\": \"Henry Martinez\"\n                    }\n                ]\n            },\n            {\n                \"id\": 11,\n                \"schedule_id\": 2,\n                \"shift_type\": 2,\n                \"required_count\": 2,\n                \"shift_name\": \"Afternoon Shift\",\n                \"start_time\": \"2024-07-02T09:00:00.000Z\",\n                \"end_time\": \"2024-07-02T13:00:00.000Z\",\n                \"date\": \"2024-07-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 11,\n                        \"email\": \"ivy.robinson@example.com\",\n                        \"name\": \"Ivy Robinson\"\n                    }\n                ]\n            },\n            {\n                \"id\": 12,\n                \"schedule_id\": 2,\n                \"shift_type\": 3,\n                \"required_count\": 2,\n                \"shift_name\": \"Evening Shift\",\n                \"start_time\": \"2024-07-02T13:00:00.000Z\",\n                \"end_time\": \"2024-07-02T17:00:00.000Z\",\n                \"date\": \"2024-07-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 12,\n                        \"email\": \"jack.lewis@example.com\",\n                        \"name\": \"Jack Lewis\"\n                    }\n                ]\n            }\n        ],\n        \"remarks\": [],\n        \"notes\": \"July schedule\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 3,\n        \"start_date\": \"2024-07-31T21:00:00.000Z\",\n        \"end_date\": \"2024-08-30T21:00:00.000Z\",\n        \"shifts\": [\n            {\n                \"id\": 13,\n                \"schedule_id\": 3,\n                \"shift_type\": 1,\n                \"required_count\": 2,\n                \"shift_name\": \"Morning Shift\",\n                \"start_time\": \"2024-08-01T05:00:00.000Z\",\n                \"end_time\": \"2024-08-01T09:00:00.000Z\",\n                \"date\": \"2024-08-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 13,\n                        \"email\": \"kate.young@example.com\",\n                        \"name\": \"Kate Young\"\n                    }\n                ]\n            },\n            {\n                \"id\": 14,\n                \"schedule_id\": 3,\n                \"shift_type\": 2,\n                \"required_count\": 2,\n                \"shift_name\": \"Afternoon Shift\",\n                \"start_time\": \"2024-08-01T09:00:00.000Z\",\n                \"end_time\": \"2024-08-01T13:00:00.000Z\",\n                \"date\": \"2024-08-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 14,\n                        \"email\": \"liam.king@example.com\",\n                        \"name\": \"Liam King\"\n                    }\n                ]\n            },\n            {\n                \"id\": 15,\n                \"schedule_id\": 3,\n                \"shift_type\": 3,\n                \"required_count\": 2,\n                \"shift_name\": \"Evening Shift\",\n                \"start_time\": \"2024-08-01T13:00:00.000Z\",\n                \"end_time\": \"2024-08-01T17:00:00.000Z\",\n                \"date\": \"2024-08-01\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 15,\n                        \"email\": \"mia.scott@example.com\",\n                        \"name\": \"Mia Scott\"\n                    }\n                ]\n            },\n            {\n                \"id\": 16,\n                \"schedule_id\": 3,\n                \"shift_type\": 1,\n                \"required_count\": 2,\n                \"shift_name\": \"Morning Shift\",\n                \"start_time\": \"2024-08-02T05:00:00.000Z\",\n                \"end_time\": \"2024-08-02T09:00:00.000Z\",\n                \"date\": \"2024-08-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 16,\n                        \"email\": \"noah.adams@example.com\",\n                        \"name\": \"Noah Adams\"\n                    }\n                ]\n            },\n            {\n                \"id\": 17,\n                \"schedule_id\": 3,\n                \"shift_type\": 2,\n                \"required_count\": 2,\n                \"shift_name\": \"Afternoon Shift\",\n                \"start_time\": \"2024-08-02T09:00:00.000Z\",\n                \"end_time\": \"2024-08-02T13:00:00.000Z\",\n                \"date\": \"2024-08-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 17,\n                        \"email\": \"olivia.baker@example.com\",\n                        \"name\": \"Olivia Baker\"\n                    }\n                ]\n            },\n            {\n                \"id\": 18,\n                \"schedule_id\": 3,\n                \"shift_type\": 3,\n                \"required_count\": 2,\n                \"shift_name\": \"Evening Shift\",\n                \"start_time\": \"2024-08-02T13:00:00.000Z\",\n                \"end_time\": \"2024-08-02T17:00:00.000Z\",\n                \"date\": \"2024-08-02\",\n                \"created_at\": \"2024-05-31T21:00:00.000Z\",\n                \"users\": [\n                    {\n                        \"id\": 18,\n                        \"email\": \"paul.garcia@example.com\",\n                        \"name\": \"Paul Garcia\"\n                    }\n                ]\n            }\n        ],\n        \"remarks\": [],\n        \"notes\": \"August schedule\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Schedule",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/schedules/1",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"schedules",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Preferences",
+			"item": [
+				{
+					"name": "Preferences",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/preferences",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"preferences"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Preferences",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base}}/preferences",
+									"host": [
+										"{{base}}"
+									],
+									"path": [
+										"preferences"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "10948"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"2ac4-8wgptGish2Icy1bP0QFAuhRJ+xE\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Jun 2024 10:02:41 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": 1,\n        \"user_id\": 1,\n        \"start_date\": \"2024-05-31T21:00:00.000Z\",\n        \"end_date\": \"2024-06-29T21:00:00.000Z\",\n        \"notes\": \"Prefers morning shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 1,\n                \"date\": \"2024-06-01\",\n                \"preference_id\": 1,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 2,\n                \"date\": \"2024-06-02\",\n                \"preference_id\": 1,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 3,\n                \"date\": \"2024-06-03\",\n                \"preference_id\": 1,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 2,\n        \"user_id\": 2,\n        \"start_date\": \"2024-06-14T21:00:00.000Z\",\n        \"end_date\": \"2024-07-14T21:00:00.000Z\",\n        \"notes\": \"Prefers evening shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 4,\n                \"date\": \"2024-06-15\",\n                \"preference_id\": 2,\n                \"morning\": 0,\n                \"noon\": 0,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 5,\n                \"date\": \"2024-06-16\",\n                \"preference_id\": 2,\n                \"morning\": 0,\n                \"noon\": 0,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 6,\n                \"date\": \"2024-06-17\",\n                \"preference_id\": 2,\n                \"morning\": 0,\n                \"noon\": 0,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 3,\n        \"user_id\": 3,\n        \"start_date\": \"2024-06-30T21:00:00.000Z\",\n        \"end_date\": \"2024-07-30T21:00:00.000Z\",\n        \"notes\": \"Flexible with shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 7,\n                \"date\": \"2024-07-01\",\n                \"preference_id\": 3,\n                \"morning\": 1,\n                \"noon\": 1,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 8,\n                \"date\": \"2024-07-02\",\n                \"preference_id\": 3,\n                \"morning\": 1,\n                \"noon\": 1,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 4,\n        \"user_id\": 4,\n        \"start_date\": \"2024-06-09T21:00:00.000Z\",\n        \"end_date\": \"2024-06-19T21:00:00.000Z\",\n        \"notes\": \"Prefers afternoon shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 9,\n                \"date\": \"2024-06-10\",\n                \"preference_id\": 4,\n                \"morning\": 0,\n                \"noon\": 1,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 10,\n                \"date\": \"2024-06-11\",\n                \"preference_id\": 4,\n                \"morning\": 0,\n                \"noon\": 1,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 11,\n                \"date\": \"2024-06-12\",\n                \"preference_id\": 4,\n                \"morning\": 0,\n                \"noon\": 1,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 5,\n        \"user_id\": 5,\n        \"start_date\": \"2024-07-04T21:00:00.000Z\",\n        \"end_date\": \"2024-07-24T21:00:00.000Z\",\n        \"notes\": \"Prefers morning shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 12,\n                \"date\": \"2024-07-05\",\n                \"preference_id\": 5,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 13,\n                \"date\": \"2024-07-06\",\n                \"preference_id\": 5,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 14,\n                \"date\": \"2024-07-07\",\n                \"preference_id\": 5,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 6,\n        \"user_id\": 6,\n        \"start_date\": \"2024-07-09T21:00:00.000Z\",\n        \"end_date\": \"2024-07-19T21:00:00.000Z\",\n        \"notes\": \"Prefers evening shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 15,\n                \"date\": \"2024-07-10\",\n                \"preference_id\": 6,\n                \"morning\": 0,\n                \"noon\": 0,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 16,\n                \"date\": \"2024-07-11\",\n                \"preference_id\": 6,\n                \"morning\": 0,\n                \"noon\": 0,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 17,\n                \"date\": \"2024-07-12\",\n                \"preference_id\": 6,\n                \"morning\": 0,\n                \"noon\": 0,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 7,\n        \"user_id\": 7,\n        \"start_date\": \"2024-06-19T21:00:00.000Z\",\n        \"end_date\": \"2024-07-09T21:00:00.000Z\",\n        \"notes\": \"Prefers afternoon shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 18,\n                \"date\": \"2024-06-20\",\n                \"preference_id\": 7,\n                \"morning\": 0,\n                \"noon\": 1,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 19,\n                \"date\": \"2024-06-21\",\n                \"preference_id\": 7,\n                \"morning\": 0,\n                \"noon\": 1,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 20,\n                \"date\": \"2024-06-22\",\n                \"preference_id\": 7,\n                \"morning\": 0,\n                \"noon\": 1,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 8,\n        \"user_id\": 8,\n        \"start_date\": \"2024-05-31T21:00:00.000Z\",\n        \"end_date\": \"2024-06-29T21:00:00.000Z\",\n        \"notes\": \"Flexible with shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 21,\n                \"date\": \"2024-06-01\",\n                \"preference_id\": 8,\n                \"morning\": 1,\n                \"noon\": 1,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 22,\n                \"date\": \"2024-06-02\",\n                \"preference_id\": 8,\n                \"morning\": 1,\n                \"noon\": 1,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 23,\n                \"date\": \"2024-06-03\",\n                \"preference_id\": 8,\n                \"morning\": 1,\n                \"noon\": 1,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 9,\n        \"user_id\": 9,\n        \"start_date\": \"2024-06-30T21:00:00.000Z\",\n        \"end_date\": \"2024-07-14T21:00:00.000Z\",\n        \"notes\": \"Prefers morning shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 24,\n                \"date\": \"2024-07-01\",\n                \"preference_id\": 9,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 25,\n                \"date\": \"2024-07-02\",\n                \"preference_id\": 9,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 26,\n                \"date\": \"2024-07-03\",\n                \"preference_id\": 9,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 10,\n        \"user_id\": 10,\n        \"start_date\": \"2024-06-14T21:00:00.000Z\",\n        \"end_date\": \"2024-06-24T21:00:00.000Z\",\n        \"notes\": \"Prefers evening shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 27,\n                \"date\": \"2024-06-15\",\n                \"preference_id\": 10,\n                \"morning\": 0,\n                \"noon\": 0,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 28,\n                \"date\": \"2024-06-16\",\n                \"preference_id\": 10,\n                \"morning\": 0,\n                \"noon\": 0,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 29,\n                \"date\": \"2024-06-17\",\n                \"preference_id\": 10,\n                \"morning\": 0,\n                \"noon\": 0,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 11,\n        \"user_id\": 11,\n        \"start_date\": \"2024-07-04T21:00:00.000Z\",\n        \"end_date\": \"2024-07-19T21:00:00.000Z\",\n        \"notes\": \"Prefers afternoon shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 30,\n                \"date\": \"2024-07-05\",\n                \"preference_id\": 11,\n                \"morning\": 0,\n                \"noon\": 1,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 31,\n                \"date\": \"2024-07-06\",\n                \"preference_id\": 11,\n                \"morning\": 0,\n                \"noon\": 1,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 32,\n                \"date\": \"2024-07-07\",\n                \"preference_id\": 11,\n                \"morning\": 0,\n                \"noon\": 1,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 12,\n        \"user_id\": 12,\n        \"start_date\": \"2024-06-09T21:00:00.000Z\",\n        \"end_date\": \"2024-06-29T21:00:00.000Z\",\n        \"notes\": \"Flexible with shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 33,\n                \"date\": \"2024-06-10\",\n                \"preference_id\": 12,\n                \"morning\": 1,\n                \"noon\": 1,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 34,\n                \"date\": \"2024-06-11\",\n                \"preference_id\": 12,\n                \"morning\": 1,\n                \"noon\": 1,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 35,\n                \"date\": \"2024-06-12\",\n                \"preference_id\": 12,\n                \"morning\": 1,\n                \"noon\": 1,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 13,\n        \"user_id\": 13,\n        \"start_date\": \"2024-07-09T21:00:00.000Z\",\n        \"end_date\": \"2024-07-24T21:00:00.000Z\",\n        \"notes\": \"Prefers morning shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 36,\n                \"date\": \"2024-07-10\",\n                \"preference_id\": 13,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 37,\n                \"date\": \"2024-07-11\",\n                \"preference_id\": 13,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 38,\n                \"date\": \"2024-07-12\",\n                \"preference_id\": 13,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 14,\n        \"user_id\": 14,\n        \"start_date\": \"2024-06-19T21:00:00.000Z\",\n        \"end_date\": \"2024-07-04T21:00:00.000Z\",\n        \"notes\": \"Prefers evening shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 39,\n                \"date\": \"2024-06-20\",\n                \"preference_id\": 14,\n                \"morning\": 0,\n                \"noon\": 0,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 40,\n                \"date\": \"2024-06-21\",\n                \"preference_id\": 14,\n                \"morning\": 0,\n                \"noon\": 0,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 41,\n                \"date\": \"2024-06-22\",\n                \"preference_id\": 14,\n                \"morning\": 0,\n                \"noon\": 0,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 15,\n        \"user_id\": 15,\n        \"start_date\": \"2024-06-30T21:00:00.000Z\",\n        \"end_date\": \"2024-07-19T21:00:00.000Z\",\n        \"notes\": \"Prefers afternoon shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 42,\n                \"date\": \"2024-07-01\",\n                \"preference_id\": 15,\n                \"morning\": 0,\n                \"noon\": 1,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 43,\n                \"date\": \"2024-07-02\",\n                \"preference_id\": 15,\n                \"morning\": 0,\n                \"noon\": 1,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 44,\n                \"date\": \"2024-07-03\",\n                \"preference_id\": 15,\n                \"morning\": 0,\n                \"noon\": 1,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 16,\n        \"user_id\": 16,\n        \"start_date\": \"2024-05-31T21:00:00.000Z\",\n        \"end_date\": \"2024-06-14T21:00:00.000Z\",\n        \"notes\": \"Flexible with shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 45,\n                \"date\": \"2024-06-01\",\n                \"preference_id\": 16,\n                \"morning\": 1,\n                \"noon\": 1,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 46,\n                \"date\": \"2024-06-02\",\n                \"preference_id\": 16,\n                \"morning\": 1,\n                \"noon\": 1,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 47,\n                \"date\": \"2024-06-03\",\n                \"preference_id\": 16,\n                \"morning\": 1,\n                \"noon\": 1,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 17,\n        \"user_id\": 17,\n        \"start_date\": \"2024-06-14T21:00:00.000Z\",\n        \"end_date\": \"2024-07-04T21:00:00.000Z\",\n        \"notes\": \"Prefers morning shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 48,\n                \"date\": \"2024-06-15\",\n                \"preference_id\": 17,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 49,\n                \"date\": \"2024-06-16\",\n                \"preference_id\": 17,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 50,\n                \"date\": \"2024-06-17\",\n                \"preference_id\": 17,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 18,\n        \"user_id\": 18,\n        \"start_date\": \"2024-07-04T21:00:00.000Z\",\n        \"end_date\": \"2024-07-24T21:00:00.000Z\",\n        \"notes\": \"Prefers evening shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 51,\n                \"date\": \"2024-07-05\",\n                \"preference_id\": 18,\n                \"morning\": 0,\n                \"noon\": 0,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 52,\n                \"date\": \"2024-07-06\",\n                \"preference_id\": 18,\n                \"morning\": 0,\n                \"noon\": 0,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 53,\n                \"date\": \"2024-07-07\",\n                \"preference_id\": 18,\n                \"morning\": 0,\n                \"noon\": 0,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 19,\n        \"user_id\": 19,\n        \"start_date\": \"2024-07-09T21:00:00.000Z\",\n        \"end_date\": \"2024-07-29T21:00:00.000Z\",\n        \"notes\": \"Prefers afternoon shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 54,\n                \"date\": \"2024-07-10\",\n                \"preference_id\": 19,\n                \"morning\": 0,\n                \"noon\": 1,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 55,\n                \"date\": \"2024-07-11\",\n                \"preference_id\": 19,\n                \"morning\": 0,\n                \"noon\": 1,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 56,\n                \"date\": \"2024-07-12\",\n                \"preference_id\": 19,\n                \"morning\": 0,\n                \"noon\": 1,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    },\n    {\n        \"id\": 20,\n        \"user_id\": 20,\n        \"start_date\": \"2024-06-09T21:00:00.000Z\",\n        \"end_date\": \"2024-06-19T21:00:00.000Z\",\n        \"notes\": \"Flexible with shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 57,\n                \"date\": \"2024-06-10\",\n                \"preference_id\": 20,\n                \"morning\": 1,\n                \"noon\": 1,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 58,\n                \"date\": \"2024-06-11\",\n                \"preference_id\": 20,\n                \"morning\": 1,\n                \"noon\": 1,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 59,\n                \"date\": \"2024-06-12\",\n                \"preference_id\": 20,\n                \"morning\": 1,\n                \"noon\": 1,\n                \"night\": 1,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Preferences by User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/preferences/user/1",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"preferences",
+								"user",
+								"1"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Preferences by User",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base}}/preferences/user/1",
+									"host": [
+										"{{base}}"
+									],
+									"path": [
+										"preferences",
+										"user",
+										"1"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "549"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"225-iEeDJcf+A13L3FFDVYWWq6fT9X4\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Jun 2024 10:02:49 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": 1,\n        \"user_id\": 1,\n        \"start_date\": \"2024-05-31T21:00:00.000Z\",\n        \"end_date\": \"2024-06-29T21:00:00.000Z\",\n        \"notes\": \"Prefers morning shifts\",\n        \"created_at\": \"2024-05-31T21:00:00.000Z\",\n        \"daily_preferences\": [\n            {\n                \"id\": 1,\n                \"date\": \"2024-06-01\",\n                \"preference_id\": 1,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 2,\n                \"date\": \"2024-06-02\",\n                \"preference_id\": 1,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            },\n            {\n                \"id\": 3,\n                \"date\": \"2024-06-03\",\n                \"preference_id\": 1,\n                \"morning\": 1,\n                \"noon\": 0,\n                \"night\": 0,\n                \"created_at\": \"2024-05-31T21:00:00.000Z\"\n            }\n        ]\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Preference by dates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/preferences/dates/2025-06-01/2027-08-01",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"preferences",
+								"dates",
+								"2025-06-01",
+								"2027-08-01"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Preference",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/preferences/1",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"preferences",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Preference",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/preferences/1",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"preferences",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Vacations",
+			"item": [
+				{
+					"name": "Vacations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/vacations/",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"vacations",
+								""
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Vacations",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base}}/vacations/",
+									"host": [
+										"{{base}}"
+									],
+									"path": [
+										"vacations",
+										""
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2803"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"af3-M7M85wg8Tpn+4MB9B9efGC/S4Js\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Jun 2024 10:03:07 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "[\n    {\n        \"id\": 1,\n        \"start_date\": \"2024-05-31T21:00:00.000Z\",\n        \"end_date\": \"2024-06-09T21:00:00.000Z\",\n        \"user_id\": 1,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 2,\n        \"start_date\": \"2024-06-10T21:00:00.000Z\",\n        \"end_date\": \"2024-06-19T21:00:00.000Z\",\n        \"user_id\": 2,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 3,\n        \"start_date\": \"2024-06-20T21:00:00.000Z\",\n        \"end_date\": \"2024-06-29T21:00:00.000Z\",\n        \"user_id\": 3,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 4,\n        \"start_date\": \"2024-06-30T21:00:00.000Z\",\n        \"end_date\": \"2024-07-09T21:00:00.000Z\",\n        \"user_id\": 4,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 5,\n        \"start_date\": \"2024-07-10T21:00:00.000Z\",\n        \"end_date\": \"2024-07-19T21:00:00.000Z\",\n        \"user_id\": 5,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 6,\n        \"start_date\": \"2024-07-20T21:00:00.000Z\",\n        \"end_date\": \"2024-07-29T21:00:00.000Z\",\n        \"user_id\": 6,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 7,\n        \"start_date\": \"2024-07-31T21:00:00.000Z\",\n        \"end_date\": \"2024-08-09T21:00:00.000Z\",\n        \"user_id\": 7,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 8,\n        \"start_date\": \"2024-08-10T21:00:00.000Z\",\n        \"end_date\": \"2024-08-19T21:00:00.000Z\",\n        \"user_id\": 8,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 9,\n        \"start_date\": \"2024-08-20T21:00:00.000Z\",\n        \"end_date\": \"2024-08-30T21:00:00.000Z\",\n        \"user_id\": 9,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 10,\n        \"start_date\": \"2024-08-31T21:00:00.000Z\",\n        \"end_date\": \"2024-09-09T21:00:00.000Z\",\n        \"user_id\": 10,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 11,\n        \"start_date\": \"2024-09-10T21:00:00.000Z\",\n        \"end_date\": \"2024-09-19T21:00:00.000Z\",\n        \"user_id\": 11,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 12,\n        \"start_date\": \"2024-09-20T21:00:00.000Z\",\n        \"end_date\": \"2024-09-29T21:00:00.000Z\",\n        \"user_id\": 12,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 13,\n        \"start_date\": \"2024-09-30T21:00:00.000Z\",\n        \"end_date\": \"2024-10-09T21:00:00.000Z\",\n        \"user_id\": 13,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 14,\n        \"start_date\": \"2024-10-10T21:00:00.000Z\",\n        \"end_date\": \"2024-10-19T21:00:00.000Z\",\n        \"user_id\": 14,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 15,\n        \"start_date\": \"2024-10-20T21:00:00.000Z\",\n        \"end_date\": \"2024-10-30T22:00:00.000Z\",\n        \"user_id\": 15,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 16,\n        \"start_date\": \"2024-10-31T22:00:00.000Z\",\n        \"end_date\": \"2024-11-09T22:00:00.000Z\",\n        \"user_id\": 16,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 17,\n        \"start_date\": \"2024-11-10T22:00:00.000Z\",\n        \"end_date\": \"2024-11-19T22:00:00.000Z\",\n        \"user_id\": 17,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 18,\n        \"start_date\": \"2024-11-20T22:00:00.000Z\",\n        \"end_date\": \"2024-11-29T22:00:00.000Z\",\n        \"user_id\": 18,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 19,\n        \"start_date\": \"2024-11-30T22:00:00.000Z\",\n        \"end_date\": \"2024-12-09T22:00:00.000Z\",\n        \"user_id\": 19,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    },\n    {\n        \"id\": 20,\n        \"start_date\": \"2024-12-10T22:00:00.000Z\",\n        \"end_date\": \"2024-12-19T22:00:00.000Z\",\n        \"user_id\": 20,\n        \"created_at\": \"2024-05-31T21:00:00.000Z\"\n    }\n]"
+						}
+					]
+				},
+				{
+					"name": "Vacation by dates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/vacations/date/2024-07-01",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"vacations",
+								"date",
+								"2024-07-01"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Vacation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": \"1\",\n    \"start_date\": \"2024-07-01\",\n    \"end_date\": \"2024-07-10\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base}}/vacations",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"vacations"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Vacation",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"user_id\": \"1\",\n    \"start_date\": \"2024-07-01\",\n    \"end_date\": \"2024-07-10\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base}}/vacations",
+									"host": [
+										"{{base}}"
+									],
+									"path": [
+										"vacations"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "38"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"26-vsp2HwCIeOI/P08Mq5JScA6drKk\""
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 16 Jun 2024 10:03:17 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"vacation created\",\n    \"id\": 21\n}"
+						}
+					]
+				},
+				{
+					"name": "Vacation",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base}}/vacations/21",
+							"host": [
+								"{{base}}"
+							],
+							"path": [
+								"vacations",
+								"21"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"var base = 'http://localhost:5713';",
+					"pm.environment.set('base', base);"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
