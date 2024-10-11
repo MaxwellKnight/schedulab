@@ -31,7 +31,7 @@ The project consists of a Node.js server that handles the scheduling logic, user
 ### Prerequisites
 
 Make sure you have the following installed:
-- [Node.js](https://nodejs.org/) (v14.x or higher)
+- [Node.js](https://nodejs.org/) (v22.4.0 or higher)
 - [MySQL](https://www.mysql.com/)
 
 ### Steps
