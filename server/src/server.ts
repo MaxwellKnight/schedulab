@@ -8,25 +8,27 @@ dotenv.config();
 
 const app = express();
 
-const PORT 			= process.env.NODE_LOCAL_PORT 	 || 8080;
-const ORIGIN_HOST = process.env.EXPRESS_ORIGIN_HOST || 'http://localhost';
-const ORIGIN_PORT = process.env.EXPRESS_ORIGIN_PORT || 3000;
+const PORT = process.env.NODE_LOCAL_PORT || 8080;
 
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(cors({ 
-	credentials: true,  
-	origin: `${ORIGIN_HOST}:${ORIGIN_PORT}` 
+app.use(cors({
+	origin: 'http://localhost:5173',
+	credentials: true,
+	methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+	allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+app.options('*', cors()) // Enable pre-flight requests for all routes
+
 //routes
-app.use('/auth', 			AuthRouter);
-app.use('/users', 		UserRouter);
+app.use('/auth', AuthRouter);
+app.use('/users', UserRouter);
 app.use('/preferences', PreferenceRouter);
-app.use('/shifts', 		ShiftRouter);
-app.use('/vacations', 	VacationRouter);
-app.use('/schedules', 	ScheduleRouter);
+app.use('/shifts', ShiftRouter);
+app.use('/vacations', VacationRouter);
+app.use('/schedules', ScheduleRouter);
 
 app.listen(PORT, () => console.log(`server running on ${ip()}:${PORT}`))
