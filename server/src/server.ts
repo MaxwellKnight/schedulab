@@ -21,8 +21,6 @@ app.use(cors({
 	allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.options('*', cors()) // Enable pre-flight requests for all routes
-
 //routes
 app.use('/auth', AuthRouter);
 app.use('/users', UserRouter);

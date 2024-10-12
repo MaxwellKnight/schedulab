@@ -18,11 +18,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 	useEffect(() => {
 		const storedToken = localStorage.getItem('authToken');
-		if (storedToken) {
+		const storedUser = localStorage.getItem('user');
+		if (storedToken && storedUser) {
 			setToken(storedToken);
 			setIsAuth(true);
+			setUser(user);
 		}
-	}, []);
+	}, [user]);
 
 	const login = (userToken: string, user: UserData) => {
 		setToken(userToken);

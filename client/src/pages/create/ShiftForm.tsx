@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { ScheduleData, ShiftData } from '@/types';
-import { DatePicker, TimePicker } from '@/components/date-picker/DatePicker';
+import { TimePicker } from '@/components/date-picker/DatePicker';
 import { UseFormReturn } from 'react-hook-form';
 import { ChevronLeft, Plus } from 'lucide-react';
+import { eachDayOfInterval, format, parse, isValid, startOfDay } from 'date-fns';
 
 interface ShiftFormProps {
 	form: UseFormReturn<ScheduleData>;
@@ -14,6 +15,15 @@ interface ShiftFormProps {
 	setSchedule: React.Dispatch<React.SetStateAction<ScheduleData>>;
 	onBack: () => void;
 	onSubmit: (data: ScheduleData) => void;
+}
+
+const createDateArray = (startDate: Date, endDate: Date): string[] => {
+	if (startDate > endDate) {
+		[startDate, endDate] = [endDate, startDate];
+	}
+
+	const dateArray = eachDayOfInterval({ start: startDate, end: endDate });
+	return dateArray.map(date => format(date, 'yyyy-MM-dd'));
 }
 
 const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBack, onSubmit }) => {
@@ -27,30 +37,89 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 		end_time: new Date(),
 		date: new Date(),
 	});
+	const [dateOptions, setDateOptions] = useState<string[]>([]);
+
+	useEffect(() => {
+		const startDate = new Date(schedule.start_date);
+		const endDate = new Date(schedule.end_date);
+
+		if (isValid(startDate) && isValid(endDate)) {
+			const dates = createDateArray(startDate, endDate);
+			setDateOptions(dates);
+		} else {
+			console.error('Invalid start or end date in schedule', { startDate, endDate });
+		}
+	}, [schedule]);
 
 	const handleShiftChange = (name: string, value: Date | number | string | null) => {
-		if (value !== null)
-			setCurrentShift({ ...currentShift, [name]: value });
+		if (value !== null) {
+			if (name === 'date') {
+				try {
+					const parsedDate = parse(value as string, 'yyyy-MM-dd', new Date());
+					if (isValid(parsedDate)) {
+						setCurrentShift({ ...currentShift, [name]: parsedDate });
+					} else {
+						console.error('Invalid date parsed', { value });
+					}
+				} catch (error) {
+					console.error('Error parsing date', { value, error });
+				}
+			} else {
+				setCurrentShift({ ...currentShift, [name]: value });
+			}
+		}
 	};
 
 	const addShift = () => {
-		setSchedule(prev => ({
-			...prev,
-			shifts: [...prev.shifts, { ...currentShift, date: new Date(currentShift.date) }]
-		}));
-		setCurrentShift({
-			shift_type: 1,
-			required_count: 1,
-			users: [],
-			likes: 0,
-			shift_name: '',
-			start_time: new Date(),
-			end_time: new Date(),
-			date: new Date(),
-		});
+		if (isValid(currentShift.date)) {
+			setSchedule(prev => ({
+				...prev,
+				shifts: [...prev.shifts, { ...currentShift, date: new Date(currentShift.date) }]
+			}));
+			// Reset the form with the first available date
+			const firstAvailableDate = dateOptions.length > 0
+				? parse(dateOptions[0], 'yyyy-MM-dd', new Date())
+				: startOfDay(new Date(schedule.start_date));
+			setCurrentShift({
+				shift_type: 1,
+				required_count: 1,
+				users: [],
+				likes: 0,
+				shift_name: '',
+				start_time: new Date(),
+				end_time: new Date(),
+				date: firstAvailableDate,
+			});
+		} else {
+			console.error('Attempted to add shift with invalid date', currentShift);
+		}
+	};
+	const handleDateChange = (value: string) => {
+		try {
+			const parsedDate = parse(value, 'yyyy-MM-dd', new Date());
+			if (isValid(parsedDate)) {
+				setCurrentShift(prev => ({ ...prev, date: parsedDate }));
+			} else {
+				console.error('Invalid date selected', { value });
+			}
+		} catch (error) {
+			console.error('Error parsing selected date', { value, error });
+		}
 	};
 
-
+	const formatDate = (date: Date): string => {
+		try {
+			if (isValid(date)) {
+				return format(date, 'yyyy-MM-dd');
+			} else {
+				console.error('Attempted to format invalid date', { date });
+				return '';
+			}
+		} catch (error) {
+			console.error('Error formatting date', { date, error });
+			return '';
+		}
+	};
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -83,24 +152,39 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 							</SelectContent>
 						</Select>
 					</FormItem>
-					<FormItem>
-						<FormLabel>Required Count</FormLabel>
-						<FormControl>
-							<Input
-								type="number"
-								name="required_count"
-								value={currentShift.required_count}
-								onChange={e => handleShiftChange('required_count', parseInt(e.target.value, 10))}
-								className="w-full"
-							/>
-						</FormControl>
-					</FormItem>
-					<DatePicker
-						label="Shift Date"
-						selected={currentShift.date}
-						onChange={(date: Date | null) => handleShiftChange('date', date)}
-						className="w-full"
-					/>
+					<div className="grid grid-cols-2 gap-4">
+						<FormItem>
+							<FormLabel>Shift Date</FormLabel>
+							<Select
+								onValueChange={handleDateChange}
+								defaultValue={formatDate(currentShift.date)}
+								value={formatDate(currentShift.date)}
+							>
+								<SelectTrigger className="w-full">
+									<SelectValue placeholder="Select date" />
+								</SelectTrigger>
+								<SelectContent>
+									{dateOptions.map((date) => (
+										<SelectItem key={date} value={date}>
+											{formatDate(parse(date, 'yyyy-MM-dd', new Date()))}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</FormItem>
+						<FormItem>
+							<FormLabel>Required Count</FormLabel>
+							<FormControl>
+								<Input
+									type="number"
+									name="required_count"
+									value={currentShift.required_count}
+									onChange={e => handleShiftChange('required_count', parseInt(e.target.value, 10) || 1)}
+									className="w-full"
+								/>
+							</FormControl>
+						</FormItem>
+					</div>
 					<div className="grid grid-cols-2 gap-4">
 						<TimePicker
 							label="Start Time"
@@ -115,7 +199,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 							className="w-full"
 						/>
 					</div>
-					<Button onClick={addShift} type="button" className="w-full bg-green-600">
+					<Button onClick={addShift} type="button" className="w-full bg-sky-900">
 						<Plus className="mr-2 h-4 w-4" /> Add Shift
 					</Button>
 				</div>

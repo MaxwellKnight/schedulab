@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +22,14 @@ const Login: React.FC = () => {
 	const { login } = useAuth();
 	const navigate = useNavigate();
 
+	useEffect(() => {
+		const storedToken = localStorage.getItem('authToken');
+		const storedUser = localStorage.getItem('user');
+		if (storedToken && storedUser) {
+			navigate("/");
+		}
+	});
+
 	const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError('');
@@ -31,6 +39,7 @@ const Login: React.FC = () => {
 				headers: {
 					'Content-Type': 'application/json',
 				},
+				withCredentials: true
 			});
 			const { token, user } = response.data;
 

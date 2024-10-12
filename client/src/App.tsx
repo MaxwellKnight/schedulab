@@ -10,7 +10,6 @@ import Login from './pages/login/Login';
 import { Layout } from './components/layout/Layout.tsx';
 import { useAuth, AuthProvider } from "./context/AuthContext";
 import { ReactNode } from 'react';
-import { Create } from "./pages/create/Create.tsx";
 import { ScheduleCreator } from "./pages/create/ScheduleCreator.tsx";
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
@@ -18,7 +17,6 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 	const location = useLocation();
 
 	if (!isAuthenticated) {
-		console.log(isAuthenticated);
 		return <Navigate to="/login" replace state={{ from: location }} />;
 	}
 
