@@ -3,7 +3,7 @@ import { IUserService } from "../interfaces/services.interface";
 import { IUserController } from "../interfaces/controllers.interface";
 import { IResponse, IRequest } from "../interfaces/http.interface";
 
-export class UserController implements IUserController{
+export class UserController implements IUserController {
 
 	private service: IUserService;
 	constructor(service: IUserService) {
@@ -11,11 +11,12 @@ export class UserController implements IUserController{
 	}
 
 	public create = async (req: IRequest, res: IResponse): Promise<void> => {
-		const user = req.body.data;
-		try{
+		const user = req.body.user;
+		try {
 			const id = await this.service.create(user);
 			res.json({ message: "User created", id });
-		}catch(error) {
+		} catch (error) {
+			console.log(error);
 			res.status(400);
 			res.json({ message: "User already exist" });
 		}
@@ -24,7 +25,7 @@ export class UserController implements IUserController{
 	public getOne = async (req: IRequest, res: IResponse): Promise<void> => {
 		const id = req.params.id;
 		const users: any = await this.service.getOne(Number(id));
-		if(users && users.id !== null) {
+		if (users && users.id !== null) {
 			res.json(users);
 		} else {
 			res.status(404)
@@ -34,7 +35,7 @@ export class UserController implements IUserController{
 
 	public getMany = async (req: IRequest, res: IResponse): Promise<void> => {
 		const users = await this.service.getMany();
-		if(users.length > 0) {
+		if (users.length > 0) {
 			res.json(users);
 		} else {
 			res.status(404);
@@ -45,7 +46,7 @@ export class UserController implements IUserController{
 	public getByShiftId = async (req: IRequest, res: IResponse): Promise<void> => {
 		const id = req.params.id;
 		const users = await this.service.getByShiftId(Number(id));
-		if(users.length > 0) {
+		if (users.length > 0) {
 			res.json(users);
 		} else {
 			res.status(404);
@@ -56,14 +57,14 @@ export class UserController implements IUserController{
 	public update = async (req: IRequest, res: IResponse): Promise<void> => {
 		const userData: UserData = req.body;
 		const user = await this.service.getOne(userData.id);
-		if(!user) {
+		if (!user) {
 			res.status(404);
 			res.json({ error: "User not found" });
 			return;
 		}
 
-		const result = await this.service.update({ ...user, ...userData});
-		if(result === 0) {
+		const result = await this.service.update({ ...user, ...userData });
+		if (result === 0) {
 			res.status(404);
 			res.json({ error: "Could not update user" });
 		}
@@ -73,10 +74,10 @@ export class UserController implements IUserController{
 	public delete = async (req: IRequest, res: IResponse): Promise<void> => {
 		const id = req.params.id;
 		const result = await this.service.delete(Number(id));
-		if(result === 0) {
+		if (result === 0) {
 			res.status(404);
 			res.json({ error: "User not found" });
-		}else 
+		} else
 			res.json({ message: "User deleted", id: id });
 	}
 }

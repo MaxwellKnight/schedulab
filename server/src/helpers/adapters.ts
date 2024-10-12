@@ -12,7 +12,6 @@ export const adaptMiddleware = (
 			cookie: res.cookie
 		};
 
-		if (body.forbidden) res.status(403).json({ error: "Forbidden" });
 
 		try {
 			await callback(request, response);

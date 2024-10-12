@@ -41,7 +41,7 @@ export class UserRepository implements IUserRepository {
 				users u
 			INNER JOIN
 				vacations v ON v.user_id = u.id
-			WHERE u.id = ?`, 
+			WHERE u.id = ?`,
 			[id, id]
 		);
 		return result;
@@ -85,7 +85,7 @@ export class UserRepository implements IUserRepository {
 						user_shifts us
 					WHERE us.shift_id = ?
 				)`
-			, 
+			,
 			[id]
 		);
 	}
@@ -117,7 +117,7 @@ export class UserRepository implements IUserRepository {
 				users u
 			LEFT JOIN
 				vacations v ON v.user_id = u.id
-			WHERE u.email = ?`, 
+			WHERE u.email = ?`,
 			[email]
 		);
 		return result[0] || null;

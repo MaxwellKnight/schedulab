@@ -34,9 +34,6 @@ const Login: React.FC = () => {
 			});
 			const { token, user } = response.data;
 
-			localStorage.setItem('authToken', token);
-			localStorage.setItem('user', JSON.stringify(user));
-
 			axios.interceptors.request.use(config => {
 				const token = localStorage.getItem('authToken');
 				if (token) {
@@ -45,7 +42,7 @@ const Login: React.FC = () => {
 				return config;
 			});
 
-			login(token);
+			login(token, user);
 			navigate('/');
 		} catch (err) {
 			if (axios.isAxiosError(err) && err.response) {

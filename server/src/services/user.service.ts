@@ -16,7 +16,7 @@ export class UserService implements IUserService {
 
 		return {
 			...rest,
-			recent_shifts: shifts|| [],
+			recent_shifts: shifts || [],
 			recent_vacations: vacs || []
 		}
 	}
@@ -34,11 +34,11 @@ export class UserService implements IUserService {
 	}
 	public async getOne(id: number): Promise<UserData | null> {
 		const result = await this.repo.getOne(id);
-		if(result.length === 0) return null;
+		if (result.length === 0) return null;
 
 		return this.transform(result[0]);
-  	}
-  
+	}
+
 	public async getMany(): Promise<UserData[]> {
 		const result = await this.repo.getMany();
 
@@ -47,14 +47,14 @@ export class UserService implements IUserService {
 
 	public async getByShiftId(id: number): Promise<UserData[]> {
 		const result = await this.repo.getByShiftId(id);
-		if(!result) throw new Error("No users found");
+		if (!result) throw new Error("No users found");
 
 		return Promise.all(result.map(this.transform));
 	}
 
 	public async getByEmail(email: string): Promise<UserData | null> {
 		const result = await this.repo.getByEmail(email);
-		if(!result || result.id === null) return null;
+		if (!result || result.id === null) return null;
 		return this.transform(result);
 	}
 

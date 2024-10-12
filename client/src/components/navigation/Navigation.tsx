@@ -8,13 +8,13 @@ import { useAuth } from '@/context/AuthContext';
 
 export const Navigation = () => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
-	const { logout } = useAuth();
+	const { logout, user } = useAuth();
 	const navigate = useNavigate();
 
 	const navItems = [
 		{ name: 'Dashboard', path: '/' },
-		{ name: 'Team', path: '/team' },
-		{ name: 'Projects', path: '/projects' },
+		{ name: 'Schedule', path: '/schedule' },
+		{ name: 'Members', path: '/members' },
 	];
 
 	return (
@@ -38,10 +38,11 @@ export const Navigation = () => {
 						/>
 					</Link>
 					<ul className="flex flex-col lg:flex-row lg:space-x-4">
-						{navItems.map((item) => (
+						{navItems.map((item, i) => (
 							<Link
 								to={item.path}
 								className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+								key={i}
 							>
 								<li key={item.name}>
 									{item.name}
@@ -52,9 +53,17 @@ export const Navigation = () => {
 				</div>
 
 				<div className="flex items-center">
-					<Button variant="ghost" size="icon" className="mr-4">
-						<CalendarRange className="h-5 w-5" />
-					</Button>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button variant="ghost" size="icon" className="mr-4 relative">
+								<CalendarRange className="h-5 w-5" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent>
+							{user && user.user_role == 'admin' ? <DropdownMenuItem onClick={() => navigate("/create")}>Create</DropdownMenuItem> : null}
+							<DropdownMenuItem>History</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
