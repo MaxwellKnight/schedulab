@@ -1,14 +1,13 @@
-import { useState } from 'react';
-import { useAuth } from "@/context/AuthContext";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ScheduleData } from '@/types';
 import { useForm } from 'react-hook-form';
 import ScheduleForm from './ScheduleForm';
 import ShiftForm from './ShiftForm';
 import ShiftList from './ShiftList';
+import ProgressSteps from './ProgressSteps';
+import { useState } from "react";
 
 export const ScheduleCreator = () => {
-	const { user } = useAuth();
 	const form = useForm<ScheduleData>();
 	const [step, setStep] = useState(1);
 	const [schedule, setSchedule] = useState<ScheduleData>({
@@ -39,9 +38,17 @@ export const ScheduleCreator = () => {
 		}));
 	};
 
+	const steps = [
+		{ label: "Schedule", sublabel: "Info" },
+		{ label: "Shifts", sublabel: "Details" },
+		{ label: "Confirmation" },
+	];
+
 	return (
-		<div className={step == 1 ? `container mx-auto p-4 max-w-md` : `container mx-auto p-4 max-w-6xl`}>
-			{user && <h1 className="text-3xl font-bold mb-6 text-center">Hello, {user.first_name}</h1>}
+		<div className={`container mx-auto p-4 ${step === 1 ? 'max-w-md' : 'max-w-6xl'}`}>
+			<div className="w-full mb-6">
+				<ProgressSteps steps={steps} currentStep={step} isCompact={step === 1} />
+			</div>
 			<div className={`grid ${step === 2 ? 'md:grid-cols-2' : 'grid-cols-1'} gap-6`}>
 				<Card>
 					<CardHeader>
@@ -68,7 +75,6 @@ export const ScheduleCreator = () => {
 						)}
 					</CardContent>
 				</Card>
-
 				{step === 2 && (
 					<Card>
 						<CardHeader>
