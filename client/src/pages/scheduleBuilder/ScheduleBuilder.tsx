@@ -25,6 +25,7 @@ export const ScheduleBuilder = () => {
 			shifts: schedule.shifts.map(shift => ({
 				...shift,
 				created_at: new Date(),
+				//need to overwrite this after schedule created in the database
 				schedule_id: 0,
 			})),
 		};
@@ -53,7 +54,7 @@ export const ScheduleBuilder = () => {
 				<Card>
 					<CardHeader>
 						<CardTitle className="text-2xl font-semibold text-center">
-							{step === 1 ? "New schedule" : "Add Shifts"}
+							{step === 1 ? "Schedule Builder" : "Shift Builder"}
 						</CardTitle>
 					</CardHeader>
 					<CardContent>

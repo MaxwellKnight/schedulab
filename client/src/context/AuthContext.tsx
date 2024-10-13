@@ -16,9 +16,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 		if (storedToken && storedUser) {
 			setToken(storedToken);
 			setIsAuth(true);
-			setUser(user);
+			setUser(JSON.parse(storedUser));
 		}
-	}, [isAuthenticated, user]);
+	}, []);
 
 	const login = (userToken: string, user: UserData) => {
 		setToken(userToken);
