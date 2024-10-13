@@ -1,15 +1,9 @@
 import { UserData } from "@/types";
-import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { AuthContextType } from "@/types/AuthContext.types";
+import React, { createContext, useState, ReactNode, useEffect } from "react";
 
-interface AuthContextType {
-	token: string | null;
-	user: UserData | null;
-	isAuthenticated: boolean;
-	login: (userToken: string, user: UserData) => void;
-	logout: () => void;
-}
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 	const [token, setToken] = useState<string | null>(null);
@@ -49,17 +43,3 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 	);
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const useAuth = () => {
-	const context = useContext(AuthContext);
-	if (!context) {
-		throw new Error("useAuth must be used within an AuthProvider");
-	}
-	return context;
-};
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const useToken = () => {
-	const { token } = useAuth();
-	return token;
-};

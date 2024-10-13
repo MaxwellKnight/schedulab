@@ -1,18 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CalendarRange, Bell, Menu, X } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth/useAuth';
 
 export const Navigation = () => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const { logout, user } = useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
-
-	useEffect(() => console.log(user), [user]);
 
 	const navItems = [
 		{ name: 'Dashboard', path: '/' },

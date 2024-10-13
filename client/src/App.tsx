@@ -8,9 +8,10 @@ import {
 } from "react-router-dom";
 import Login from './pages/login/Login';
 import { Layout } from './components/layout/Layout.tsx';
-import { useAuth, AuthProvider } from "./context/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
 import { ReactNode } from 'react';
 import { ScheduleBuilder } from "./pages/scheduleBuilder/ScheduleBuilder.tsx";
+import { useAuth } from "./hooks/useAuth/useAuth.ts";
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 	const { isAuthenticated } = useAuth();

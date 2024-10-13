@@ -6,8 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth } from '@/context/AuthContext';
 import { GoogleIcon } from './GoogleIcon';
+import { useAuth } from '@/hooks/useAuth/useAuth';
 
 axios.defaults.baseURL = 'http://localhost:5713';
 axios.defaults.withCredentials = true;
