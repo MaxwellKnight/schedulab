@@ -10,11 +10,12 @@ import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { eachDayOfInterval, format, parse, isValid, startOfDay, isAfter } from 'date-fns';
 
 interface ShiftFormProps {
-	form: UseFormReturn<ScheduleData | ShiftData>;
+	form: UseFormReturn<ScheduleData>;
 	schedule: ScheduleData;
 	setSchedule: React.Dispatch<React.SetStateAction<ScheduleData>>;
 	onBack: () => void;
-	onSubmit: (data: ScheduleData | ShiftData) => void;
+	onNext: () => void;
+	onSubmit: (data: ScheduleData) => void;
 }
 
 const createDateArray = (startDate: Date, endDate: Date): string[] => {
@@ -26,7 +27,7 @@ const createDateArray = (startDate: Date, endDate: Date): string[] => {
 	return dateArray.map(date => format(date, 'yyyy-MM-dd'));
 }
 
-const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBack, onSubmit }) => {
+const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBack, onSubmit, onNext }) => {
 	const [currentShift, setCurrentShift] = useState<ShiftData>({
 		shift_type: 1,
 		required_count: 1,
@@ -53,7 +54,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 		}
 	}, [schedule]);
 
-	const handleShiftChange = (name: string, value: Date | number | string | null) => {
+	const handleShiftChange = (name: keyof ShiftData, value: Date | number | string | null) => {
 		if (value !== null) {
 			if (name === 'date') {
 				try {
@@ -173,15 +174,14 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 					)}
 					<FormField
 						control={form.control}
-						name="shift_name"
-						rules={{ required: "*Shift name is required" }}
+						name="shifts.0.shift_name"
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Shift Name</FormLabel>
 								<FormControl>
 									<Input
 										{...field}
-										value={field.value || ''}
+										value={currentShift.shift_name}
 										onChange={(e) => {
 											field.onChange(e.target.value);
 											handleShiftChange('shift_name', e.target.value);
@@ -195,17 +195,17 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 					/>
 					<FormField
 						control={form.control}
-						name="shift_type"
+						name="shifts.0.shift_type"
 						rules={{ required: "*Shift type is required" }}
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Shift Type</FormLabel>
 								<Select
 									onValueChange={(value) => {
-										field.onChange(value);
+										field.onChange(parseInt(value, 10));
 										handleShiftChange('shift_type', parseInt(value, 10));
 									}}
-									value={field.value?.toString() || currentShift.shift_type.toString()}
+									value={currentShift.shift_type.toString()}
 								>
 									<SelectTrigger className="w-full">
 										<SelectValue placeholder="Select shift type" />
@@ -265,7 +265,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 							className="w-full"
 						/>
 					</div>
-					<Button type="button" onClick={addShift} className="w-full bg-sky-900">
+					<Button type="submit" onClick={addShift} className="w-full bg-sky-900">
 						<Plus className="mr-2 h-4 w-4" /> Add Shift
 					</Button>
 				</div>
@@ -274,7 +274,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 					<Button onClick={onBack} type="button" variant="outline">
 						<ChevronLeft className="mr-2 h-4 w-4" /> Back
 					</Button>
-					<Button type="submit" className='bg-sky-700'>
+					<Button onClick={() => onNext()} type="button" className='cursor-pointer bg-sky-700'>
 						Next <ChevronRight className="ml-2 h-4 w-4" />
 					</Button>
 				</div>

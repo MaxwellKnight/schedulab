@@ -42,6 +42,7 @@ export const ScheduleBuilder = () => {
 	const steps = [
 		{ label: "Schedule", sublabel: "Info" },
 		{ label: "Shifts", sublabel: "Details" },
+		{ label: "Constraints" },
 		{ label: "Confirmation" },
 	];
 
@@ -63,20 +64,23 @@ export const ScheduleBuilder = () => {
 								form={form}
 								schedule={schedule}
 								setSchedule={setSchedule}
-								onNext={() => setStep(2)}
+								onNext={() => setStep(prev => prev + 1)}
 							/>
-						) : (
+						) : step === 2 ? (
 							<ShiftForm
 								form={form}
 								schedule={schedule}
 								setSchedule={setSchedule}
-								onBack={() => setStep(1)}
+								onBack={() => setStep(prev => prev - 1)}
+								onNext={() => setStep(prev => prev + 1)}
 								onSubmit={handleSubmit}
 							/>
-						)}
+						) :
+							<div className="max-w-md">Step-3</div>
+						}
 					</CardContent>
 				</Card>
-				{step === 2 && (
+				{step === 2 ? (
 					<Card>
 						<CardHeader>
 							<CardTitle className="text-2xl font-semibold text-center">Added Shifts</CardTitle>
@@ -85,7 +89,7 @@ export const ScheduleBuilder = () => {
 							<ShiftList shifts={schedule.shifts} onRemove={removeShift} />
 						</CardContent>
 					</Card>
-				)}
+				) : null}
 			</div>
 		</div>
 	);
