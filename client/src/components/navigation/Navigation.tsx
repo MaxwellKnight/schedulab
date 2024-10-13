@@ -59,8 +59,8 @@ export const Navigation = () => {
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end">
 									{user && user.user_role === 'admin' && (
-										<DropdownMenuItem onClick={() => navigate("/create")}>
-											Create
+										<DropdownMenuItem onClick={() => navigate("/build")}>
+											Build
 										</DropdownMenuItem>
 									)}
 									<DropdownMenuItem>History</DropdownMenuItem>

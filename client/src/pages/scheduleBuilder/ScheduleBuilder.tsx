@@ -7,7 +7,7 @@ import ShiftList from './ShiftList';
 import ProgressSteps from './ProgressSteps';
 import { useState } from "react";
 
-export const ScheduleCreator = () => {
+export const ScheduleBuilder = () => {
 	const form = useForm<ScheduleData>();
 	const [step, setStep] = useState(1);
 	const [schedule, setSchedule] = useState<ScheduleData>({

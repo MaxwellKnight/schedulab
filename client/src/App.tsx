@@ -10,7 +10,7 @@ import Login from './pages/login/Login';
 import { Layout } from './components/layout/Layout.tsx';
 import { useAuth, AuthProvider } from "./context/AuthContext";
 import { ReactNode } from 'react';
-import { ScheduleCreator } from "./pages/create/ScheduleCreator.tsx";
+import { ScheduleBuilder } from "./pages/scheduleBuilder/ScheduleBuilder.tsx";
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 	const { isAuthenticated } = useAuth();
@@ -69,8 +69,8 @@ const AppRoutes = () => {
 					element: <div>Home</div>
 				},
 				{
-					path: "/create",
-					element: <ScheduleCreator />
+					path: "/build",
+					element: <ScheduleBuilder />
 				},
 				{
 					path: "/members",

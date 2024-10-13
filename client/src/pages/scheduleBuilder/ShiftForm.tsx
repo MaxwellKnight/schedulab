@@ -6,7 +6,7 @@ import { Form, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { ScheduleData, ShiftData } from '@/types';
 import { TimePicker } from '@/components/date-picker/DatePicker';
 import { UseFormReturn } from 'react-hook-form';
-import { ChevronLeft, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { eachDayOfInterval, format, parse, isValid, startOfDay } from 'date-fns';
 
 interface ShiftFormProps {
@@ -76,7 +76,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 				...prev,
 				shifts: [...prev.shifts, { ...currentShift, date: new Date(currentShift.date) }]
 			}));
-			// Reset the form with the first available date
+
 			const firstAvailableDate = dateOptions.length > 0
 				? parse(dateOptions[0], 'yyyy-MM-dd', new Date())
 				: startOfDay(new Date(schedule.start_date));
@@ -208,7 +208,9 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 					<Button onClick={onBack} type="button" variant="outline">
 						<ChevronLeft className="mr-2 h-4 w-4" /> Back
 					</Button>
-					<Button type="submit" className='bg-sky-700'>Create Schedule</Button>
+					<Button type="submit" className='bg-sky-700'>
+						Next <ChevronRight className="ml-2 h-4 w-4" />
+					</Button>
 				</div>
 			</form>
 		</Form>
