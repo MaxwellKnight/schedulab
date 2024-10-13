@@ -2,13 +2,13 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { ScheduleData } from '@/types';
+import { ScheduleData, ShiftData } from '@/types';
 import { DatePicker } from '@/components/date-picker/DatePicker';
 import { UseFormReturn } from 'react-hook-form';
 import { ChevronRight } from 'lucide-react';
 
 interface ScheduleFormProps {
-	form: UseFormReturn<ScheduleData>;
+	form: UseFormReturn<ScheduleData | ShiftData>;
 	schedule: ScheduleData;
 	setSchedule: React.Dispatch<React.SetStateAction<ScheduleData>>;
 	onNext: () => void;

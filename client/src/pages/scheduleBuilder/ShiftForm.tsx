@@ -2,19 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { Form, FormItem, FormLabel, FormControl, FormField, FormMessage } from "@/components/ui/form";
 import { ScheduleData, ShiftData } from '@/types';
 import { TimePicker } from '@/components/date-picker/DatePicker';
 import { UseFormReturn } from 'react-hook-form';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import { eachDayOfInterval, format, parse, isValid, startOfDay } from 'date-fns';
+import { eachDayOfInterval, format, parse, isValid, startOfDay, isAfter } from 'date-fns';
 
 interface ShiftFormProps {
-	form: UseFormReturn<ScheduleData>;
+	form: UseFormReturn<ScheduleData | ShiftData>;
 	schedule: ScheduleData;
 	setSchedule: React.Dispatch<React.SetStateAction<ScheduleData>>;
 	onBack: () => void;
-	onSubmit: (data: ScheduleData) => void;
+	onSubmit: (data: ScheduleData | ShiftData) => void;
 }
 
 const createDateArray = (startDate: Date, endDate: Date): string[] => {
@@ -38,6 +38,8 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 		date: new Date(),
 	});
 	const [dateOptions, setDateOptions] = useState<string[]>([]);
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
 	useEffect(() => {
 		const startDate = new Date(schedule.start_date);
@@ -57,7 +59,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 				try {
 					const parsedDate = parse(value as string, 'yyyy-MM-dd', new Date());
 					if (isValid(parsedDate)) {
-						setCurrentShift({ ...currentShift, [name]: parsedDate });
+						setCurrentShift(prev => ({ ...prev, [name]: parsedDate }));
 					} else {
 						console.error('Invalid date parsed', { value });
 					}
@@ -65,12 +67,40 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 					console.error('Error parsing date', { value, error });
 				}
 			} else {
-				setCurrentShift({ ...currentShift, [name]: value });
+				setCurrentShift(prev => ({ ...prev, [name]: value }));
 			}
 		}
 	};
 
 	const addShift = () => {
+		setErrorMessage(null);
+		setSuccessMessage(null);
+
+		if (!currentShift.shift_name.trim()) {
+			setErrorMessage("Shift name is required");
+			return;
+		}
+
+		if (!isValid(currentShift.date)) {
+			setErrorMessage("Invalid shift date");
+			return;
+		}
+
+		if (!isValid(currentShift.start_time) || !isValid(currentShift.end_time)) {
+			setErrorMessage("Invalid start or end time");
+			return;
+		}
+
+		if (isAfter(currentShift.start_time, currentShift.end_time)) {
+			setErrorMessage("Start time must be before end time");
+			return;
+		}
+
+		if (currentShift.required_count < 1) {
+			setErrorMessage("Required count must be at least 1");
+			return;
+		}
+
 		if (isValid(currentShift.date)) {
 			setSchedule(prev => ({
 				...prev,
@@ -90,10 +120,13 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 				end_time: new Date(),
 				date: firstAvailableDate,
 			});
+			setSuccessMessage("Shift added successfully");
 		} else {
 			console.error('Attempted to add shift with invalid date', currentShift);
+			setErrorMessage("Invalid shift date");
 		}
 	};
+
 	const handleDateChange = (value: string) => {
 		try {
 			const parsedDate = parse(value, 'yyyy-MM-dd', new Date());
@@ -120,44 +153,78 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 			return '';
 		}
 	};
+
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 				<div className="space-y-4">
 					<h3 className="text-lg font-medium">Add Shifts</h3>
-					<FormItem>
-						<FormLabel>Shift Name</FormLabel>
-						<FormControl>
-							<Input
-								name="shift_name"
-								value={currentShift.shift_name}
-								onChange={e => handleShiftChange('shift_name', e.target.value)}
-								className="w-full"
-							/>
-						</FormControl>
-					</FormItem>
-					<FormItem>
-						<FormLabel>Shift Type</FormLabel>
-						<Select
-							onValueChange={value => handleShiftChange('shift_type', parseInt(value, 10))}
-							value={currentShift.shift_type.toString()}
-						>
-							<SelectTrigger className="w-full">
-								<SelectValue placeholder="Select shift type" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="1">Morning</SelectItem>
-								<SelectItem value="2">Afternoon</SelectItem>
-								<SelectItem value="3">Night</SelectItem>
-							</SelectContent>
-						</Select>
-					</FormItem>
+					{errorMessage && (
+						<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+							<strong className="font-bold">Error:</strong>
+							<span className="block sm:inline"> {errorMessage}</span>
+						</div>
+					)}
+					{successMessage && (
+						<div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+							<strong className="font-bold">Success:</strong>
+							<span className="block sm:inline"> {successMessage}</span>
+						</div>
+					)}
+					<FormField
+						control={form.control}
+						name="shift_name"
+						rules={{ required: "*Shift name is required" }}
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Shift Name</FormLabel>
+								<FormControl>
+									<Input
+										{...field}
+										value={field.value || ''}
+										onChange={(e) => {
+											field.onChange(e.target.value);
+											handleShiftChange('shift_name', e.target.value);
+										}}
+										className="w-full"
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="shift_type"
+						rules={{ required: "*Shift type is required" }}
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Shift Type</FormLabel>
+								<Select
+									onValueChange={(value) => {
+										field.onChange(value);
+										handleShiftChange('shift_type', parseInt(value, 10));
+									}}
+									value={field.value?.toString() || currentShift.shift_type.toString()}
+								>
+									<SelectTrigger className="w-full">
+										<SelectValue placeholder="Select shift type" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="1">Morning</SelectItem>
+										<SelectItem value="2">Afternoon</SelectItem>
+										<SelectItem value="3">Night</SelectItem>
+									</SelectContent>
+								</Select>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
 					<div className="grid grid-cols-2 gap-4">
 						<FormItem>
 							<FormLabel>Shift Date</FormLabel>
 							<Select
 								onValueChange={handleDateChange}
-								defaultValue={formatDate(currentShift.date)}
 								value={formatDate(currentShift.date)}
 							>
 								<SelectTrigger className="w-full">
@@ -177,9 +244,8 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 							<FormControl>
 								<Input
 									type="number"
-									name="required_count"
 									value={currentShift.required_count}
-									onChange={e => handleShiftChange('required_count', parseInt(e.target.value, 10) || 1)}
+									onChange={(e) => handleShiftChange('required_count', parseInt(e.target.value, 10) || 1)}
 									className="w-full"
 								/>
 							</FormControl>
@@ -199,7 +265,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 							className="w-full"
 						/>
 					</div>
-					<Button onClick={addShift} type="button" className="w-full bg-sky-900">
+					<Button type="button" onClick={addShift} className="w-full bg-sky-900">
 						<Plus className="mr-2 h-4 w-4" /> Add Shift
 					</Button>
 				</div>
