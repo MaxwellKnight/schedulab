@@ -85,4 +85,5 @@ const ShiftList: React.FC<ShiftListProps> = ({ shifts, onRemove }) => {
 		</div>
 	);
 };
+
 export default ShiftList;

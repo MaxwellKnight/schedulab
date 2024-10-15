@@ -2,22 +2,27 @@ import { UserData } from "@/types";
 import { AuthContextType } from "@/types/AuthContext.types";
 import React, { createContext, useState, ReactNode, useEffect } from "react";
 
-
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 	const [token, setToken] = useState<string | null>(null);
 	const [user, setUser] = useState<UserData | null>(null);
 	const [isAuthenticated, setIsAuth] = useState<boolean>(false);
+	const [isLoading, setIsLoading] = useState<boolean>(true);
 
 	useEffect(() => {
-		const storedToken = localStorage.getItem('authToken');
-		const storedUser = localStorage.getItem('user');
-		if (storedToken && storedUser) {
-			setToken(storedToken);
-			setIsAuth(true);
-			setUser(JSON.parse(storedUser));
-		}
+		const initializeAuth = async () => {
+			const storedToken = localStorage.getItem('authToken');
+			const storedUser = localStorage.getItem('user');
+			if (storedToken && storedUser) {
+				setToken(storedToken);
+				setIsAuth(true);
+				setUser(JSON.parse(storedUser));
+			}
+			setIsLoading(false);
+		};
+
+		initializeAuth();
 	}, []);
 
 	const login = (userToken: string, user: UserData) => {
@@ -36,10 +41,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 		localStorage.removeItem('user');
 	};
 
+	if (isLoading) {
+		return <div>Loading...</div>;
+	}
+
 	return (
 		<AuthContext.Provider value={{ token, isAuthenticated, login, user, logout }}>
 			{children}
 		</AuthContext.Provider>
 	);
 };
-

@@ -1,31 +1,53 @@
+import { useReducer } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { ScheduleData } from '@/types';
+import { ScheduleData, ShiftData } from '@/types';
 import { useForm } from 'react-hook-form';
 import ScheduleForm from './ScheduleForm';
 import ShiftForm from './ShiftForm';
 import ShiftList from './ShiftList';
 import ProgressSteps from './ProgressSteps';
-import { useState } from "react";
+
+export type ScheduleAction =
+	| { type: 'SET_STEP'; payload: number }
+	| { type: 'UPDATE_SCHEDULE'; payload: Partial<ScheduleData> }
+	| { type: 'ADD_SHIFT'; payload: ShiftData }
+	| { type: 'REMOVE_SHIFT'; payload: number };
+
+const scheduleReducer = (state: ScheduleData & { step: number }, action: ScheduleAction): ScheduleData & { step: number } => {
+	switch (action.type) {
+		case 'SET_STEP':
+			return { ...state, step: action.payload };
+		case 'UPDATE_SCHEDULE':
+			return { ...state, ...action.payload };
+		case 'ADD_SHIFT':
+			return { ...state, shifts: [...state.shifts, action.payload] };
+		case 'REMOVE_SHIFT':
+			return { ...state, shifts: state.shifts.filter((_, i) => i !== action.payload) };
+		default:
+			return state;
+	}
+};
 
 export const ScheduleBuilder = () => {
-	const form = useForm<ScheduleData>();
-	const [step, setStep] = useState(1);
-	const [schedule, setSchedule] = useState<ScheduleData>({
+	const initialState: ScheduleData & { step: number } = {
 		start_date: new Date(),
 		end_date: new Date(),
 		shifts: [],
 		remarks: [],
 		likes: 0,
 		notes: '',
-	});
+		step: 1,
+	};
+
+	const [state, dispatch] = useReducer(scheduleReducer, initialState);
+	const form = useForm<ScheduleData>();
 
 	const handleSubmit = (data: ScheduleData) => {
 		const finalSchedule: ScheduleData = {
 			...data,
-			shifts: schedule.shifts.map(shift => ({
+			shifts: state.shifts.map(shift => ({
 				...shift,
 				created_at: new Date(),
-				//need to overwrite this after schedule created in the database
 				schedule_id: 0,
 			})),
 		};
@@ -33,10 +55,7 @@ export const ScheduleBuilder = () => {
 	};
 
 	const removeShift = (index: number) => {
-		setSchedule(prev => ({
-			...prev,
-			shifts: prev.shifts.filter((_, i) => i !== index)
-		}));
+		dispatch({ type: 'REMOVE_SHIFT', payload: index });
 	};
 
 	const steps = [
@@ -47,46 +66,46 @@ export const ScheduleBuilder = () => {
 	];
 
 	return (
-		<div className={`container mx-auto p-4 ${step === 1 ? 'max-w-md' : 'max-w-6xl'}`}>
+		<div className={`container mx-auto p-4 ${state.step === 1 ? 'max-w-md' : 'max-w-6xl'}`}>
 			<div className="w-full mb-6">
-				<ProgressSteps steps={steps} currentStep={step} isCompact={step === 1} />
+				<ProgressSteps steps={steps} currentStep={state.step} isCompact={state.step === 1} />
 			</div>
-			<div className={`grid ${step === 2 ? 'md:grid-cols-2' : 'grid-cols-1'} gap-6`}>
+			<div className={`grid ${state.step === 2 ? 'md:grid-cols-2' : 'grid-cols-1'} gap-6`}>
 				<Card>
 					<CardHeader>
 						<CardTitle className="text-2xl font-semibold text-center">
-							{step === 1 ? "Schedule Builder" : "Shift Builder"}
+							{state.step === 1 ? "Schedule Builder" : "Shift Builder"}
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						{step === 1 ? (
+						{state.step === 1 ? (
 							<ScheduleForm
 								form={form}
-								schedule={schedule}
-								setSchedule={setSchedule}
-								onNext={() => setStep(prev => prev + 1)}
+								schedule={state}
+								dispatch={dispatch}
+								onNext={() => dispatch({ type: 'SET_STEP', payload: state.step + 1 })}
 							/>
-						) : step === 2 ? (
+						) : state.step === 2 ? (
 							<ShiftForm
 								form={form}
-								schedule={schedule}
-								setSchedule={setSchedule}
-								onBack={() => setStep(prev => prev - 1)}
-								onNext={() => setStep(prev => prev + 1)}
+								schedule={state}
+								dispatch={dispatch}
+								onBack={() => dispatch({ type: 'SET_STEP', payload: state.step - 1 })}
+								onNext={() => dispatch({ type: 'SET_STEP', payload: state.step + 1 })}
 								onSubmit={handleSubmit}
 							/>
-						) :
+						) : (
 							<div className="max-w-md">Step-3</div>
-						}
+						)}
 					</CardContent>
 				</Card>
-				{step === 2 ? (
+				{state.step === 2 ? (
 					<Card>
 						<CardHeader>
 							<CardTitle className="text-2xl font-semibold text-center">Added Shifts</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<ShiftList shifts={schedule.shifts} onRemove={removeShift} />
+							<ShiftList shifts={state.shifts} onRemove={removeShift} />
 						</CardContent>
 					</Card>
 				) : null}

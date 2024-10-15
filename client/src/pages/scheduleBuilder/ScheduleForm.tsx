@@ -6,17 +6,18 @@ import { ScheduleData } from '@/types';
 import { DatePicker } from '@/components/date-picker/DatePicker';
 import { UseFormReturn } from 'react-hook-form';
 import { ChevronRight } from 'lucide-react';
+import { ScheduleAction } from './ScheduleBuilder';
 
 interface ScheduleFormProps {
 	form: UseFormReturn<ScheduleData>;
 	schedule: ScheduleData;
-	setSchedule: React.Dispatch<React.SetStateAction<ScheduleData>>;
+	dispatch: React.Dispatch<ScheduleAction>;
 	onNext: () => void;
 }
 
-const ScheduleForm: React.FC<ScheduleFormProps> = ({ form, schedule, setSchedule, onNext }) => {
+const ScheduleForm: React.FC<ScheduleFormProps> = ({ form, dispatch, onNext }) => {
 	const handleScheduleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		setSchedule({ ...schedule, [e.target.name]: e.target.value });
+		dispatch({ type: 'UPDATE_SCHEDULE', payload: { [e.target.name]: e.target.value } });
 	};
 
 	return (
@@ -36,7 +37,7 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ form, schedule, setSchedule
 										selected={field.value}
 										onChange={(date: Date) => {
 											field.onChange(date);
-											setSchedule(prev => ({ ...prev, start_date: date }));
+											dispatch({ type: 'UPDATE_SCHEDULE', payload: { start_date: date } });
 										}}
 										className="w-full"
 									/>
@@ -62,7 +63,7 @@ const ScheduleForm: React.FC<ScheduleFormProps> = ({ form, schedule, setSchedule
 										selected={field.value}
 										onChange={(date: Date) => {
 											field.onChange(date);
-											setSchedule(prev => ({ ...prev, end_date: date }));
+											dispatch({ type: 'UPDATE_SCHEDULE', payload: { end_date: date } });
 										}}
 										className="w-full"
 									/>

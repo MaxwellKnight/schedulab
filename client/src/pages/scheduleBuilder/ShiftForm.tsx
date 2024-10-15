@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,11 +8,12 @@ import { TimePicker } from '@/components/date-picker/DatePicker';
 import { UseFormReturn } from 'react-hook-form';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { eachDayOfInterval, format, parse, isValid, startOfDay, isAfter } from 'date-fns';
+import { ScheduleAction } from './ScheduleBuilder';
 
 interface ShiftFormProps {
 	form: UseFormReturn<ScheduleData>;
 	schedule: ScheduleData;
-	setSchedule: React.Dispatch<React.SetStateAction<ScheduleData>>;
+	dispatch: React.Dispatch<ScheduleAction>;
 	onBack: () => void;
 	onNext: () => void;
 	onSubmit: (data: ScheduleData) => void;
@@ -27,7 +28,7 @@ const createDateArray = (startDate: Date, endDate: Date): string[] => {
 	return dateArray.map(date => format(date, 'yyyy-MM-dd'));
 }
 
-const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBack, onSubmit, onNext }) => {
+const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, dispatch, onBack, onSubmit, onNext }) => {
 	const [currentShift, setCurrentShift] = useState<ShiftData>({
 		shift_type: 1,
 		required_count: 1,
@@ -103,10 +104,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 		}
 
 		if (isValid(currentShift.date)) {
-			setSchedule(prev => ({
-				...prev,
-				shifts: [...prev.shifts, { ...currentShift, date: new Date(currentShift.date) }]
-			}));
+			dispatch({ type: 'ADD_SHIFT', payload: { ...currentShift, date: new Date(currentShift.date) } });
 
 			const firstAvailableDate = dateOptions.length > 0
 				? parse(dateOptions[0], 'yyyy-MM-dd', new Date())
@@ -265,7 +263,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 							className="w-full"
 						/>
 					</div>
-					<Button type="submit" onClick={addShift} className="w-full bg-sky-900">
+					<Button type="button" onClick={addShift} className="w-full bg-sky-900">
 						<Plus className="mr-2 h-4 w-4" /> Add Shift
 					</Button>
 				</div>
@@ -274,7 +272,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, setSchedule, onBa
 					<Button onClick={onBack} type="button" variant="outline">
 						<ChevronLeft className="mr-2 h-4 w-4" /> Back
 					</Button>
-					<Button onClick={() => onNext()} type="button" className='cursor-pointer bg-sky-700'>
+					<Button onClick={onNext} type="button" className='cursor-pointer bg-sky-700'>
 						Next <ChevronRight className="ml-2 h-4 w-4" />
 					</Button>
 				</div>
