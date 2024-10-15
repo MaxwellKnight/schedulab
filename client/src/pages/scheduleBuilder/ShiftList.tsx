@@ -62,7 +62,14 @@ const ShiftList: React.FC<ShiftListProps> = ({ shifts, onRemove }) => {
 											<div className="grid grid-cols-3 gap-4 text-sm text-gray-600">
 												<div className="flex items-center">
 													<Clock className="h-4 w-4 mr-2" />
-													<span>{format(new Date(shift.start_time), "HH:mm")} - {format(new Date(shift.end_time), "HH:mm")}</span>
+													<span className="grid">
+														{shift.ranges.map((range, index) => (
+															<span key={index}>
+																{format(new Date(range.start_time), "HH:mm")} - {format(new Date(range.end_time), "HH:mm")}
+																{index < shift.ranges.length - 1 ? ", " : ""}
+															</span>
+														))}
+													</span>
 												</div>
 												<div className="flex items-center">
 													<Users className="h-4 w-4 mr-2" />

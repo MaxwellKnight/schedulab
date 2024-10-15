@@ -45,7 +45,7 @@ export const ScheduleBuilder = () => {
 	const handleSubmit = (data: ScheduleData) => {
 		const finalSchedule: ScheduleData = {
 			...data,
-			shifts: state.shifts.map(shift => ({
+			shifts: state.shifts.map((shift: ShiftData) => ({
 				...shift,
 				created_at: new Date(),
 				schedule_id: 0,
