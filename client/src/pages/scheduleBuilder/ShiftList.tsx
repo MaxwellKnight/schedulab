@@ -35,7 +35,7 @@ const ShiftList: React.FC<ShiftListProps> = ({ shifts, onRemove }) => {
 	if (shifts.length === 0) return <div className="h-full flex items-center justify-center text-gray-500">No shifts added yet.</div>;
 
 	return (
-		<div className="h-[500px] overflow-y-auto "> {/* Adjust the height as needed */}
+		<div className="h-[500px] overflow-y-auto ">
 			{Object.entries(groupedShifts).map(([date, dateShifts]) => (
 				<div key={date} className="mb-6">
 					<h5 className="font-semibold text-md mb-2">{format(new Date(date), 'MMMM dd, yyyy')}</h5>
