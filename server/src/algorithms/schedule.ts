@@ -24,6 +24,10 @@ export class Employee {
 	public get id(): number {
 		return this._id;
 	}
+
+	public get preferences() {
+		return this._preferences;
+	}
 }
 
 export class Shift {
