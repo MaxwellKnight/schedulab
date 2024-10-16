@@ -4,4 +4,18 @@ import { ScheduleData, RemarkData } from "./schedules.dto";
 import { UserData } from "./users.dto";
 import { VacationData } from "./vacations.dto";
 
-export { PreferenceData, ShiftData, TimeRange, ScheduleData, UserData, VacationData, DailyPreferenceData, RemarkData };
+interface AlgorithmicConstraint {
+	id: string;
+	type: 'maxConsecutive' | 'minTimeBetween' | 'maxPerDay' | 'maxPerWeek' | 'noSequence' | 'custom';
+	shiftTypes: number[];
+	value?: number;
+	additionalData?: number[];
+	priority?: number;
+	groupId?: string;
+	startTime?: string;
+	endTime?: string;
+	daysOfWeek?: number[];
+	customCondition?: string;
+}
+
+export { AlgorithmicConstraint, PreferenceData, ShiftData, TimeRange, ScheduleData, UserData, VacationData, DailyPreferenceData, RemarkData };
