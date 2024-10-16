@@ -2,14 +2,12 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlgorithmicConstraint } from '@/types';
-import ConstraintList from './ConstraintList';
 
 interface ShiftConstraintsManagerProps {
 	constraints: AlgorithmicConstraint[];
@@ -20,9 +18,7 @@ interface ShiftConstraintsManagerProps {
 }
 
 const ConstraintBuilder: React.FC<ShiftConstraintsManagerProps> = ({
-	constraints,
 	onAddConstraint,
-	onRemoveConstraint,
 	onBack,
 	onNext
 }) => {
