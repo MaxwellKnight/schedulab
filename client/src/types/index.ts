@@ -18,4 +18,4 @@ interface AlgorithmicConstraint {
 	customCondition?: string;
 }
 
-export { AlgorithmicConstraint, PreferenceData, ShiftData, TimeRange, ScheduleData, UserData, VacationData, DailyPreferenceData, RemarkData };
+export type { AlgorithmicConstraint, PreferenceData, ShiftData, TimeRange, ScheduleData, UserData, VacationData, DailyPreferenceData, RemarkData };

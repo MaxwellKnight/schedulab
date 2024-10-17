@@ -10,6 +10,7 @@ import { eachDayOfInterval, format, parse, isValid, startOfDay } from 'date-fns'
 import { ScheduleAction } from './ScheduleBuilder';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import TimeRangeDialog from './TimeRangeDialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface ShiftFormProps {
 	form: UseFormReturn<ScheduleData>;
@@ -29,6 +30,10 @@ const createDateArray = (startDate: Date, endDate: Date): string[] => {
 }
 
 const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, dispatch, onBack, onSubmit, onNext }) => {
+	const [dateOptions, setDateOptions] = useState<string[]>([]);
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+	const [successMessage, setSuccessMessage] = useState<string | null>(null);
+	const [newShiftType, setNewShiftType] = useState('');
 	const [currentShift, setCurrentShift] = useState<ShiftData>({
 		shift_type: 1,
 		required_count: 1,
@@ -38,9 +43,11 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, dispatch, onBack,
 		ranges: [],
 		date: new Date(),
 	});
-	const [dateOptions, setDateOptions] = useState<string[]>([]);
-	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-	const [successMessage, setSuccessMessage] = useState<string | null>(null);
+	const [shiftTypes, setShiftTypes] = useState([
+		{ id: 1, name: 'Morning' },
+		{ id: 2, name: 'Afternoon' },
+		{ id: 3, name: 'Night' },
+	]);
 
 	useEffect(() => {
 		const startDate = new Date(schedule.start_date);
@@ -116,6 +123,14 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, dispatch, onBack,
 		}));
 	};
 
+	const handleAddShiftType = () => {
+		if (newShiftType.trim()) {
+			const newId = Math.max(...shiftTypes.map(t => t.id)) + 1;
+			setShiftTypes([...shiftTypes, { id: newId, name: newShiftType.trim() }]);
+			setNewShiftType('');
+		}
+	};
+
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -174,9 +189,35 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, dispatch, onBack,
 											<SelectValue placeholder="Select shift type" />
 										</SelectTrigger>
 										<SelectContent>
-											<SelectItem value="1">Morning</SelectItem>
-											<SelectItem value="2">Afternoon</SelectItem>
-											<SelectItem value="3">Night</SelectItem>
+											{shiftTypes.map((type) => (
+												<SelectItem key={type.id} value={type.id.toString()}>
+													{type.name}
+												</SelectItem>
+											))}
+
+											<Dialog>
+												<DialogTrigger asChild>
+													<Button variant="ghost" className="w-full justify-start">
+														<Plus className="mr-2 h-4 w-4" /> Add New Shift Type
+													</Button>
+												</DialogTrigger>
+												<DialogContent>
+													<DialogHeader>
+														<DialogTitle>Add New Shift Type</DialogTitle>
+														<DialogDescription>
+															Enter a name for the new shift type and click 'Add' to create it.
+														</DialogDescription>
+													</DialogHeader>
+													<div className="flex items-center space-x-2">
+														<Input
+															value={newShiftType}
+															onChange={(e) => setNewShiftType(e.target.value)}
+															placeholder="Enter new shift type"
+														/>
+														<Button onClick={handleAddShiftType}>Add</Button>
+													</div>
+												</DialogContent>
+											</Dialog>
 										</SelectContent>
 									</Select>
 									<FormMessage />
@@ -184,7 +225,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, dispatch, onBack,
 							)}
 						/>
 
-						<FormItem >
+						<FormItem>
 							<FormLabel>Shift Date</FormLabel>
 							<Select
 								onValueChange={(value) => handleShiftChange('date', value)}
@@ -203,7 +244,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, dispatch, onBack,
 							</Select>
 						</FormItem>
 
-						<FormItem >
+						<FormItem>
 							<FormLabel>Required Count</FormLabel>
 							<FormControl>
 								<Input
@@ -214,8 +255,8 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, dispatch, onBack,
 								/>
 							</FormControl>
 						</FormItem>
-
 					</div>
+
 					<TimeRangeDialog onAddRanges={handleAddTimeRanges} />
 
 					{currentShift.ranges.length > 0 && (

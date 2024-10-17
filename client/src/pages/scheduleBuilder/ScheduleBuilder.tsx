@@ -8,7 +8,6 @@ import ShiftList from './ShiftList';
 import ProgressSteps from './ProgressSteps';
 import ConstraintBuilder from './ConstraintBuilder';
 import { AlgorithmicConstraint } from '@/types';
-import ConstraintList from './ConstraintList';
 
 export type ScheduleAction =
 	| { type: 'SET_STEP'; payload: number }
@@ -92,7 +91,7 @@ export const ScheduleBuilder = () => {
 			<div className="w-full mb-6">
 				<ProgressSteps steps={steps} currentStep={state.step} isCompact={state.step === 1} />
 			</div>
-			<div className={`grid ${state.step === 2 || state.step == 3 ? 'md:grid-cols-2' : 'grid-cols-1'} gap-6`}>
+			<div className={`grid ${state.step === 2 ? 'md:grid-cols-2' : 'grid-cols-1'} gap-6`}>
 				<Card>
 					<CardHeader>
 						<CardTitle className="text-2xl font-semibold text-center">
@@ -144,16 +143,6 @@ export const ScheduleBuilder = () => {
 						</CardHeader>
 						<CardContent>
 							<ShiftList shifts={state.shifts} onRemove={removeShift} />
-						</CardContent>
-					</Card>
-				)}
-				{state.step === 3 && (
-					<Card>
-						<CardHeader>
-							<CardTitle className="text-2xl font-semibold text-center">Added Constraints</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<ConstraintList constraints={state.constraints} onRemoveConstraint={removeConstraint} />
 						</CardContent>
 					</Card>
 				)}
