@@ -15,12 +15,16 @@ export type ScheduleAction =
 	| { type: 'ADD_SHIFT'; payload: ShiftData }
 	| { type: 'REMOVE_SHIFT'; payload: number }
 	| { type: 'ADD_CONSTRAINT'; payload: AlgorithmicConstraint }
-	| { type: 'REMOVE_CONSTRAINT'; payload: string };
+	| { type: 'REMOVE_CONSTRAINT'; payload: string }
+	| { type: 'ADD_SHIFT_TYPE'; payload: ShiftType };
+
+export type ShiftType = { id: number, name: string };
+export type Schedule = ScheduleData & { types: ShiftType[] } & { step: number, constraints: AlgorithmicConstraint[] };
 
 const scheduleReducer = (
-	state: ScheduleData & { step: number; constraints: AlgorithmicConstraint[] },
+	state: Schedule,
 	action: ScheduleAction
-): ScheduleData & { step: number; constraints: AlgorithmicConstraint[] } => {
+): Schedule => {
 	switch (action.type) {
 		case 'SET_STEP':
 			return { ...state, step: action.payload };
@@ -34,13 +38,15 @@ const scheduleReducer = (
 			return { ...state, constraints: [...state.constraints, action.payload] };
 		case 'REMOVE_CONSTRAINT':
 			return { ...state, constraints: state.constraints.filter(c => c.id !== action.payload) };
+		case 'ADD_SHIFT_TYPE':
+			return { ...state, types: [...state.types, action.payload] };
 		default:
 			return state;
 	}
 };
 
 export const ScheduleBuilder = () => {
-	const initialState: ScheduleData & { step: number; constraints: AlgorithmicConstraint[] } = {
+	const initialState: Schedule = {
 		start_date: new Date(),
 		end_date: new Date(),
 		shifts: [],
@@ -48,14 +54,19 @@ export const ScheduleBuilder = () => {
 		likes: 0,
 		notes: '',
 		step: 1,
+		types: [
+			{ id: 1, name: 'Morning' },
+			{ id: 2, name: 'Afternoon' },
+			{ id: 3, name: 'Night' },
+		],
 		constraints: [],
 	};
 
 	const [state, dispatch] = useReducer(scheduleReducer, initialState);
-	const form = useForm<ScheduleData>();
+	const form = useForm<Schedule>();
 
-	const handleSubmit = (data: ScheduleData) => {
-		const finalSchedule: ScheduleData = {
+	const handleSubmit = (data: Schedule) => {
+		const finalSchedule: Schedule = {
 			...data,
 			shifts: state.shifts.map((shift: ShiftData) => ({
 				...shift,
@@ -78,6 +89,9 @@ export const ScheduleBuilder = () => {
 	const removeConstraint = (id: string) => {
 		dispatch({ type: 'REMOVE_CONSTRAINT', payload: id });
 	};
+
+	const next = () => dispatch({ type: 'SET_STEP', payload: state.step + 1 });
+	const previous = () => dispatch({ type: 'SET_STEP', payload: state.step - 1 });
 
 	const steps = [
 		{ label: "Schedule", sublabel: "Info" },
@@ -106,7 +120,7 @@ export const ScheduleBuilder = () => {
 								form={form}
 								schedule={state}
 								dispatch={dispatch}
-								onNext={() => dispatch({ type: 'SET_STEP', payload: state.step + 1 })}
+								onNext={next}
 							/>
 						)}
 						{state.step === 2 && (
@@ -114,18 +128,19 @@ export const ScheduleBuilder = () => {
 								form={form}
 								schedule={state}
 								dispatch={dispatch}
-								onBack={() => dispatch({ type: 'SET_STEP', payload: state.step - 1 })}
-								onNext={() => dispatch({ type: 'SET_STEP', payload: state.step + 1 })}
+								onBack={previous}
+								onNext={next}
 								onSubmit={handleSubmit}
 							/>
 						)}
 						{state.step === 3 && (
 							<ConstraintBuilder
+								schedule={state}
 								constraints={state.constraints}
 								onAddConstraint={addConstraint}
 								onRemoveConstraint={removeConstraint}
-								onBack={() => dispatch({ type: 'SET_STEP', payload: state.step - 1 })}
-								onNext={() => dispatch({ type: 'SET_STEP', payload: state.step + 1 })}
+								onBack={previous}
+								onNext={next}
 							/>
 						)}
 						{state.step === 4 && (

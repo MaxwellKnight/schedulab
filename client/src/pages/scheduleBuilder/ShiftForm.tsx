@@ -3,22 +3,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormItem, FormLabel, FormControl, FormField, FormMessage } from "@/components/ui/form";
-import { ScheduleData, ShiftData, TimeRange } from '@/types';
+import { ShiftData, TimeRange } from '@/types';
 import { UseFormReturn } from 'react-hook-form';
 import { ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import { eachDayOfInterval, format, parse, isValid, startOfDay } from 'date-fns';
-import { ScheduleAction } from './ScheduleBuilder';
+import { Schedule, ScheduleAction } from './ScheduleBuilder';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import TimeRangeDialog from './TimeRangeDialog';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface ShiftFormProps {
-	form: UseFormReturn<ScheduleData>;
-	schedule: ScheduleData;
+	form: UseFormReturn<Schedule>;
+	schedule: Schedule;
 	dispatch: React.Dispatch<ScheduleAction>;
 	onBack: () => void;
 	onNext: () => void;
-	onSubmit: (data: ScheduleData) => void;
+	onSubmit: (data: Schedule) => void;
 }
 
 const createDateArray = (startDate: Date, endDate: Date): string[] => {
@@ -43,11 +43,6 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, dispatch, onBack,
 		ranges: [],
 		date: new Date(),
 	});
-	const [shiftTypes, setShiftTypes] = useState([
-		{ id: 1, name: 'Morning' },
-		{ id: 2, name: 'Afternoon' },
-		{ id: 3, name: 'Night' },
-	]);
 
 	useEffect(() => {
 		const startDate = new Date(schedule.start_date);
@@ -125,8 +120,8 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, dispatch, onBack,
 
 	const handleAddShiftType = () => {
 		if (newShiftType.trim()) {
-			const newId = Math.max(...shiftTypes.map(t => t.id)) + 1;
-			setShiftTypes([...shiftTypes, { id: newId, name: newShiftType.trim() }]);
+			const newId = Math.max(...schedule.types.map(t => t.id)) + 1;
+			dispatch({ type: 'ADD_SHIFT_TYPE', payload: { id: newId, name: newShiftType.trim() } });
 			setNewShiftType('');
 		}
 	};
@@ -189,7 +184,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, dispatch, onBack,
 											<SelectValue placeholder="Select shift type" />
 										</SelectTrigger>
 										<SelectContent>
-											{shiftTypes.map((type) => (
+											{schedule.types.map((type) => (
 												<SelectItem key={type.id} value={type.id.toString()}>
 													{type.name}
 												</SelectItem>
@@ -198,7 +193,7 @@ const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, dispatch, onBack,
 											<Dialog>
 												<DialogTrigger asChild>
 													<Button variant="ghost" className="w-full justify-start">
-														<Plus className="mr-2 h-4 w-4" /> Add New Shift Type
+														<Plus className="mr-2 h-4 w-4" /> Add Type
 													</Button>
 												</DialogTrigger>
 												<DialogContent>

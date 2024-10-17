@@ -6,16 +6,8 @@ import { VacationData } from "./vacations.dto";
 
 interface AlgorithmicConstraint {
 	id: string;
-	type: 'maxConsecutive' | 'minTimeBetween' | 'maxPerDay' | 'maxPerWeek' | 'noSequence' | 'custom';
-	shiftTypes: number[];
-	value?: number;
-	additionalData?: number[];
-	priority?: number;
-	groupId?: string;
-	startTime?: string;
-	endTime?: string;
-	daysOfWeek?: number[];
-	customCondition?: string;
+	name: string;
+	ranges?: TimeRange[];
 }
 
 export type { AlgorithmicConstraint, PreferenceData, ShiftData, TimeRange, ScheduleData, UserData, VacationData, DailyPreferenceData, RemarkData };
