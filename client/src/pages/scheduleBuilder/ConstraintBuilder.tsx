@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from '@/components/ui/badge';
-import { Constraints } from '@/types';
-import { ArrowRight, ChevronLeft, ChevronRight, GripVertical, Info, Plus } from 'lucide-react';
-import { Schedule, ShiftType } from './ScheduleBuilder';
-import { DndContext, DragOverlay, useDraggable, useDroppable, DragStartEvent, DragEndEvent, DragOverEvent, Active, Over } from '@dnd-kit/core';
+import { Constraints, ShiftData, TimeRange } from '@/types';
+import { ArrowRight, ChevronLeft, ChevronRight, GripVertical, Info, Plus, Clock } from 'lucide-react';
+import { DndContext, useDraggable, useDroppable, DragStartEvent, DragEndEvent, DragOverEvent, Active, Over } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { Schedule, ShiftType } from './ScheduleBuilder';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
+import { format } from 'date-fns';
 
 interface ShiftConstraintsManagerProps {
 	constraints: Constraints[];
@@ -61,9 +64,11 @@ const DraggableShiftType: React.FC<DraggableShiftTypeProps> = ({ type, schedule 
 interface ConstraintItemProps {
 	constraint: Constraints;
 	schedule: Schedule;
+	timeRanges: TimeRange[];
+	onUpdateTimeRanges: (constraintId: string, selectedRanges: TimeRange[]) => void;
 }
 
-const ConstraintItem: React.FC<ConstraintItemProps> = ({ constraint, schedule }) => {
+const ConstraintItem: React.FC<ConstraintItemProps> = ({ constraint, schedule, timeRanges, onUpdateTimeRanges }) => {
 	const { attributes, listeners, setNodeRef, transform } = useDraggable({
 		id: `constraint-${constraint.id}`,
 		data: { constraint, isNew: false },
@@ -74,18 +79,69 @@ const ConstraintItem: React.FC<ConstraintItemProps> = ({ constraint, schedule })
 	} : undefined;
 
 	const color = getColorForShiftType(constraint.id.split('-')[0], schedule);
+	const [selectedRanges, setSelectedRanges] = useState<TimeRange[]>(constraint.ranges || []);
+
+	const handleTimeRangeChange = (range: TimeRange) => {
+		const newSelectedRanges = selectedRanges.includes(range)
+			? selectedRanges.filter(r => r !== range)
+			: [...selectedRanges, range];
+		setSelectedRanges(newSelectedRanges);
+		onUpdateTimeRanges(constraint.id, newSelectedRanges);
+	};
+
+	const handleSelectAll = () => {
+		const newSelectedRanges = selectedRanges.length === timeRanges.length ? [] : timeRanges;
+		setSelectedRanges(newSelectedRanges);
+		onUpdateTimeRanges(constraint.id, newSelectedRanges);
+	};
 
 	return (
-		<div
-			ref={setNodeRef}
-			style={style}
-			{...attributes}
-			{...listeners}
-			className="bg-white border rounded-md shadow-sm flex gap-2 items-center p-2 cursor-move"
-		>
-			<div className={`${color} w-3 h-3 rounded-full mr-2`}></div>
+		<div className="flex items-center gap-2 bg-white border rounded-md shadow-sm p-2">
+			<div
+				ref={setNodeRef}
+				style={style}
+				{...attributes}
+				{...listeners}
+				className="cursor-move"
+			>
+				<GripVertical className="text-gray-500" size={20} />
+			</div>
+			<div className={`${color} w-3 h-3 rounded-full`}></div>
 			<span className="font-medium flex-grow">{constraint.name}</span>
-			<GripVertical className="text-gray-500" size={20} />
+			<Popover>
+				<PopoverTrigger asChild>
+					<Button variant="outline" size="sm">
+						<Clock className="h-4 w-4 mr-2" />
+						{selectedRanges.length} / {timeRanges.length}
+					</Button>
+				</PopoverTrigger>
+				<PopoverContent className="w-50">
+					<div className="space-y-2">
+						<div className="flex items-center">
+							<Checkbox
+								id={`selectAll-${constraint.id}`}
+								checked={selectedRanges.length === timeRanges.length}
+								onCheckedChange={handleSelectAll}
+							/>
+							<label htmlFor={`selectAll-${constraint.id}`} className="ml-2 text-sm font-medium">
+								Select All
+							</label>
+						</div>
+						{timeRanges.map((range, index) => (
+							<div key={index} className="flex items-center">
+								<Checkbox
+									id={`range-${constraint.id}-${index}`}
+									checked={selectedRanges.includes(range)}
+									onCheckedChange={() => handleTimeRangeChange(range)}
+								/>
+								<label htmlFor={`range-${constraint.id}-${index}`} className="ml-2 text-sm">
+									{format(new Date(range.start_time), "HH:mm")} - {format(new Date(range.end_time), "HH:mm")}
+								</label>
+							</div>
+						))}
+					</div>
+				</PopoverContent>
+			</Popover>
 		</div>
 	);
 };
@@ -94,9 +150,12 @@ interface ConstraintRowProps {
 	constraints: Constraints[];
 	rowIndex: number;
 	schedule: Schedule;
+	isOver: boolean;
+	timeRanges: GroupedTimeRanges;
+	onUpdateTimeRanges: (constraintId: string, selectedRanges: TimeRange[]) => void;
 }
 
-const ConstraintRow: React.FC<ConstraintRowProps & { isOver: boolean }> = ({ constraints, rowIndex, schedule, isOver }) => {
+const ConstraintRow: React.FC<ConstraintRowProps> = ({ constraints, rowIndex, schedule, isOver, timeRanges, onUpdateTimeRanges }) => {
 	const { setNodeRef } = useDroppable({
 		id: `row-${rowIndex}`,
 	});
@@ -109,7 +168,12 @@ const ConstraintRow: React.FC<ConstraintRowProps & { isOver: boolean }> = ({ con
 			<Badge variant="secondary">{rowIndex + 1}</Badge>
 			{constraints.map((constraint, index) => (
 				<React.Fragment key={constraint.id}>
-					<ConstraintItem constraint={constraint} schedule={schedule} />
+					<ConstraintItem
+						constraint={constraint}
+						schedule={schedule}
+						timeRanges={timeRanges[Number(constraint.id.split('-')[0])] || []}
+						onUpdateTimeRanges={onUpdateTimeRanges}
+					/>
 					{index < constraints.length - 1 && (
 						<ArrowRight className="text-gray-400" size={20} />
 					)}
@@ -134,14 +198,32 @@ const NewRowButton: React.FC<{ rowIndex: number; isOver: boolean }> = ({ rowInde
 	);
 };
 
+type GroupedTimeRanges = Record<number, TimeRange[]>;
+
 const ConstraintBuilder: React.FC<ShiftConstraintsManagerProps> = ({
 	schedule,
 	onBack,
 	onNext
 }) => {
 	const [constraintRows, setConstraintRows] = useState<Constraints[][]>([]);
-	const [activeId, setActiveId] = useState<string | null>(null);
+	const [, setActiveId] = useState<string | null>(null);
 	const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
+	const [timeRanges, setTimeRanges] = useState<GroupedTimeRanges>({});
+
+	const groupTimeRangesByShiftType = (schedule: Schedule): GroupedTimeRanges => {
+		const groupedRanges: GroupedTimeRanges = {};
+
+		schedule.shifts.forEach((shift: ShiftData) => {
+			if (!groupedRanges[shift.shift_type]) {
+				groupedRanges[shift.shift_type] = [];
+			}
+			groupedRanges[shift.shift_type].push(...shift.ranges);
+		});
+
+		return groupedRanges;
+	};
+
+	useEffect(() => setTimeRanges(groupTimeRangesByShiftType(schedule)), [schedule]);
 
 	const handleDragStart = (event: DragStartEvent) => {
 		setActiveId(event.active.id as string);
@@ -176,6 +258,7 @@ const ConstraintBuilder: React.FC<ShiftConstraintsManagerProps> = ({
 		const newConstraint: Constraints = {
 			id: `${(active.data.current?.type as ShiftType).id}-${Date.now()}`,
 			name: (active.data.current?.type as ShiftType).name,
+			ranges: [],
 		};
 
 		if (over.id === 'droppable-area') {
@@ -228,9 +311,22 @@ const ConstraintBuilder: React.FC<ShiftConstraintsManagerProps> = ({
 		setConstraintRows(newRows);
 	};
 
+	const handleUpdateTimeRanges = (constraintId: string, selectedRanges: TimeRange[]) => {
+		setConstraintRows(prevRows =>
+			prevRows.map(row =>
+				row.map(constraint =>
+					constraint.id === constraintId
+						? { ...constraint, timeRanges: selectedRanges }
+						: constraint
+				)
+			)
+		);
+	};
+
 	const { setNodeRef } = useDroppable({
 		id: 'droppable-area',
 	});
+
 	return (
 		<DndContext onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
 			<div className="space-y-6">
@@ -240,6 +336,7 @@ const ConstraintBuilder: React.FC<ShiftConstraintsManagerProps> = ({
 						<p>
 							Each row represents a forbidden sequence of shift types that cannot occur in the schedule.
 							Drag shift types to create these sequences and define your scheduling constraints.
+							Click on the clock icon to select specific time ranges for each constraint.
 						</p>
 					</div>
 				</div>
@@ -256,6 +353,8 @@ const ConstraintBuilder: React.FC<ShiftConstraintsManagerProps> = ({
 										rowIndex={index}
 										schedule={schedule}
 										isOver={hoveredRowId === `row-${index}`}
+										timeRanges={timeRanges}
+										onUpdateTimeRanges={handleUpdateTimeRanges}
 									/>
 								</React.Fragment>
 							))}
@@ -283,14 +382,6 @@ const ConstraintBuilder: React.FC<ShiftConstraintsManagerProps> = ({
 					</Button>
 				</div>
 			</div>
-			<DragOverlay>
-				{activeId ? (
-					<div className="bg-white border rounded-md shadow-sm flex items-center p-2">
-						<div className="bg-gray-400 w-3 h-3 rounded-full mr-2"></div>
-						<span className="font-medium flex-grow">Dragging...</span>
-					</div>
-				) : null}
-			</DragOverlay>
 		</DndContext>
 	);
 };
