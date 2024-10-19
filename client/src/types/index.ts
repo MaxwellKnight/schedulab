@@ -4,10 +4,10 @@ import { ScheduleData, RemarkData } from "./schedules.dto";
 import { UserData } from "./users.dto";
 import { VacationData } from "./vacations.dto";
 
-interface AlgorithmicConstraint {
+interface Constraints {
 	id: string;
 	name: string;
 	ranges?: TimeRange[];
 }
 
-export type { AlgorithmicConstraint, PreferenceData, ShiftData, TimeRange, ScheduleData, UserData, VacationData, DailyPreferenceData, RemarkData };
+export type { Constraints, PreferenceData, ShiftData, TimeRange, ScheduleData, UserData, VacationData, DailyPreferenceData, RemarkData };

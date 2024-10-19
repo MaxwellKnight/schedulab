@@ -3,15 +3,14 @@ import {
 	RouterProvider,
 	Navigate,
 	useLocation,
-	useRouteError,
-	isRouteErrorResponse
 } from "react-router-dom";
 import Login from './pages/login/Login';
 import { Layout } from './components/layout/Layout.tsx';
 import { AuthProvider } from "./context/AuthContext";
 import { ReactNode } from 'react';
-import { ScheduleBuilder } from "./pages/scheduleBuilder/ScheduleBuilder.tsx";
+import { ScheduleBuilder } from "./pages/ScheduleBuilder/ScheduleBuilder.tsx";
 import { useAuth } from "./hooks/useAuth/useAuth.ts";
+import ErrorBoundary from "./pages/ErrorBoundary/ErrorBoundary.tsx";
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 	const { isAuthenticated } = useAuth();
@@ -22,30 +21,6 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 	}
 
 	return <>{children}</>;
-};
-
-const ErrorBoundary = () => {
-	const error = useRouteError();
-
-	if (isRouteErrorResponse(error)) {
-		if (error.status === 404) {
-			return <div>This page doesn't exist!</div>;
-		}
-
-		if (error.status === 401) {
-			return <div>You aren't authorized to see this</div>;
-		}
-
-		if (error.status === 503) {
-			return <div>Looks like our API is down</div>;
-		}
-
-		if (error.status === 418) {
-			return <div>🫖</div>;
-		}
-	}
-
-	return <div>Something went wrong</div>;
 };
 
 const AppRoutes = () => {

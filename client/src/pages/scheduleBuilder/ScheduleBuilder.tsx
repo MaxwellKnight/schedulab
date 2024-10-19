@@ -7,19 +7,19 @@ import ShiftForm from './ShiftForm';
 import ShiftList from './ShiftList';
 import ProgressSteps from './ProgressSteps';
 import ConstraintBuilder from './ConstraintBuilder';
-import { AlgorithmicConstraint } from '@/types';
+import { Constraints } from '@/types';
 
 export type ScheduleAction =
 	| { type: 'SET_STEP'; payload: number }
 	| { type: 'UPDATE_SCHEDULE'; payload: Partial<ScheduleData> }
 	| { type: 'ADD_SHIFT'; payload: ShiftData }
 	| { type: 'REMOVE_SHIFT'; payload: number }
-	| { type: 'ADD_CONSTRAINT'; payload: AlgorithmicConstraint }
+	| { type: 'ADD_CONSTRAINT'; payload: Constraints }
 	| { type: 'REMOVE_CONSTRAINT'; payload: string }
 	| { type: 'ADD_SHIFT_TYPE'; payload: ShiftType };
 
 export type ShiftType = { id: number, name: string };
-export type Schedule = ScheduleData & { types: ShiftType[] } & { step: number, constraints: AlgorithmicConstraint[] };
+export type Schedule = ScheduleData & { types: ShiftType[] } & { step: number, constraints: Constraints[] };
 
 const scheduleReducer = (
 	state: Schedule,
@@ -82,7 +82,7 @@ export const ScheduleBuilder = () => {
 		dispatch({ type: 'REMOVE_SHIFT', payload: index });
 	};
 
-	const addConstraint = (constraint: AlgorithmicConstraint) => {
+	const addConstraint = (constraint: Constraints) => {
 		dispatch({ type: 'ADD_CONSTRAINT', payload: constraint });
 	};
 

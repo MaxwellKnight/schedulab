@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from '@/components/ui/badge';
-import { AlgorithmicConstraint } from '@/types';
+import { Constraints } from '@/types';
 import { ArrowRight, ChevronLeft, ChevronRight, GripVertical, Info, Plus } from 'lucide-react';
 import { Schedule, ShiftType } from './ScheduleBuilder';
 import { DndContext, DragOverlay, useDraggable, useDroppable, DragStartEvent, DragEndEvent, DragOverEvent, Active, Over } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 
 interface ShiftConstraintsManagerProps {
-	constraints: AlgorithmicConstraint[];
+	constraints: Constraints[];
 	schedule: Schedule;
-	onAddConstraint: (constraint: AlgorithmicConstraint) => void;
+	onAddConstraint: (constraint: Constraints) => void;
 	onRemoveConstraint: (id: string) => void;
 	onBack: () => void;
 	onNext: () => void;
@@ -49,7 +49,7 @@ const DraggableShiftType: React.FC<DraggableShiftTypeProps> = ({ type, schedule 
 			style={style}
 			{...attributes}
 			{...listeners}
-			className="bg-white border rounded-md shadow-sm flex items-center p-2 cursor-move"
+			className="bg-white border rounded-md shadow-sm flex items-center p-3 cursor-move"
 		>
 			<div className={`${color} w-3 h-3 rounded-full mr-2`}></div>
 			<span className="font-medium flex-grow">{type.name}</span>
@@ -59,7 +59,7 @@ const DraggableShiftType: React.FC<DraggableShiftTypeProps> = ({ type, schedule 
 };
 
 interface ConstraintItemProps {
-	constraint: AlgorithmicConstraint;
+	constraint: Constraints;
 	schedule: Schedule;
 }
 
@@ -81,7 +81,7 @@ const ConstraintItem: React.FC<ConstraintItemProps> = ({ constraint, schedule })
 			style={style}
 			{...attributes}
 			{...listeners}
-			className="bg-white border rounded-md shadow-sm flex items-center p-2 cursor-move"
+			className="bg-white border rounded-md shadow-sm flex gap-2 items-center p-2 cursor-move"
 		>
 			<div className={`${color} w-3 h-3 rounded-full mr-2`}></div>
 			<span className="font-medium flex-grow">{constraint.name}</span>
@@ -91,7 +91,7 @@ const ConstraintItem: React.FC<ConstraintItemProps> = ({ constraint, schedule })
 };
 
 interface ConstraintRowProps {
-	constraints: AlgorithmicConstraint[];
+	constraints: Constraints[];
 	rowIndex: number;
 	schedule: Schedule;
 }
@@ -139,7 +139,7 @@ const ConstraintBuilder: React.FC<ShiftConstraintsManagerProps> = ({
 	onBack,
 	onNext
 }) => {
-	const [constraintRows, setConstraintRows] = useState<AlgorithmicConstraint[][]>([]);
+	const [constraintRows, setConstraintRows] = useState<Constraints[][]>([]);
 	const [activeId, setActiveId] = useState<string | null>(null);
 	const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
 
@@ -173,7 +173,7 @@ const ConstraintBuilder: React.FC<ShiftConstraintsManagerProps> = ({
 	};
 
 	const addNewConstraint = (active: Active, over: Over) => {
-		const newConstraint: AlgorithmicConstraint = {
+		const newConstraint: Constraints = {
 			id: `${(active.data.current?.type as ShiftType).id}-${Date.now()}`,
 			name: (active.data.current?.type as ShiftType).name,
 		};
@@ -265,7 +265,7 @@ const ConstraintBuilder: React.FC<ShiftConstraintsManagerProps> = ({
 							isOver={hoveredRowId === `new-row-${constraintRows.length + 1}`}
 						/>
 					</div>
-					<div className="w-1/6 min-w-[200px]">
+					<div className="p-1">
 						<h3 className="text-lg font-semibold mb-2">Shift Types</h3>
 						<div className="space-y-2">
 							{schedule.types.map((type) => (
