@@ -8,6 +8,7 @@ import ShiftList from './ShiftList';
 import ProgressSteps from './ProgressSteps';
 import ConstraintBuilder from './ConstraintBuilder';
 import { Constraints } from '@/types';
+import ScheduleTable from './ScheduleTable';
 
 export type ScheduleAction =
 	| { type: 'SET_STEP'; payload: number }
@@ -136,7 +137,6 @@ export const ScheduleBuilder = () => {
 						{state.step === 3 && (
 							<ConstraintBuilder
 								schedule={state}
-								constraints={state.constraints}
 								onAddConstraint={addConstraint}
 								onRemoveConstraint={removeConstraint}
 								onBack={previous}
@@ -144,10 +144,11 @@ export const ScheduleBuilder = () => {
 							/>
 						)}
 						{state.step === 4 && (
-							<div>
-								<h3>Confirmation</h3>
-								<p>Review your schedule, shifts, and constraints before submitting.</p>
-							</div>
+							<ScheduleTable
+								schedule={state}
+								onNext={next}
+								onBack={previous}
+							/>
 						)}
 					</CardContent>
 				</Card>

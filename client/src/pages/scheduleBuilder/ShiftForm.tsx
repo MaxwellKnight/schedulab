@@ -21,7 +21,7 @@ interface ShiftFormProps {
 	onSubmit: (data: Schedule) => void;
 }
 
-const createDateArray = (startDate: Date, endDate: Date): string[] => {
+export const createDateArray = (startDate: Date, endDate: Date): string[] => {
 	if (startDate > endDate) {
 		[startDate, endDate] = [endDate, startDate];
 	}

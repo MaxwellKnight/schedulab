@@ -9,9 +9,9 @@ import { Schedule, ShiftType } from './ScheduleBuilder';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
+import { getColorForShiftType } from '@/utils/colors';
 
 interface ShiftConstraintsManagerProps {
-	constraints: Constraints[];
 	schedule: Schedule;
 	onAddConstraint: (constraint: Constraints) => void;
 	onRemoveConstraint: (id: string) => void;
@@ -19,15 +19,6 @@ interface ShiftConstraintsManagerProps {
 	onNext: () => void;
 }
 
-const colorPalette: string[] = [
-	'bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500',
-	'bg-purple-500', 'bg-pink-500', 'bg-indigo-500', 'bg-teal-500'
-];
-
-const getColorForShiftType = (shiftTypeId: string, schedule: Schedule): string => {
-	const index = schedule.types.findIndex(type => type.id === Number(shiftTypeId));
-	return colorPalette[index % colorPalette.length];
-};
 
 interface DraggableShiftTypeProps {
 	type: ShiftType;
