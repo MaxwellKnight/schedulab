@@ -1,4 +1,4 @@
-import { User, Vacation, Preference, Shift, Schedule, DailyPreference } from "../models";
+import { User, Vacation, Preference, Shift, Schedule, DailyPreference, ShiftType, Team } from "../models";
 
 export interface Repository<T> {
 	create(data: Omit<T, "id">): Promise<number>;
@@ -8,9 +8,10 @@ export interface Repository<T> {
 	delete(id: number): Promise<number>;
 }
 
-export interface IUserRepository extends Repository<User>{
+export interface IUserRepository extends Repository<User> {
 	getByShiftId(id: number): Promise<User[]>;
 	getByEmail(email: string): Promise<User | null>;
+	getByTeamId(teamId: number): Promise<User[]>;
 }
 
 export interface IVacationRepository extends Repository<Vacation> {
@@ -33,11 +34,25 @@ export interface IShiftRepository extends Repository<Shift> {
 	getByName(name: string): Promise<Shift[]>;
 	getByUserId(id: number): Promise<Shift[]>;
 	getByScheduleId(id: number): Promise<Shift[]>;
+	getByShiftTypeId(shiftTypeId: number): Promise<Shift[]>;
 	deleteByScheduleId(id: number): Promise<number>;
 	removeUser(id: number): Promise<number>;
+	addTimeRange(shiftId: number, startTime: Date, endTime: Date): Promise<number>;
+	removeTimeRange(timeRangeId: number): Promise<number>;
 }
 
 export interface IScheduleRepository extends Repository<Schedule> {
 	getByDates(start_date: Date, end_date: Date): Promise<Schedule[]>;
 	getByUserId(id: number): Promise<Schedule[]>;
+	getByTeamId(teamId: number): Promise<Schedule[]>;
+	publish(id: number): Promise<number>;
+	unpublish(id: number): Promise<number>;
+}
+
+export interface IShiftTypeRepository extends Repository<ShiftType> {
+	getByTeamId(teamId: number): Promise<ShiftType[]>;
+}
+
+export interface ITeamRepository extends Repository<Team> {
+	getByUserId(userId: number): Promise<Team[]>;
 }

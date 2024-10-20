@@ -17,6 +17,17 @@ import { IVacationRepository } from '../interfaces/repos.interface';
 import { IUserRepository } from '../interfaces/repos.interface';
 import { IDatabase } from './db.interface';
 import { IAuthController } from './controllers.interface';
+import { Remark } from '../models/schedule.model';
+
+export interface IRemarkRepository {
+	create(remark: Remark): Promise<number>;
+	getOne(id: number): Promise<Remark | null>;
+	getMany(): Promise<Remark[]>;
+	getByScheduleId(scheduleId: number): Promise<Remark[]>;
+	update(remark: Remark): Promise<number>;
+	delete(id: number): Promise<number>;
+	deleteByScheduleId(scheduleId: number): Promise<number>;
+}
 
 export {
 	IRequest,
@@ -42,6 +53,7 @@ export {
 	RemarkData,
 	ShiftData,
 	UserData,
+	Remark,
 	VacationData,
 	IDatabase,
 	IAuthController
