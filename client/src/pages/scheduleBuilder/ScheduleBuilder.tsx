@@ -10,17 +10,15 @@ import ConstraintBuilder from './ConstraintBuilder';
 import { Constraints } from '@/types';
 import ScheduleTable from './ScheduleTable';
 
+export type ShiftType = { id: number, name: string };
+export type Schedule = ScheduleData & { types: ShiftType[] } & { step: number, constraints: Constraints[][] };
+
 export type ScheduleAction =
 	| { type: 'SET_STEP'; payload: number }
-	| { type: 'UPDATE_SCHEDULE'; payload: Partial<ScheduleData> }
+	| { type: 'UPDATE_SCHEDULE'; payload: Partial<Schedule> }
 	| { type: 'ADD_SHIFT'; payload: ShiftData }
 	| { type: 'REMOVE_SHIFT'; payload: number }
-	| { type: 'ADD_CONSTRAINT'; payload: Constraints }
-	| { type: 'REMOVE_CONSTRAINT'; payload: string }
 	| { type: 'ADD_SHIFT_TYPE'; payload: ShiftType };
-
-export type ShiftType = { id: number, name: string };
-export type Schedule = ScheduleData & { types: ShiftType[] } & { step: number, constraints: Constraints[] };
 
 const scheduleReducer = (
 	state: Schedule,
@@ -35,10 +33,6 @@ const scheduleReducer = (
 			return { ...state, shifts: [...state.shifts, action.payload] };
 		case 'REMOVE_SHIFT':
 			return { ...state, shifts: state.shifts.filter((_, i) => i !== action.payload) };
-		case 'ADD_CONSTRAINT':
-			return { ...state, constraints: [...state.constraints, action.payload] };
-		case 'REMOVE_CONSTRAINT':
-			return { ...state, constraints: state.constraints.filter(c => c.id !== action.payload) };
 		case 'ADD_SHIFT_TYPE':
 			return { ...state, types: [...state.types, action.payload] };
 		default:
@@ -76,19 +70,14 @@ export const ScheduleBuilder = () => {
 			})),
 		};
 		console.log('Submitting schedule:', finalSchedule);
-		console.log('Constraints:', state.constraints);
 	};
 
 	const removeShift = (index: number) => {
 		dispatch({ type: 'REMOVE_SHIFT', payload: index });
 	};
 
-	const addConstraint = (constraint: Constraints) => {
-		dispatch({ type: 'ADD_CONSTRAINT', payload: constraint });
-	};
-
-	const removeConstraint = (id: string) => {
-		dispatch({ type: 'REMOVE_CONSTRAINT', payload: id });
+	const updateSchedule = (updatedSchedule: Partial<Schedule>) => {
+		dispatch({ type: 'UPDATE_SCHEDULE', payload: updatedSchedule });
 	};
 
 	const next = () => dispatch({ type: 'SET_STEP', payload: state.step + 1 });
@@ -97,8 +86,8 @@ export const ScheduleBuilder = () => {
 	const steps = [
 		{ label: "Schedule", sublabel: "Info" },
 		{ label: "Shifts", sublabel: "Details" },
-		{ label: "Constraints" },
-		{ label: "Confirmation" },
+		{ label: "Constraints", sublabel: "Details" },
+		{ label: "Confirmation", sublabel: "Details" },
 	];
 
 	return (
@@ -137,8 +126,7 @@ export const ScheduleBuilder = () => {
 						{state.step === 3 && (
 							<ConstraintBuilder
 								schedule={state}
-								onAddConstraint={addConstraint}
-								onRemoveConstraint={removeConstraint}
+								onUpdateSchedule={updateSchedule}
 								onBack={previous}
 								onNext={next}
 							/>
@@ -146,7 +134,7 @@ export const ScheduleBuilder = () => {
 						{state.step === 4 && (
 							<ScheduleTable
 								schedule={state}
-								onNext={next}
+								onSubmit={handleSubmit}
 								onBack={previous}
 							/>
 						)}

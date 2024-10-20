@@ -19,10 +19,10 @@ import { getColorForShiftType } from '@/utils/colors';
 interface ScheduleTableProps {
 	schedule: Schedule;
 	onBack: () => void;
-	onNext: () => void;
+	onSubmit: (data: Schedule) => void;
 }
 
-const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedule, onBack, onNext }) => {
+const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedule, onBack, onSubmit }) => {
 	const [headers, setHeaders] = useState<string[]>([]);
 
 	useEffect(() => {
@@ -44,7 +44,6 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedule, onBack, onNext 
 		const cellId = `${typeId}-${date}`;
 		const colorClass = getColorForShiftType(typeId.toString(), schedule);
 		const borderClass = colorClass.replace("bg", "border");
-		console.log(borderClass);
 
 		if (shifts.length === 0) return <TableCell key={cellId}>-</TableCell>;
 
@@ -139,12 +138,16 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedule, onBack, onNext 
 					})}
 				</TableBody>
 			</Table>
-			<div className="flex justify-between mt-6">
-				<Button onClick={onBack} type="button" variant="outline">
+			<div className="flex justify-between items-center mt-6">
+				<Button onClick={onBack} type="button" variant="outline" className="px-4 py-2">
 					<ChevronLeft className="mr-2 h-4 w-4" /> Back
 				</Button>
-				<Button onClick={onNext} type="button" className="bg-sky-700 hover:bg-sky-600">
-					Next <ChevronRight className="ml-2 h-4 w-4" />
+				<Button
+					onClick={() => onSubmit(schedule)}
+					type="submit"
+					className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+				>
+					Create Layout <ChevronRight className="ml-2 h-5 w-5" />
 				</Button>
 			</div>
 		</React.Fragment>

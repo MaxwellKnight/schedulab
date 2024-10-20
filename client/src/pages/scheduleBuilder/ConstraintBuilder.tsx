@@ -13,12 +13,10 @@ import { getColorForShiftType } from '@/utils/colors';
 
 interface ShiftConstraintsManagerProps {
 	schedule: Schedule;
-	onAddConstraint: (constraint: Constraints) => void;
-	onRemoveConstraint: (id: string) => void;
+	onUpdateSchedule: (updatedSchedule: Partial<Schedule>) => void;
 	onBack: () => void;
 	onNext: () => void;
 }
-
 
 interface DraggableShiftTypeProps {
 	type: ShiftType;
@@ -193,10 +191,10 @@ type GroupedTimeRanges = Record<number, TimeRange[]>;
 
 const ConstraintBuilder: React.FC<ShiftConstraintsManagerProps> = ({
 	schedule,
+	onUpdateSchedule,
 	onBack,
 	onNext
 }) => {
-	const [constraintRows, setConstraintRows] = useState<Constraints[][]>([]);
 	const [, setActiveId] = useState<string | null>(null);
 	const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
 	const [timeRanges, setTimeRanges] = useState<GroupedTimeRanges>({});
@@ -252,66 +250,65 @@ const ConstraintBuilder: React.FC<ShiftConstraintsManagerProps> = ({
 			ranges: [],
 		};
 
+		const newConstraints = [...schedule.constraints];
+
 		if (over.id === 'droppable-area') {
-			setConstraintRows([...constraintRows, [newConstraint]]);
+			newConstraints.push([newConstraint]);
 		} else if (typeof over.id === 'string' && over.id.startsWith('new-row-')) {
 			const newRowIndex = parseInt(over.id.split('-')[2]);
-			const newRows = [...constraintRows];
-			newRows.splice(newRowIndex, 0, [newConstraint]);
-			setConstraintRows(newRows);
+			newConstraints.splice(newRowIndex, 0, [newConstraint]);
 		} else {
 			const [rowIndex] = (over.id as string).split('-').slice(1);
-			const newRows = [...constraintRows];
-			newRows[Number(rowIndex)].push(newConstraint);
-			setConstraintRows(newRows);
+			newConstraints[Number(rowIndex)].push(newConstraint);
 		}
+
+		onUpdateSchedule({ constraints: newConstraints });
 	};
 
 	const moveExistingConstraint = (active: Active, over: Over) => {
-		const activeRowIndex = constraintRows.findIndex(row =>
+		const activeRowIndex = schedule.constraints.findIndex(row =>
 			row.some(constraint => `constraint-${constraint.id}` === active.id)
 		);
-		const activeConstraintIndex = constraintRows[activeRowIndex].findIndex(
+		const activeConstraintIndex = schedule.constraints[activeRowIndex].findIndex(
 			constraint => `constraint-${constraint.id}` === active.id
 		);
-		const activeConstraint = constraintRows[activeRowIndex][activeConstraintIndex];
+		const activeConstraint = schedule.constraints[activeRowIndex][activeConstraintIndex];
 
 		// Remove from the original position
-		const newRows = constraintRows.map(row => [...row]);
-		newRows[activeRowIndex].splice(activeConstraintIndex, 1);
+		const newConstraints = schedule.constraints.map(row => [...row]);
+		newConstraints[activeRowIndex].splice(activeConstraintIndex, 1);
 
 		// Add to the new position
 		if (over.id === 'droppable-area') {
-			newRows.push([activeConstraint]);
+			newConstraints.push([activeConstraint]);
 		} else if (typeof over.id === 'string' && over.id.startsWith('new-row-')) {
 			const newRowIndex = parseInt(over.id.split('-')[2]);
-			newRows.splice(newRowIndex, 0, [activeConstraint]);
+			newConstraints.splice(newRowIndex, 0, [activeConstraint]);
 		} else {
 			const [rowIndex] = (over.id as string).split('-').slice(1);
-			newRows[Number(rowIndex)].push(activeConstraint);
+			newConstraints[Number(rowIndex)].push(activeConstraint);
 		}
 
 		// Remove empty rows
-		setConstraintRows(newRows.filter(row => row.length > 0));
+		onUpdateSchedule({ constraints: newConstraints.filter(row => row.length > 0) });
 	};
 
 	const removeConstraint = (active: Active) => {
-		const newRows = constraintRows.map(row =>
+		const newConstraints = schedule.constraints.map(row =>
 			row.filter(constraint => `constraint-${constraint.id}` !== active.id)
 		).filter(row => row.length > 0);
-		setConstraintRows(newRows);
+		onUpdateSchedule({ constraints: newConstraints });
 	};
 
 	const handleUpdateTimeRanges = (constraintId: string, selectedRanges: TimeRange[]) => {
-		setConstraintRows(prevRows =>
-			prevRows.map(row =>
-				row.map(constraint =>
-					constraint.id === constraintId
-						? { ...constraint, timeRanges: selectedRanges }
-						: constraint
-				)
+		const newConstraints = schedule.constraints.map(row =>
+			row.map(constraint =>
+				constraint.id === constraintId
+					? { ...constraint, ranges: selectedRanges }
+					: constraint
 			)
 		);
+		onUpdateSchedule({ constraints: newConstraints });
 	};
 
 	const { setNodeRef } = useDroppable({
@@ -333,11 +330,11 @@ const ConstraintBuilder: React.FC<ShiftConstraintsManagerProps> = ({
 				</div>
 				<div className="flex space-x-4">
 					<div ref={setNodeRef} className="flex flex-col flex-grow border-2 rounded-sm p-4 space-y-2">
-						{constraintRows.length === 0 && (
+						{schedule.constraints.length === 0 && (
 							<p className="text-gray-400">Drag shift types here to create forbidden sequences</p>
 						)}
 						<div className="flex flex-col flex-grow space-y-4 ">
-							{constraintRows.map((row, index) => (
+							{schedule.constraints.map((row, index) => (
 								<React.Fragment key={index}>
 									<ConstraintRow
 										constraints={row}
@@ -351,8 +348,8 @@ const ConstraintBuilder: React.FC<ShiftConstraintsManagerProps> = ({
 							))}
 						</div>
 						<NewRowButton
-							rowIndex={constraintRows.length + 1}
-							isOver={hoveredRowId === `new-row-${constraintRows.length + 1}`}
+							rowIndex={schedule.constraints.length + 1}
+							isOver={hoveredRowId === `new-row-${schedule.constraints.length + 1}`}
 						/>
 					</div>
 					<div className="p-1">
