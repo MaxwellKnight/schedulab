@@ -11,10 +11,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ChevronLeft, ChevronRight, Clock, Info, Users } from "lucide-react";
-import { createDateArray } from "./ShiftForm";
 import { Schedule, } from "./ScheduleBuilder";
 import { ShiftData } from "@/types";
 import { getColorForShiftType } from '@/utils/colors';
+import { createDateArray } from "@/lib/utils";
 
 interface ScheduleTableProps {
 	schedule: Schedule;

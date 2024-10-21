@@ -1,20 +1,20 @@
-import { useReducer } from 'react';
+import { useReducer, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { ScheduleData, ShiftData } from '@/types';
 import { useForm } from 'react-hook-form';
+import { useAuth } from '@/hooks/useAuth/useAuth';
+import { ScheduleData, ShiftData, Constraints } from '@/types';
+import { TemplateScheduleData, TemplateShiftData, TemplateConstraintData } from '@/types/template.dto';
 import ScheduleForm from './ScheduleForm';
 import ShiftForm from './ShiftForm';
 import ShiftList from './ShiftList';
 import ProgressSteps from './ProgressSteps';
 import ConstraintBuilder from './ConstraintBuilder';
-import { Constraints } from '@/types';
 import ScheduleTable from './ScheduleTable';
-import { TemplateConstraintData, TemplateScheduleData, TemplateShiftData } from '@/types/template.dto';
-import axios from 'axios';
-import { useAuth } from '@/hooks/useAuth/useAuth';
 
-export type ShiftType = { id: number, name: string };
-export type Schedule = ScheduleData & { types: ShiftType[] } & { step: number, constraints: Constraints[][] };
+export type ShiftType = { id: number; name: string };
+export type Schedule = ScheduleData & { types: ShiftType[] } & { step: number; constraints: Constraints[][] };
 
 export type ScheduleAction =
 	| { type: 'SET_STEP'; payload: number }
@@ -23,10 +23,7 @@ export type ScheduleAction =
 	| { type: 'REMOVE_SHIFT'; payload: number }
 	| { type: 'ADD_SHIFT_TYPE'; payload: ShiftType };
 
-const scheduleReducer = (
-	state: Schedule,
-	action: ScheduleAction
-): Schedule => {
+const scheduleReducer = (state: Schedule, action: ScheduleAction): Schedule => {
 	switch (action.type) {
 		case 'SET_STEP':
 			return { ...state, step: action.payload };
@@ -43,30 +40,33 @@ const scheduleReducer = (
 	}
 };
 
-export const ScheduleBuilder = () => {
-	const initialState: Schedule = {
-		start_date: new Date(),
-		end_date: new Date(),
-		shifts: [],
-		remarks: [],
-		likes: 0,
-		notes: '',
-		step: 1,
-		types: [
-			{ id: 1, name: 'Morning' },
-			{ id: 2, name: 'Afternoon' },
-			{ id: 3, name: 'Night' },
-		],
-		constraints: [],
-	};
+const initialState: Schedule = {
+	start_date: new Date(),
+	end_date: new Date(),
+	shifts: [],
+	remarks: [],
+	likes: 0,
+	notes: '',
+	step: 1,
+	types: [
+		{ id: 1, name: 'Morning' },
+		{ id: 2, name: 'Afternoon' },
+		{ id: 3, name: 'Night' },
+	],
+	constraints: [],
+};
 
+export const ScheduleBuilder = () => {
 	const [state, dispatch] = useReducer(scheduleReducer, initialState);
+	const [error, setError] = useState<string | null>(null);
 	const form = useForm<Schedule>();
 	const { user } = useAuth();
+	const navigate = useNavigate();
 
 	axios.defaults.baseURL = 'http://localhost:5713';
 
 	const handleSubmit = async (data: Schedule) => {
+		setError(null);
 		try {
 			const templateSchedule: Omit<TemplateScheduleData, 'id' | 'created_at'> = {
 				team_id: 1,
@@ -75,7 +75,7 @@ export const ScheduleBuilder = () => {
 				end_date: new Date(data.end_date),
 				notes: data.notes || "",
 				shifts: data.shifts.map((shift: ShiftData): Omit<TemplateShiftData, 'id' | 'created_at'> => ({
-					template_schedule_id: 0, // This will be set by the backend
+					template_schedule_id: 0,
 					shift_type_id: shift.shift_type,
 					shift_name: shift.shift_name,
 					required_count: shift.required_count,
@@ -88,30 +88,28 @@ export const ScheduleBuilder = () => {
 				})),
 				constraints: data.constraints.map(constraintPair =>
 					constraintPair.map((constraint): Omit<TemplateConstraintData, 'id' | 'created_at'> => ({
-						template_schedule_id: 0, // This will be set by the backend
+						template_schedule_id: 0,
 						shift_type_id: getShiftTypeId(constraint.shift_type, data.types),
 						next_shift_type_id: constraintPair[1] ? getShiftTypeId(constraintPair[1].shift_type, data.types) : undefined
 					}))
 				)
 			};
 
-			console.log('Submitting template schedule:', templateSchedule);
-			const response = await axios.post('/schedules/templates', { ...templateSchedule, user });
-			console.log('Template schedule created:', response.data);
-			// Handle successful creation (e.g., show a success message, redirect, etc.)
+			await axios.post('/schedules/templates', { ...templateSchedule, user });
+			navigate('/schedules', { state: { success: 'Template schedule created successfully!' } });
 		} catch (error) {
-			console.error('Error creating template schedule:', error);
-			// Handle error (e.g., show an error message to the user)
+			setError('Failed to create template schedule. Please try again.');
 		}
 	};
-	// Helper function to get shift_type_id from shift_type name
-	const getShiftTypeId = (shiftTypeName: string, types: { id: number; name: string }[]): number => {
+
+	const getShiftTypeId = (shiftTypeName: string, types: ShiftType[]): number => {
 		const shiftType = types.find(type => type.name === shiftTypeName);
 		if (!shiftType) {
 			throw new Error(`Shift type not found: ${shiftTypeName}`);
 		}
 		return shiftType.id;
 	};
+
 	const removeShift = (index: number) => {
 		dispatch({ type: 'REMOVE_SHIFT', payload: index });
 	};
@@ -135,6 +133,12 @@ export const ScheduleBuilder = () => {
 			<div className="w-full mb-6">
 				<ProgressSteps steps={steps} currentStep={state.step} isCompact={state.step === 1} />
 			</div>
+			{error && (
+				<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+					<strong className="font-bold">Error:</strong>
+					<span className="block sm:inline"> {error}</span>
+				</div>
+			)}
 			<div className={`grid ${state.step === 2 ? 'md:grid-cols-2' : 'grid-cols-1'} gap-6`}>
 				<Card>
 					<CardHeader>

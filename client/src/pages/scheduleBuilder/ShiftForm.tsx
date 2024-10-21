@@ -6,11 +6,12 @@ import { Form, FormItem, FormLabel, FormControl, FormField, FormMessage } from "
 import { ShiftData, TimeRange } from '@/types';
 import { UseFormReturn } from 'react-hook-form';
 import { ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
-import { eachDayOfInterval, format, parse, isValid, startOfDay } from 'date-fns';
+import { format, parse, isValid, startOfDay } from 'date-fns';
 import { Schedule, ScheduleAction } from './ScheduleBuilder';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import TimeRangeDialog from './TimeRangeDialog';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { createDateArray } from '@/lib/utils';
 
 interface ShiftFormProps {
 	form: UseFormReturn<Schedule>;
@@ -21,13 +22,6 @@ interface ShiftFormProps {
 	onSubmit: (data: Schedule) => void;
 }
 
-export const createDateArray = (startDate: Date, endDate: Date): string[] => {
-	if (startDate > endDate) {
-		[startDate, endDate] = [endDate, startDate];
-	}
-	return eachDayOfInterval({ start: startDate, end: endDate })
-		.map(date => format(date, 'yyyy-MM-dd'));
-}
 
 const ShiftForm: React.FC<ShiftFormProps> = ({ form, schedule, dispatch, onBack, onSubmit, onNext }) => {
 	const [dateOptions, setDateOptions] = useState<string[]>([]);
