@@ -6,7 +6,7 @@ import { VacationData } from "./vacations.dto";
 
 interface Constraints {
 	id: string;
-	name: string;
+	shift_type: string;
 	ranges?: TimeRange[];
 }
 

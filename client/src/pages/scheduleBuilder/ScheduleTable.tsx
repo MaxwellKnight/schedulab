@@ -53,7 +53,7 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedule, onBack, onSubmi
 					{shifts.map((shift, index) => (
 						<div
 							key={`${cellId}-${index}`}
-							className={`bg-gray-100 rounded-md p-2 shadow-sm border-l-4 ${borderClass}`}
+							className={`bg-gray-100 rounded-md p-2 shadow-sm border-l-8 ${borderClass}`}
 						>
 							<div className="flex items-center justify-between mb-1">
 								<span className={`font-medium text-sm `}>{shift.shift_name}</span>
@@ -98,7 +98,7 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedule, onBack, onSubmi
 									</PopoverContent>
 								</Popover>
 							</div>
-							<div className="flex flex-col text-xs text-gray-600">
+							<div className="flex flex-col text-xs text-black">
 								<span className="flex items-center">
 									<Clock className="h-3 w-3 mr-1" /> {formatTime(shift.ranges[0].start_time)}-{formatTime(shift.ranges[0].end_time)}
 								</span>
@@ -129,7 +129,7 @@ const ScheduleTable: React.FC<ScheduleTableProps> = ({ schedule, onBack, onSubmi
 					{schedule.types.map(type => {
 						return (
 							<TableRow key={type.id}>
-								<TableCell className={`font-medium`}>
+								<TableCell className={`font-medium text-lg`}>
 									{type.name}
 								</TableCell>
 								{headers.map(date => renderShiftCell(getShiftsForDateAndType(date, type.id), date, type.id))}

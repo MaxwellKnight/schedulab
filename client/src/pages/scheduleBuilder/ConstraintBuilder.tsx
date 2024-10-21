@@ -96,7 +96,7 @@ const ConstraintItem: React.FC<ConstraintItemProps> = ({ constraint, schedule, t
 				<GripVertical className="text-gray-500" size={20} />
 			</div>
 			<div className={`${color} w-3 h-3 rounded-full`}></div>
-			<span className="font-medium flex-grow">{constraint.name}</span>
+			<span className="font-medium flex-grow">{constraint.shift_type}</span>
 			<Popover>
 				<PopoverTrigger asChild>
 					<Button variant="outline" size="sm">
@@ -246,7 +246,7 @@ const ConstraintBuilder: React.FC<ShiftConstraintsManagerProps> = ({
 	const addNewConstraint = (active: Active, over: Over) => {
 		const newConstraint: Constraints = {
 			id: `${(active.data.current?.type as ShiftType).id}-${Date.now()}`,
-			name: (active.data.current?.type as ShiftType).name,
+			shift_type: (active.data.current?.type as ShiftType).name,
 			ranges: [],
 		};
 

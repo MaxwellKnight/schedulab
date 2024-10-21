@@ -9,6 +9,9 @@ import ProgressSteps from './ProgressSteps';
 import ConstraintBuilder from './ConstraintBuilder';
 import { Constraints } from '@/types';
 import ScheduleTable from './ScheduleTable';
+import { TemplateConstraintData, TemplateScheduleData, TemplateShiftData } from '@/types/template.dto';
+import axios from 'axios';
+import { useAuth } from '@/hooks/useAuth/useAuth';
 
 export type ShiftType = { id: number, name: string };
 export type Schedule = ScheduleData & { types: ShiftType[] } & { step: number, constraints: Constraints[][] };
@@ -59,19 +62,56 @@ export const ScheduleBuilder = () => {
 
 	const [state, dispatch] = useReducer(scheduleReducer, initialState);
 	const form = useForm<Schedule>();
+	const { user } = useAuth();
 
-	const handleSubmit = (data: Schedule) => {
-		const finalSchedule: Schedule = {
-			...data,
-			shifts: state.shifts.map((shift: ShiftData) => ({
-				...shift,
-				created_at: new Date(),
-				schedule_id: 0,
-			})),
-		};
-		console.log('Submitting schedule:', finalSchedule);
+	axios.defaults.baseURL = 'http://localhost:5713';
+
+	const handleSubmit = async (data: Schedule) => {
+		try {
+			const templateSchedule: Omit<TemplateScheduleData, 'id' | 'created_at'> = {
+				team_id: 1,
+				name: "Weekly Template",
+				start_date: new Date(data.start_date),
+				end_date: new Date(data.end_date),
+				notes: data.notes || "",
+				shifts: data.shifts.map((shift: ShiftData): Omit<TemplateShiftData, 'id' | 'created_at'> => ({
+					template_schedule_id: 0, // This will be set by the backend
+					shift_type_id: shift.shift_type,
+					shift_name: shift.shift_name,
+					required_count: shift.required_count,
+					day_of_week: new Date(shift.date).getDay(),
+					ranges: shift.ranges.map(range => ({
+						template_shift_id: 0,
+						start_time: new Date(range.start_time).toTimeString().split(' ')[0],
+						end_time: new Date(range.end_time).toTimeString().split(' ')[0]
+					}))
+				})),
+				constraints: data.constraints.map(constraintPair =>
+					constraintPair.map((constraint): Omit<TemplateConstraintData, 'id' | 'created_at'> => ({
+						template_schedule_id: 0, // This will be set by the backend
+						shift_type_id: getShiftTypeId(constraint.shift_type, data.types),
+						next_shift_type_id: constraintPair[1] ? getShiftTypeId(constraintPair[1].shift_type, data.types) : undefined
+					}))
+				)
+			};
+
+			console.log('Submitting template schedule:', templateSchedule);
+			const response = await axios.post('/schedules/templates', { ...templateSchedule, user });
+			console.log('Template schedule created:', response.data);
+			// Handle successful creation (e.g., show a success message, redirect, etc.)
+		} catch (error) {
+			console.error('Error creating template schedule:', error);
+			// Handle error (e.g., show an error message to the user)
+		}
 	};
-
+	// Helper function to get shift_type_id from shift_type name
+	const getShiftTypeId = (shiftTypeName: string, types: { id: number; name: string }[]): number => {
+		const shiftType = types.find(type => type.name === shiftTypeName);
+		if (!shiftType) {
+			throw new Error(`Shift type not found: ${shiftTypeName}`);
+		}
+		return shiftType.id;
+	};
 	const removeShift = (index: number) => {
 		dispatch({ type: 'REMOVE_SHIFT', payload: index });
 	};
