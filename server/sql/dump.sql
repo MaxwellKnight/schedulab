@@ -31,7 +31,8 @@ CREATE TABLE shift_types (
   team_id INT NOT NULL,
   name VARCHAR(255) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (team_id) REFERENCES teams(id)
+  FOREIGN KEY (team_id) REFERENCES teams(id),
+  UNIQUE (name)
 );
 
 -- Table: schedules
@@ -74,18 +75,20 @@ CREATE TABLE time_ranges (
 
 -- Table: constraints
 CREATE TABLE constraints (
-  id VARCHAR(255) NOT NULL PRIMARY KEY,
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   team_id INT NOT NULL,
   shift_type_id INT NOT NULL,
+  next_id INT,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (team_id) REFERENCES teams(id),
-  FOREIGN KEY (shift_type_id) REFERENCES shift_types(id)
+  FOREIGN KEY (shift_type_id) REFERENCES shift_types(id),
+  FOREIGN KEY (next_id) REFERENCES constraints(id)
 );
 
 -- Table: constraint_time_ranges
 CREATE TABLE constraint_time_ranges (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  constraint_id VARCHAR(255) NOT NULL,
+  constraint_id INT NOT NULL,
   start_time TIME NOT NULL,
   end_time TIME NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

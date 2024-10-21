@@ -13,7 +13,6 @@ export const makeValidator = (schema: Schema) => {
 
 const makeAuthorization = (allowedRoles: string[]) => {
 	return async (req: IRequest, res: IResponse): Promise<void> => {
-		console.log(req.body.user);
 		const { user_role } = req.body.user;
 		if (!user_role || !allowedRoles.includes(user_role)) {
 			console.log('Access forbidden');
