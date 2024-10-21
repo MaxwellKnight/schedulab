@@ -1,5 +1,5 @@
-import { Preference, Schedule, Shift, User } from "../models";
-import { PreferenceData, ScheduleData, ShiftData, UserData, VacationData } from "./dto";
+import { Preference, Schedule, Shift, TemplateSchedule, User } from "../models";
+import { PreferenceData, ScheduleData, ShiftData, TemplateScheduleData, UserData, VacationData } from "./dto";
 
 export interface Service<T> {
 	create: (data: T) => Promise<number>;
@@ -26,7 +26,7 @@ export interface IPreferenceService extends Service<PreferenceData> {
 	getByDates: (start_date: Date, end_date: Date) => Promise<unknown[]>;
 	getByUserId: (id: number) => Promise<unknown[]>;
 }
-	
+
 export interface IShiftService extends Service<ShiftData> {
 	transform: (data: Shift) => Promise<ShiftData> | Promise<ShiftData[]>;
 	getByDate: (date: Date) => Promise<unknown[]>;
@@ -40,4 +40,10 @@ export interface IScheduleService extends Service<ScheduleData> {
 	transform: (data: Schedule) => Promise<ScheduleData>;
 	getByDates: (start_date: Date, end_date: Date) => Promise<ScheduleData[]>;
 	getByUserId: (id: number) => Promise<ScheduleData[]>;
+}
+
+export interface ITemplateService extends Service<TemplateScheduleData> {
+	transform: (data: TemplateSchedule) => Promise<TemplateScheduleData>;
+	getByTeamId: (teamId: number) => Promise<TemplateScheduleData[]>;
+	createScheduleFromTemplate: (templateId: number, startDate: Date) => Promise<number>;
 }

@@ -1,4 +1,4 @@
--- Drop database if it exists and create a new one
+-- Drop database if it exists and create a new onesql
 DROP DATABASE IF EXISTS shifty;
 CREATE DATABASE shifty;
 USE shifty;
@@ -242,4 +242,52 @@ CREATE TABLE expired (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   token VARCHAR(255) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- Table: template_schedules
+CREATE TABLE template_schedules (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  team_id INT NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  notes TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (team_id) REFERENCES teams(id)
+);
+
+-- Table: template_shifts
+CREATE TABLE template_shifts (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  template_schedule_id INT NOT NULL,
+  shift_type_id INT NOT NULL,
+  shift_name VARCHAR(255) NOT NULL,
+  required_count INT NOT NULL,
+  day_of_week INT NOT NULL, -- 0 for Sunday, 1 for Monday, etc.
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (template_schedule_id) REFERENCES template_schedules(id),
+  FOREIGN KEY (shift_type_id) REFERENCES shift_types(id)
+);
+
+-- Table: template_time_ranges
+CREATE TABLE template_time_ranges (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  template_shift_id INT NOT NULL,
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (template_shift_id) REFERENCES template_shifts(id)
+);
+
+-- Table: template_constraints
+CREATE TABLE template_constraints (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  template_schedule_id INT NOT NULL,
+  shift_type_id INT NOT NULL,
+  next_shift_type_id INT,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (template_schedule_id) REFERENCES template_schedules(id),
+  FOREIGN KEY (shift_type_id) REFERENCES shift_types(id),
+  FOREIGN KEY (next_shift_type_id) REFERENCES shift_types(id)
 );

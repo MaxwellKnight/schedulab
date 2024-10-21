@@ -18,6 +18,8 @@ import { IUserRepository } from '../interfaces/repos.interface';
 import { IDatabase } from './db.interface';
 import { IAuthController } from './controllers.interface';
 import { Remark } from '../models/schedule.model';
+import { ITemplateScheduleRepository } from '../interfaces/repos.interface';
+import { ITemplateService } from './services.interface';
 
 export interface IRemarkRepository {
 	create(remark: Remark): Promise<number>;
@@ -56,5 +58,7 @@ export {
 	Remark,
 	VacationData,
 	IDatabase,
-	IAuthController
+	IAuthController,
+	ITemplateScheduleRepository,
+	ITemplateService
 }

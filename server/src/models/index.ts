@@ -3,6 +3,7 @@ import { Preference, DailyPreference } from "./preference.model";
 import { Shift, TimeRange, UserShifts } from "./shift.model";
 import { Schedule } from "./schedule.model";
 import { Vacation } from "./vacations.model";
+import { TemplateSchedule, TemplateShift, TemplateTimeRange, TemplateConstraint } from "./template.model";
 
 export {
 	User,
@@ -12,5 +13,9 @@ export {
 	UserShifts,
 	Schedule,
 	Vacation,
-	TimeRange
+	TimeRange,
+	TemplateSchedule,
+	TemplateShift,
+	TemplateTimeRange,
+	TemplateConstraint
 };

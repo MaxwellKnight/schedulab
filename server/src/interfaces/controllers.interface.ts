@@ -34,7 +34,7 @@ export interface IPreferenceController extends EntityController {
 	getByDates: ControllerFunction;
 	getByUserId: ControllerFunction;
 }
-	
+
 export interface IShiftController extends EntityController {
 	getByDate: ControllerFunction;
 	getByName: ControllerFunction;
@@ -45,4 +45,9 @@ export interface IShiftController extends EntityController {
 export interface IScheduleController extends EntityController {
 	getByDates: ControllerFunction;
 	getByUserId: ControllerFunction;
+}
+
+export interface ITemplateController extends EntityController {
+	getByTeamId: ControllerFunction;
+	createScheduleFromTemplate: ControllerFunction;
 }

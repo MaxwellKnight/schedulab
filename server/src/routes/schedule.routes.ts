@@ -2,22 +2,28 @@ import Router from 'express';
 import { makeSQL } from '../configs/db.config';
 import { UserRepository } from '../repositories';
 import { adaptMiddleware } from '../helpers/adapters';
-import { ScheduleService, UserService } from '../services';
+import { ScheduleService, TemplateService, UserService } from '../services';
 import { access, makeValidator } from '../middlewares/middlewares';
 import { AuthController, ScheduleController } from '../controllers';
 import { scheduleSchema } from '../validations/schedule.validation';
 import { ScheduleRepository } from '../repositories/schedule.repository';
+import { TemplateScheduleRepository } from '../repositories/template.repository';
+import { TemplateController } from '../controllers/template.controller';
 
 
-const DB 			= makeSQL();
+const DB = makeSQL();
 const respository = new ScheduleRepository(DB);
-const service		= new ScheduleService(respository);
-const controller 	= new ScheduleController(service);
-const validator 	= makeValidator(scheduleSchema);
+const service = new ScheduleService(respository);
+const controller = new ScheduleController(service);
+const validator = makeValidator(scheduleSchema);
+
+const templateRepository = new TemplateScheduleRepository(DB);
+const templateService = new TemplateService(templateRepository);
+const templateController = new TemplateController(templateService);
 
 const userRepository = new UserRepository(DB);
-const userService		= new UserService(userRepository);
-const authController	= new AuthController(userService);
+const userService = new UserService(userRepository);
+const authController = new AuthController(userService);
 
 const router = Router();
 
@@ -66,5 +72,47 @@ router.route('/user/:id')
 		adaptMiddleware(controller.getByUserId)
 	);
 
-	
+router.route('/templates')
+	.get(
+		adaptMiddleware(authController.authenticate),
+		adaptMiddleware(access.USER_ACCESS),
+		adaptMiddleware(templateController.getMany)
+	)
+	.post(
+		adaptMiddleware(authController.authenticate),
+		adaptMiddleware(access.ADMIN_ACCESS),
+		adaptMiddleware(templateController.create)
+	);
+
+router.route('/templates/:id')
+	.get(
+		adaptMiddleware(authController.authenticate),
+		adaptMiddleware(access.USER_ACCESS),
+		adaptMiddleware(templateController.getOne)
+	)
+	.put(
+		adaptMiddleware(authController.authenticate),
+		adaptMiddleware(access.ADMIN_ACCESS),
+		adaptMiddleware(templateController.update)
+	)
+	.delete(
+		adaptMiddleware(authController.authenticate),
+		adaptMiddleware(access.ADMIN_ACCESS),
+		adaptMiddleware(templateController.delete)
+	);
+
+router.route('/templates/team/:teamId')
+	.get(
+		adaptMiddleware(authController.authenticate),
+		adaptMiddleware(access.USER_ACCESS),
+		adaptMiddleware(templateController.getByTeamId)
+	);
+
+router.route('/templates/:id/create-schedule')
+	.post(
+		adaptMiddleware(authController.authenticate),
+		adaptMiddleware(access.ADMIN_ACCESS),
+		adaptMiddleware(templateController.createScheduleFromTemplate)
+	);
+
 export default router;

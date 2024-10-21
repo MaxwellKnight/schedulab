@@ -1,4 +1,4 @@
-import { User, Vacation, Preference, Shift, Schedule, DailyPreference, ShiftType, Team } from "../models";
+import { User, Vacation, Preference, Shift, Schedule, DailyPreference, TemplateSchedule } from "../models";
 
 export interface Repository<T> {
 	create(data: Omit<T, "id">): Promise<number>;
@@ -49,10 +49,7 @@ export interface IScheduleRepository extends Repository<Schedule> {
 	unpublish(id: number): Promise<number>;
 }
 
-export interface IShiftTypeRepository extends Repository<ShiftType> {
-	getByTeamId(teamId: number): Promise<ShiftType[]>;
-}
-
-export interface ITeamRepository extends Repository<Team> {
-	getByUserId(userId: number): Promise<Team[]>;
+export interface ITemplateScheduleRepository extends Repository<TemplateSchedule> {
+	getByTeamId(teamId: number): Promise<TemplateSchedule[]>;
+	createScheduleFromTemplate(templateId: number, startDate: Date): Promise<number>;
 }
