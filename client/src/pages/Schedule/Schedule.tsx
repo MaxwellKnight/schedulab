@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Save, Users, Settings, Sheet } from 'lucide-react';
 import Combobox from "@/components/combobox/Combobox";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { TemplateScheduleData } from '@/types/template.dto';
 
 const Schedule: React.FC = () => {
@@ -96,14 +96,12 @@ const Schedule: React.FC = () => {
 
 					{/* Settings Panel */}
 					<Card className="col-span-12 sm:col-span-2">
-						<CardHeader>
-							<div className="p-3 border-b">
-								<div className="flex items-center text-md text-gray-600 font-normal">
-									<Settings className="h-4 w-4 mr-2" />
-									Settings
-								</div>
+						<div className="p-3 border-b">
+							<div className="flex items-center text-md text-gray-600 font-normal">
+								<Settings className="h-4 w-4 mr-2" />
+								Settings
 							</div>
-						</CardHeader>
+						</div>
 						<CardContent className="p-2">
 							<div className="space-y-2">
 								<div className="h-8 bg-gray-100 rounded animate-pulse"></div>

@@ -129,7 +129,7 @@ const ScheduleBuilder: React.FC = () => {
 	];
 
 	return (
-		<div className={`container mx-auto p-4 ${state.step === 1 ? 'max-w-md' : 'max-w-6xl'}`}>
+		<div className={`container mx-auto p-4 ${state.step === 1 ? 'max-w-md' : state.step === 4 ? 'max-w-full' : 'max-w-7xl'}`}>
 			<div className="w-full mb-6">
 				<ProgressSteps steps={steps} currentStep={state.step} isCompact={state.step === 1} />
 			</div>
