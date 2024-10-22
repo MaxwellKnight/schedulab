@@ -1,5 +1,6 @@
 import { IDatabase, ITemplateScheduleRepository } from "../interfaces";
 import { TemplateSchedule, TemplateShift, TemplateConstraint, TemplateTimeRange } from "../models";
+import { parse, addHours } from 'date-fns';
 
 interface MySQLError extends Error {
 	code?: string;
@@ -131,19 +132,25 @@ export class TemplateScheduleRepository implements ITemplateScheduleRepository {
 	private async getTemplateShifts(templateScheduleId: number): Promise<TemplateShift[]> {
 		const shifts = await this.db.execute<(TemplateShift & { time_ranges: string })[]>(
 			`SELECT ts.*, GROUP_CONCAT(CONCAT(ttr.id, ':', ttr.start_time, '-', ttr.end_time) SEPARATOR ',') as time_ranges
-             FROM template_shifts ts
-             LEFT JOIN template_time_ranges ttr ON ts.id = ttr.template_shift_id
-             WHERE ts.template_schedule_id = ?
-             GROUP BY ts.id`,
+         FROM template_shifts ts
+         LEFT JOIN template_time_ranges ttr ON ts.id = ttr.template_shift_id
+         WHERE ts.template_schedule_id = ?
+         GROUP BY ts.id`,
 			[templateScheduleId]
 		);
 
 		return shifts.map(shift => ({
 			...shift,
 			ranges: shift.time_ranges.split(',').map(range => {
-				const [id, times] = range.split(':');
-				const [start_time, end_time] = times.split('-');
-				return { id: parseInt(id), template_shift_id: shift.id, start_time, end_time } as TemplateTimeRange;
+				const [idAndStart, end] = range.split('-');
+				const [id, ...startParts] = idAndStart.split(':');
+				const startTime = startParts.join(':');
+				return {
+					id: parseInt(id),
+					template_shift_id: shift.id,
+					start_time: startTime,
+					end_time: end
+				} as TemplateTimeRange;
 			})
 		}));
 	}
