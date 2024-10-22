@@ -56,7 +56,7 @@ const initialState: Schedule = {
 	constraints: [],
 };
 
-export const ScheduleBuilder = () => {
+const ScheduleBuilder: React.FC = () => {
 	const [state, dispatch] = useReducer(scheduleReducer, initialState);
 	const [error, setError] = useState<string | null>(null);
 	const form = useForm<Schedule>();
@@ -198,3 +198,5 @@ export const ScheduleBuilder = () => {
 		</div>
 	);
 };
+
+export default ScheduleBuilder;

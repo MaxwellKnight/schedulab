@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
 
-const ErrorBoundary = () => {
+const ErrorBoundary: React.FC = () => {
 	const error = useRouteError();
 
 	const renderErrorContent = () => {

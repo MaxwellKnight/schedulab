@@ -1,16 +1,9 @@
-import {
-	createBrowserRouter,
-	RouterProvider,
-	Navigate,
-	useLocation,
-} from "react-router-dom";
-import Login from './pages/login/Login';
 import { Layout } from './components/layout/Layout.tsx';
 import { AuthProvider } from "./context/AuthContext";
 import { ReactNode } from 'react';
-import { ScheduleBuilder } from "./pages/ScheduleBuilder/ScheduleBuilder.tsx";
 import { useAuth } from "./hooks/useAuth/useAuth.ts";
-import ErrorBoundary from "./pages/ErrorBoundary/ErrorBoundary.tsx";
+import { createBrowserRouter, RouterProvider, Navigate, useLocation } from "react-router-dom";
+import { ScheduleBuilder, ErrorBoundary, Schedule, Login, Home, Members } from "./pages";
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 	const { isAuthenticated } = useAuth();
@@ -23,7 +16,7 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 	return <>{children}</>;
 };
 
-const AppRoutes = () => {
+const AppRoutes: React.FC = () => {
 	const router = createBrowserRouter([
 		{
 			path: "/login",
@@ -42,7 +35,7 @@ const AppRoutes = () => {
 			children: [
 				{
 					index: true,
-					element: <div>Home</div>
+					element: <Home />
 				},
 				{
 					path: "/build",
@@ -50,11 +43,11 @@ const AppRoutes = () => {
 				},
 				{
 					path: "/members",
-					element: <div>Members</div>
+					element: <Members />
 				},
 				{
 					path: "/schedule",
-					element: <div>Schedule</div>
+					element: <Schedule />
 				},
 			]
 		},
