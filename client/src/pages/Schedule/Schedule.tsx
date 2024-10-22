@@ -1,13 +1,103 @@
 import React, { useState } from 'react';
-import { Save, Users, Settings, Sheet } from 'lucide-react';
+import { Save, Users, Settings, Sheet, ChevronLeft, ChevronRight } from 'lucide-react';
 import Combobox from "@/components/combobox/Combobox";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { TemplateScheduleData } from '@/types/template.dto';
+import { cn } from '@/lib/utils';
+
+interface SidebarToggleButtonProps {
+	isOpen: boolean;
+	onClick: () => void;
+	position: 'left' | 'right';
+}
+
+interface SidebarProps {
+	isOpen: boolean;
+	onToggle: () => void;
+	position: 'left' | 'right';
+	icon: React.ReactNode;
+	title: string;
+	children: React.ReactNode;
+}
+
+const SidebarToggleButton: React.FC<SidebarToggleButtonProps> = ({
+	isOpen,
+	onClick,
+	position
+}) => (
+	<Button
+		variant="ghost"
+		size="sm"
+		className={cn(
+			'absolute top-1/2 -translate-y-1/2 z-10',
+			'h-6 w-6 p-0.5 rounded-full',
+			'bg-white border shadow-sm hover:bg-gray-50',
+			'transition-transform duration-300',
+			position === 'left' ? '-right-3' : '-left-3',
+			!isOpen && position === 'left' && 'rotate-180',
+			!isOpen && position === 'right' && '-rotate-180'
+		)}
+		onClick={onClick}
+		aria-label={`${isOpen ? 'Collapse' : 'Expand'} sidebar`}
+	>
+		{position === 'left' ?
+			<ChevronLeft className="h-4 w-4" /> :
+			<ChevronRight className="h-4 w-4" />
+		}
+	</Button>
+);
+
+const Sidebar: React.FC<SidebarProps> = ({
+	isOpen,
+	onToggle,
+	position,
+	icon,
+	title,
+	children
+}) => (
+	<Card className={cn(
+		'relative col-span-12 transition-all duration-300',
+		isOpen ? 'sm:col-span-2' : 'sm:col-span-1 h-12'
+	)}>
+		<SidebarToggleButton
+			isOpen={isOpen}
+			onClick={onToggle}
+			position={position}
+		/>
+		<div className={cn(
+			'p-3 border-b transition-all duration-300',
+			!isOpen && 'px-2'
+		)}>
+			<div className={cn(
+				'flex items-center text-md text-gray-600 font-normal',
+				!isOpen && 'justify-center'
+			)}>
+				{React.cloneElement(icon as React.ReactElement, {
+					className: cn('h-4 w-4', isOpen && 'mr-2')
+				})}
+				<span className={cn(
+					'transition-all duration-300 origin-left',
+					!isOpen && 'w-0 scale-0 opacity-0'
+				)}>
+					{title}
+				</span>
+			</div>
+		</div>
+		<CardContent className={cn(
+			'p-2 transition-all duration-300',
+			!isOpen && 'opacity-0 h-0 overflow-hidden'
+		)}>
+			{children}
+		</CardContent>
+	</Card>
+);
 
 const Schedule: React.FC = () => {
 	const [template, setTemplate] = useState<TemplateScheduleData | null>(null);
 	const [isDirty, setIsDirty] = useState(false);
+	const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
+	const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
 
 	const handleTemplateSelect = (selected: TemplateScheduleData | null) => {
 		setTemplate(selected);
@@ -15,18 +105,16 @@ const Schedule: React.FC = () => {
 	};
 
 	const handlePublish = () => {
-		//TODO:  Implement publish logic
 		console.log('Publishing schedule:', template);
 	};
 
 	const handleSaveDraft = () => {
-		//TODO: Implement save draft logic
 		console.log('Saving draft:', template);
 		setIsDirty(false);
 	};
 
 	return (
-		<div className=" mx-auto p-4 space-y-4">
+		<div className="mx-auto p-4 space-y-4">
 			<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg shadow-sm">
 				<div className="flex-1 max-w-md">
 					<h1 className="text-sm text-gray-500 mb-2">Template</h1>
@@ -55,26 +143,28 @@ const Schedule: React.FC = () => {
 				</div>
 			</div>
 
-			{template && (
+			{template ? (
 				<div className="grid grid-cols-12 gap-4">
-					{/* Sidebar - Employee List */}
-					<Card className="col-span-12 sm:col-span-2">
-						<div className="p-3 border-b">
-							<div className="flex items-center text-md text-gray-600 font-normal">
-								<Users className="h-4 w-4 mr-2" />
-								Members
-							</div>
+					<Sidebar
+						isOpen={leftSidebarOpen}
+						onToggle={() => setLeftSidebarOpen(!leftSidebarOpen)}
+						position="left"
+						icon={<Users />}
+						title="Members"
+					>
+						<div className="space-y-2">
+							<div className="h-8 bg-gray-100 rounded animate-pulse" />
+							<div className="h-8 bg-gray-100 rounded animate-pulse" />
+							<div className="h-8 bg-gray-100 rounded animate-pulse" />
 						</div>
-						<CardContent className="p-2">
-							<div className="space-y-2">
-								<div className="h-8 bg-gray-100 rounded animate-pulse"></div>
-								<div className="h-8 bg-gray-100 rounded animate-pulse"></div>
-								<div className="h-8 bg-gray-100 rounded animate-pulse"></div>
-							</div>
-						</CardContent>
-					</Card>
+					</Sidebar>
 
-					<Card className="col-span-12 sm:col-span-8">
+					<Card className={cn(
+						'col-span-12 transition-all duration-300',
+						leftSidebarOpen && rightSidebarOpen ? 'sm:col-span-8' :
+							(!leftSidebarOpen && !rightSidebarOpen) ? 'sm:col-span-10' :
+								'sm:col-span-9'
+					)}>
 						<div className="p-3 border-b">
 							<div className="flex items-center text-md text-gray-600 font-normal">
 								<Sheet className="h-4 w-4 mr-2" />
@@ -82,38 +172,27 @@ const Schedule: React.FC = () => {
 							</div>
 						</div>
 						<CardContent className="p-2">
-							{template ? (
-								<div className="h-96 bg-gray-50 rounded border border-dashed border-gray-300 flex items-center justify-center">
-									Schedule Grid Area
-								</div>
-							) : (
-								<div className="h-96 flex items-center justify-center text-gray-500">
-									Select a template to start creating your schedule
-								</div>
-							)}
+							<div className="h-96 bg-gray-50 rounded border border-dashed border-gray-300 flex items-center justify-center">
+								Schedule Grid Area
+							</div>
 						</CardContent>
 					</Card>
 
-					{/* Settings Panel */}
-					<Card className="col-span-12 sm:col-span-2">
-						<div className="p-3 border-b">
-							<div className="flex items-center text-md text-gray-600 font-normal">
-								<Settings className="h-4 w-4 mr-2" />
-								Settings
-							</div>
+					<Sidebar
+						isOpen={rightSidebarOpen}
+						onToggle={() => setRightSidebarOpen(!rightSidebarOpen)}
+						position="right"
+						icon={<Settings />}
+						title="Settings"
+					>
+						<div className="space-y-2">
+							<div className="h-8 bg-gray-100 rounded animate-pulse" />
+							<div className="h-8 bg-gray-100 rounded animate-pulse" />
+							<div className="h-8 bg-gray-100 rounded animate-pulse" />
 						</div>
-						<CardContent className="p-2">
-							<div className="space-y-2">
-								<div className="h-8 bg-gray-100 rounded animate-pulse"></div>
-								<div className="h-8 bg-gray-100 rounded animate-pulse"></div>
-								<div className="h-8 bg-gray-100 rounded animate-pulse"></div>
-							</div>
-						</CardContent>
-					</Card>
+					</Sidebar>
 				</div>
-			)}
-
-			{!template && (
+			) : (
 				<div className="grid grid-cols-12 gap-4">
 					<div className="col-span-12 h-96 flex items-center justify-center text-gray-500">
 						Select a template to start creating your schedule
