@@ -3,7 +3,7 @@ import { IRequest, IResponse } from '../interfaces';
 
 export const makeValidator = (schema: Schema) => {
 	return async (req: IRequest, res: IResponse): Promise<void> => {
-		const { error } = schema.validate(req.body.user);
+		const { error } = schema.validate(req.query);
 		if (error) {
 			console.log('Validation error:', error.details);
 			return res.status(400).json({ error: error.details.map(err => err.message).join(", ") + "." });
@@ -13,7 +13,7 @@ export const makeValidator = (schema: Schema) => {
 
 const makeAuthorization = (allowedRoles: string[]) => {
 	return async (req: IRequest, res: IResponse): Promise<void> => {
-		const { user_role } = req.body.user;
+		const { user_role } = req.query;
 		if (!user_role || !allowedRoles.includes(user_role)) {
 			console.log('Access forbidden');
 			return res.status(403).json({ error: "Forbidden" });

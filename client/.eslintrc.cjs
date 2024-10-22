@@ -10,15 +10,13 @@ module.exports = {
 		'plugin:@typescript-eslint/recommended',
 		'plugin:react/recommended',
 		'plugin:react/jsx-runtime',
-		'plugin:react-hooks/recommended',
-		'plugin:react-refresh/recommended'
+		'plugin:react-hooks/recommended'
 	],
 	ignorePatterns: ['dist', '.eslintrc.cjs'],
 	parser: '@typescript-eslint/parser',
 	plugins: [
 		'react',
 		'react-hooks',
-		'react-refresh',
 		'@typescript-eslint'
 	],
 	settings: {
@@ -29,9 +27,7 @@ module.exports = {
 	rules: {
 		'react/react-in-jsx-scope': 'off',
 		'react/prop-types': 'off',
-		'react-refresh/only-export-components': [
-			'warn',
-			{ allowConstantExport: true },
-		],
+		'@typescript-eslint/no-explicit-any': 'warn',
+		'@typescript-eslint/no-unused-vars': 'warn'
 	}
 };
