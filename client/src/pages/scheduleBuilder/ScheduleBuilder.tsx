@@ -95,7 +95,7 @@ const ScheduleBuilder: React.FC = () => {
 				)
 			};
 
-			await axios.post('/schedules/templates', { ...templateSchedule, user });
+			await axios.post('/templates', { ...templateSchedule, user });
 			navigate('/schedules', { state: { success: 'Template schedule created successfully!' } });
 		} catch (error) {
 			setError('Failed to create template schedule. Please try again.');

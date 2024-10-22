@@ -3,7 +3,7 @@ import express from "express";
 import ip from './helpers/ip';
 import * as dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
-import { UserRouter, PreferenceRouter, ShiftRouter, VacationRouter, ScheduleRouter, AuthRouter } from "./routes";
+import { UserRouter, PreferenceRouter, ShiftRouter, VacationRouter, ScheduleRouter, AuthRouter, TemplateRouter } from "./routes";
 dotenv.config();
 
 const app = express();
@@ -28,5 +28,6 @@ app.use('/preferences', PreferenceRouter);
 app.use('/shifts', ShiftRouter);
 app.use('/vacations', VacationRouter);
 app.use('/schedules', ScheduleRouter);
+app.use('/templates', TemplateRouter);
 
 app.listen(PORT, () => console.log(`server running on ${ip()}:${PORT}`))

@@ -4,6 +4,7 @@ import { ShiftRepository } from "./shift.repository";
 import { UserRepository } from "./user.repository";
 import { VacationRepository } from "./vacation.repository";
 import { RemarkRepository } from "./remark.repository";
+import { TemplateScheduleRepository } from "./template.repository";
 
 export {
 	PreferenceRepository,
@@ -11,5 +12,6 @@ export {
 	ShiftRepository,
 	UserRepository,
 	VacationRepository,
-	RemarkRepository
+	RemarkRepository,
+	TemplateScheduleRepository
 }

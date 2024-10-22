@@ -108,11 +108,4 @@ router.route('/templates/team/:teamId')
 		adaptMiddleware(templateController.getByTeamId)
 	);
 
-router.route('/templates/:id/create-schedule')
-	.post(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.ADMIN_ACCESS),
-		adaptMiddleware(templateController.createScheduleFromTemplate)
-	);
-
 export default router;
