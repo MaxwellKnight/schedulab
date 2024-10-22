@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '@/hooks/useAuth/useAuth';
+import { GoogleIcon } from './GoogleIcon';
 
 axios.defaults.baseURL = 'http://localhost:5713';
 axios.defaults.withCredentials = true;
