@@ -15,3 +15,10 @@ export interface ShiftData {
 	ranges: TimeRange[];
 	date: Date;
 }
+
+export interface ShiftType {
+	id: number;
+	team_id: number;
+	name: string;
+	created_at: Date;
+}

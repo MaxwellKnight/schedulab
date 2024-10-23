@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Save, Users, Settings, Sheet, ChevronLeft, ChevronRight } from 'lucide-react';
 import Combobox from "@/components/combobox/Combobox";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TemplateScheduleData } from '@/types/template.dto';
 import { cn } from '@/lib/utils';
 import ScheduleEditable from './ScheduleEditable';
+import { useAuthenticatedFetch } from '@/hooks/useAuthFetch';
+import { ShiftType } from '@/types/shifts.dto';
+import { useAuth } from '@/hooks/useAuth/useAuth';
 
 interface SidebarToggleButtonProps {
 	isOpen: boolean;
@@ -99,6 +102,14 @@ const Schedule: React.FC = () => {
 	const [isDirty, setIsDirty] = useState(false);
 	const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
 	const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
+	const { user } = useAuth();
+
+	const {
+		data: shiftTypes,
+		loading: shiftTypesLoading,
+		error: shiftTypesError,
+		fetchData: fetchShiftTypes
+	} = useAuthenticatedFetch<ShiftType[]>(`/shifts/types/${user?.team_id}`);
 
 	const handleTemplateSelect = (selected: TemplateScheduleData | null) => {
 		setTemplate(selected);
@@ -113,6 +124,19 @@ const Schedule: React.FC = () => {
 		console.log('Saving draft:', template);
 		setIsDirty(false);
 	};
+
+	useEffect(() => {
+		fetchShiftTypes();
+	}, [fetchShiftTypes]);
+
+	if (shiftTypesLoading) {
+		return <div>Loading shift types...</div>;
+	}
+
+	if (shiftTypesError) {
+		return <div>Error loading shift types. Please try again.</div>;
+	}
+
 
 	return (
 		<div className="mx-auto p-4 space-y-4">
@@ -173,7 +197,7 @@ const Schedule: React.FC = () => {
 							</div>
 						</div>
 						<CardContent className="p-2">
-							<ScheduleEditable template={template} />
+							<ScheduleEditable template={template} shiftTypes={shiftTypes} />
 						</CardContent>
 					</Card>
 
