@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { TemplateScheduleData } from '@/types/template.dto';
 import { cn } from '@/lib/utils';
+import ScheduleEditable from './ScheduleEditable';
 
 interface SidebarToggleButtonProps {
 	isOpen: boolean;
@@ -96,8 +97,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 const Schedule: React.FC = () => {
 	const [template, setTemplate] = useState<TemplateScheduleData | null>(null);
 	const [isDirty, setIsDirty] = useState(false);
-	const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
-	const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
+	const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
+	const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
 
 	const handleTemplateSelect = (selected: TemplateScheduleData | null) => {
 		setTemplate(selected);
@@ -172,9 +173,7 @@ const Schedule: React.FC = () => {
 							</div>
 						</div>
 						<CardContent className="p-2">
-							<div className="h-96 bg-gray-50 rounded border border-dashed border-gray-300 flex items-center justify-center">
-								Schedule Grid Area
-							</div>
+							<ScheduleEditable template={template} />
 						</CardContent>
 					</Card>
 

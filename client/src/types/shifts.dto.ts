@@ -6,6 +6,7 @@ export interface TimeRange {
 }
 
 export interface ShiftData {
+	id: number,
 	shift_type: number;
 	required_count: number;
 	users: UserData[] | number[];
