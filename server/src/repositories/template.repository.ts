@@ -1,6 +1,5 @@
 import { IDatabase, ITemplateScheduleRepository } from "../interfaces";
 import { TemplateSchedule, TemplateShift, TemplateConstraint, TemplateTimeRange } from "../models";
-import { parse, addHours } from 'date-fns';
 
 interface MySQLError extends Error {
 	code?: string;

@@ -31,7 +31,6 @@ router.route("/:id")
 	)
 	.delete(
 		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
 		adaptMiddleware(controller.delete)
 	)
 	.get(
