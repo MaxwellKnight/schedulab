@@ -1,5 +1,6 @@
 import { Shift } from "../models";
 import { IDatabase, IShiftRepository } from "../interfaces";
+import { ShiftType } from "../interfaces/dto/shifts.dto";
 
 export class ShiftRepository implements IShiftRepository {
 	private readonly db: IDatabase;
@@ -241,6 +242,10 @@ export class ShiftRepository implements IShiftRepository {
             ORDER BY
                 s.date, tr.start_time
         `, [shiftTypeId]);
+	}
+
+	async getTypes(team_id: number): Promise<ShiftType[]> {
+		return await this.db.execute("SELECT * from shift_types WHERE shift_types.team_id = ?", [team_id]);
 	}
 
 	async addTimeRange(shiftId: number, startTime: Date, endTime: Date): Promise<number> {

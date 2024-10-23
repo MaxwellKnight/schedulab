@@ -1,4 +1,5 @@
 import { User, Vacation, Preference, Shift, Schedule, DailyPreference, TemplateSchedule } from "../models";
+import { ShiftTypes } from "./dto/shifts.dto";
 
 export interface Repository<T> {
 	create(data: Omit<T, "id">): Promise<number>;
@@ -39,6 +40,7 @@ export interface IShiftRepository extends Repository<Shift> {
 	removeUser(id: number): Promise<number>;
 	addTimeRange(shiftId: number, startTime: Date, endTime: Date): Promise<number>;
 	removeTimeRange(timeRangeId: number): Promise<number>;
+	getTypes(team_id: number): Promise<ShiftTypes[]>;
 }
 
 export interface IScheduleRepository extends Repository<Schedule> {

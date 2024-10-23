@@ -7,15 +7,15 @@ import { access, makeValidator } from "../middlewares/middlewares";
 import { AuthController, ShiftController } from '../controllers';
 import { ShiftRepository, UserRepository } from "../repositories";
 
-const repository 	= new ShiftRepository(makeSQL());
-const service 		= new ShiftService(repository);
-const controller 	= new ShiftController(service);
+const repository = new ShiftRepository(makeSQL());
+const service = new ShiftService(repository);
+const controller = new ShiftController(service);
 
 const validator = makeValidator(shiftSchema);
 
 const userRepository = new UserRepository(makeSQL());
-const userService		= new UserService(userRepository);
-const authController	= new AuthController(userService);
+const userService = new UserService(userRepository);
+const authController = new AuthController(userService);
 
 const router = Router();
 
@@ -31,6 +31,9 @@ router.route("/")
 		adaptMiddleware(validator),
 		adaptMiddleware(controller.create)
 	);
+
+router.route("/types/:id")
+	.get(adaptMiddleware(controller.getTypes));
 
 router.route("/:id")
 	.put(

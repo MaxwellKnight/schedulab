@@ -1,5 +1,6 @@
 import { Preference, Schedule, Shift, TemplateSchedule, User } from "../models";
 import { PreferenceData, ScheduleData, ShiftData, TemplateScheduleData, UserData, VacationData } from "./dto";
+import { ShiftType } from "./dto/shifts.dto";
 
 export interface Service<T> {
 	create: (data: T) => Promise<number>;
@@ -34,6 +35,7 @@ export interface IShiftService extends Service<ShiftData> {
 	getByName: (name: string) => Promise<ShiftData[]>;
 	getByUserId: (id: number) => Promise<ShiftData[]>;
 	getByScheduleId: (id: number) => Promise<ShiftData[]>;
+	getTypes: (team_id: number) => Promise<ShiftType[]>;
 }
 
 export interface IScheduleService extends Service<ScheduleData> {

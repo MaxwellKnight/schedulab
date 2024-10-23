@@ -4,28 +4,28 @@ import { IShiftController } from "../interfaces/controllers.interface";
 import { IRequest, IResponse } from "../interfaces/http.interface";
 
 
-export class ShiftController implements IShiftController{
+export class ShiftController implements IShiftController {
 
-	private service: IShiftService ;
-	constructor(service: IShiftService ) {
+	private service: IShiftService;
+	constructor(service: IShiftService) {
 		this.service = service;
 	}
 
 	public create = async (req: IRequest, res: IResponse): Promise<void> => {
 		const shift = req.body;
-		try{
+		try {
 			const id = await this.service.create(shift);
 			res.json({ message: "Shift created", id });
-		}catch(error) {
+		} catch (error) {
 			res.status(400);
-			res.json({ error: "Shift already exist" });	
+			res.json({ error: "Shift already exist" });
 		}
 	}
 
 	public getOne = async (req: IRequest, res: IResponse): Promise<void> => {
 		const id = req.params.id;
 		const shift = await this.service.getOne(Number(id));
-		if(shift) {
+		if (shift) {
 			res.json(shift);
 		} else {
 			res.status(404);
@@ -35,7 +35,7 @@ export class ShiftController implements IShiftController{
 	}
 	public getMany = async (req: IRequest, res: IResponse): Promise<void> => {
 		const shifts = await this.service.getMany();
-		if(shifts.length > 0) {
+		if (shifts.length > 0) {
 			res.json(shifts);
 		} else {
 			res.status(404);
@@ -44,9 +44,9 @@ export class ShiftController implements IShiftController{
 	}
 
 	public getByDates = async (req: IRequest, res: IResponse): Promise<void> => {
-		const {start_date, end_date} = req.params;
+		const { start_date, end_date } = req.params;
 		const shifts = await this.service.getByDates(new Date(start_date), new Date(end_date));
-		if(shifts.length > 0) {
+		if (shifts.length > 0) {
 			res.json(shifts);
 		} else {
 			res.status(404);
@@ -58,7 +58,7 @@ export class ShiftController implements IShiftController{
 		const date = req.params.date;
 		const shifts = await this.service.getByDate(new Date(date));
 
-		if(shifts.length > 0) {
+		if (shifts.length > 0) {
 			res.json(shifts);
 		} else {
 			res.status(404);
@@ -70,7 +70,7 @@ export class ShiftController implements IShiftController{
 		const name = req.params.name;
 		const shifts = await this.service.getByName(name);
 
-		if(shifts.length > 0) {
+		if (shifts.length > 0) {
 			res.json(shifts);
 		} else {
 			res.status(404)
@@ -82,7 +82,7 @@ export class ShiftController implements IShiftController{
 		const id = req.params.id;
 		const shifts = await this.service.getByUserId(Number(id));
 
-		if(shifts.length > 0) {
+		if (shifts.length > 0) {
 			res.json(shifts);
 		} else {
 			res.status(404);
@@ -94,7 +94,7 @@ export class ShiftController implements IShiftController{
 		const id = req.params.id;
 		const shifts = await this.service.getByScheduleId(Number(id));
 
-		if(shifts.length > 0) {
+		if (shifts.length > 0) {
 			res.json(shifts);
 		} else {
 			res.status(404);
@@ -102,29 +102,41 @@ export class ShiftController implements IShiftController{
 		}
 	}
 
+	public getTypes = async (req: IRequest, res: IResponse): Promise<void> => {
+		const id = req.params.id;
+		const shift_types = await this.service.getTypes(Number(id));
+
+		if (shift_types.length > 0) {
+			res.json(shift_types);
+		} else {
+			res.status(404);
+			res.json({ error: "Types not found" });
+		}
+	}
+
 
 	public update = async (req: IRequest, res: IResponse): Promise<void> => {
 		const { id, ...rest }: ShiftData = req.body;
 		const shift = this.service.getOne(id);
-		if(!shift) {
+		if (!shift) {
 			res.status(404);
 			res.json({ error: "Shift not found" });
 			return;
 		}
 
 		const result = await this.service.update({ ...shift, ...rest });
-		if(result === 0) {
+		if (result === 0) {
 			res.status(404);
 			res.json({ error: "Could not update user" });
 		}
-		else 
+		else
 			res.json({ message: "shift updated", id });
 	}
 
 	public delete = async (req: IRequest, res: IResponse): Promise<void> => {
 		const id = req.params.id;
 		const result = await this.service.delete(Number(id));
-		if(result !== 0) {
+		if (result !== 0) {
 			res.json({ message: "Shift deleted", id: id });
 		}
 		else {

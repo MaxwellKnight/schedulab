@@ -68,14 +68,13 @@ export class ShiftService implements IShiftService {
 	}
 
 	public async getTypes(team_id: number): Promise<ShiftType[]> {
-		const types = await this.repo.getTypes(team_id);
-
-		return types.map(({ id, team_id, name, created_at }) => ({
+		const { id, team_id, name, created_at } = await this.repo.getTypes(team_id);
+		return {
 			id,
 			team_id,
 			name,
 			created_at: new Date(created_at)
-		}));
+		}
 	}
 
 	public async update({ users, time_ranges, ...rest }: ShiftData): Promise<number> {

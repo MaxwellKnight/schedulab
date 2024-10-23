@@ -15,6 +15,13 @@ export interface ShiftData {
 	created_at: Date;
 }
 
+export interface ShiftType {
+	id: number;
+	team_id: number;
+	name: string;
+	created_at: Date;
+}
+
 export interface TimeRange {
 	id?: number;  // Optional as it might not be set when creating a new time range
 	start_time: Date;

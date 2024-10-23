@@ -40,6 +40,7 @@ export interface IShiftController extends EntityController {
 	getByName: ControllerFunction;
 	getByUserId: ControllerFunction;
 	getByScheduleId: ControllerFunction;
+	getTypes: ControllerFunction;
 }
 
 export interface IScheduleController extends EntityController {
