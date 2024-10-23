@@ -1,4 +1,4 @@
-import { useReducer, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -63,11 +63,23 @@ const ScheduleBuilder: React.FC = () => {
 	const { user } = useAuth();
 	const navigate = useNavigate();
 
-	axios.defaults.baseURL = 'http://localhost:5713';
+	useEffect(() => {
+		axios.defaults.baseURL = 'http://localhost:5713';
+		axios.defaults.withCredentials = true;
+	}, []);
 
 	const handleSubmit = async (data: Schedule) => {
 		setError(null);
 		try {
+			const token = localStorage.getItem('authToken');
+			if (!token) {
+				throw new Error('Authentication token not found');
+			}
+
+			if (!user?.user_role) {
+				throw new Error('User role not found');
+			}
+
 			const templateSchedule: Omit<TemplateScheduleData, 'id' | 'created_at'> = {
 				team_id: 1,
 				name: "Weekly Template",
@@ -95,10 +107,40 @@ const ScheduleBuilder: React.FC = () => {
 				)
 			};
 
-			await axios.post('/templates', { ...templateSchedule, user });
-			navigate('/schedules', { state: { success: 'Template schedule created successfully!' } });
+			// Include user role and other authorization params in the query parameters
+			const response = await axios.post('/templates', templateSchedule, {
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${token}`
+				},
+				params: {
+					user_role: user.user_role,
+					user_id: user.id,
+					team_id: user.team_id
+				}
+			});
+
+			if (response.status === 201 || response.status === 200) {
+				navigate('/schedule', { state: { success: 'Template schedule created successfully!' } });
+			} else {
+				throw new Error('Failed to create template schedule');
+			}
 		} catch (error) {
-			setError('Failed to create template schedule. Please try again.');
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 401) {
+					setError('Authentication failed. Please log in again.');
+					navigate('/login');
+				} else if (error.response?.status === 403) {
+					setError('You do not have permission to perform this action.');
+				} else {
+					setError(error.response?.data?.message || 'Failed to create template schedule. Please try again.');
+				}
+			} else if (error instanceof Error) {
+				setError(error.message);
+			} else {
+				setError('An unexpected error occurred. Please try again.');
+			}
+			console.error('Submit error:', error);
 		}
 	};
 
