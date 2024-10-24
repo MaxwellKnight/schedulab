@@ -56,6 +56,18 @@ export class UserController implements IUserController {
 		}
 	}
 
+	public getByTeamId = async (req: IRequest, res: IResponse): Promise<void> => {
+		const team_id = req.params.team_id;
+		const users = await this.service.getByTeamId(Number(team_id));
+		if (users.length > 0) {
+			const result = users.map(({ password, ...user }) => user);
+			res.json(result);
+		} else {
+			res.status(404);
+			res.json({ error: "User not found" });
+		}
+	}
+
 	public update = async (req: IRequest, res: IResponse): Promise<void> => {
 		const userData: UserData = req.body;
 		const user = await this.service.getOne(userData.id);

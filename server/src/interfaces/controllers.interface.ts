@@ -22,6 +22,7 @@ export interface EntityController extends Controller {
 
 export interface IUserController extends EntityController {
 	getByShiftId: ControllerFunction;
+	getByTeamId: ControllerFunction;
 }
 
 export interface IVacationController extends EntityController {

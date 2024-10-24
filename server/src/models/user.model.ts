@@ -11,7 +11,7 @@ export interface User {
 	created_at: Date;
 	recent_shifts?: string;
 	recent_vacations?: string;
-	team_name?: string;  // Optional field for when joined with teams table
+	team_name?: string;
 }
 
 export interface ParsedRecentShift {

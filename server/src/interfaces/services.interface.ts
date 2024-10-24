@@ -14,6 +14,7 @@ export interface IUserService extends Service<UserData> {
 	transform: (data: User) => UserData;
 	getByShiftId: (id: number) => Promise<UserData[]>;
 	getByEmail: (email: string) => Promise<UserData | null>;
+	getByTeamId: (team_id: number) => Promise<UserData[]>;
 }
 
 export interface IVacationService extends Service<VacationData> {

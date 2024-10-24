@@ -75,6 +75,12 @@ export class UserService implements IUserService {
 		return Promise.all(result.map(user => this.transform(user)));
 	}
 
+	public async getByTeamId(team_id: number): Promise<UserData[]> {
+		const result = await this.repo.getByTeamId(team_id);
+		if (!result) throw new Error("No users found");
+		return Promise.all(result.map(user => this.transform(user)));
+	}
+
 	public async getByEmail(email: string): Promise<UserData | null> {
 		const result = await this.repo.getByEmail(email);
 		if (!result || result.id === null) return null;

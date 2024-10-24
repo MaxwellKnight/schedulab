@@ -22,6 +22,13 @@ router.route("/")
 		adaptMiddleware(controller.getMany)
 	)
 
+router.route("/team/:team_id")
+	.get(
+		adaptMiddleware(authController.authenticate),
+		adaptMiddleware(access.SUPEVISOR_ACCESS),
+		adaptMiddleware(controller.getByTeamId)
+	)
+
 router.route("/:id")
 	.put(
 		adaptMiddleware(authController.authenticate),
