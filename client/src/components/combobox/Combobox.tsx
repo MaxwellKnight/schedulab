@@ -93,6 +93,7 @@ const TemplateCombobox: React.FC<TemplateComboboxProps> = ({
 		template => template.id!.toString() === value
 	);
 
+
 	return (
 		<div className="space-y-2">
 			<Popover open={open} onOpenChange={setOpen}>

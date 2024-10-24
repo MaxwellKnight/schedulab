@@ -81,27 +81,41 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({ template, shiftType
 			const shiftType = shiftTypes?.find(type => type.id === shift.shift_type_id);
 			if (!shiftType) return null;
 
+			const baseHeight = 24;
+			const spacing = 6;
+
+			const scaledBaseHeight = baseHeight * zoomLevel;
+			const scaledSpacing = spacing * zoomLevel;
+
+			const totalHeight = (scaledBaseHeight * shift.required_count) +
+				(scaledSpacing * (shift.required_count - 1));
+
 			return (
 				<div
 					key={shift.id}
 					className="p-1 first:pt-2 last:pb-2 relative"
+					style={{
+						height: `${totalHeight + 32}px`,
+						minHeight: `${totalHeight + 32}px`
+					}}
 				>
-					<div
-						className="text-xs font-medium text-gray-500 mb-1 px-1"
-					>
+					<div className="text-xs font-medium text-gray-500 mb-1 px-1">
 						{shift.required_count > 1 ? `${shift.required_count}x ${shiftType.name}` : shiftType.name}
 					</div>
-					<div
-						className="space-y-1.5"
-						style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}
-					>
+					<div className="relative">
 						{Array.from({ length: shift.required_count }).map((_, i) => (
 							<div
 								key={`${shiftType.id}-${i}`}
-								className={`h-6 w-full rounded border ${shiftColors[shiftType.id]} 
+								className={`absolute rounded border ${shiftColors[shiftType.id]} 
 									bg-opacity-50 transition-all hover:bg-opacity-75
 									flex items-center justify-center text-xs shadow-sm hover:shadow-md
 									cursor-pointer`}
+								style={{
+									height: `${scaledBaseHeight}px`,
+									top: `${i * (scaledBaseHeight + scaledSpacing)}px`,
+									left: 0,
+									right: 0
+								}}
 							>
 								{shiftType.name}
 							</div>
@@ -128,8 +142,8 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({ template, shiftType
 		<Card className={`transition-all duration-300 ${isFullScreen ? 'fixed inset-0 z-50 m-0 rounded-none' : ''}`}>
 			<CardHeader className="border-b bg-white sticky top-0 z-20">
 				<div className="flex justify-between items-center">
-					<CardTitle className="text-lg font-semibold">
-						Schedule Editor
+					<CardTitle className="text-lg font-medium">
+						Schedule Playground
 					</CardTitle>
 					<div className="flex items-center space-x-2">
 						<Button
@@ -199,8 +213,8 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({ template, shiftType
 				</div>
 			</CardHeader>
 			<CardContent className={`p-0 ${isFullScreen ? 'h-[calc(100vh-9rem)]' : ''}`}>
-				<ScrollArea className={`${isFullScreen ? 'h-full' : 'max-h-[calc(100vh-16rem)]'}`}>
-					<div className="p-2">
+				<ScrollArea className={`${isFullScreen ? 'h-full' : 'max-h-[calc(100vh-16rem)] overflow-y-scroll'}`}>
+					<div className="p-2 max-h-[500px]">
 						<Table>
 							<TableHeader className="sticky top-0 bg-white z-10">
 								<TableRow>
