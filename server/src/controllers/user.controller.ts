@@ -24,9 +24,9 @@ export class UserController implements IUserController {
 
 	public getOne = async (req: IRequest, res: IResponse): Promise<void> => {
 		const id = req.params.id;
-		const users: any = await this.service.getOne(Number(id));
-		if (users && users.id !== null) {
-			res.json(users);
+		const { password, ...user }: any = await this.service.getOne(Number(id));
+		if (user && user.id !== null) {
+			res.json(user);
 		} else {
 			res.status(404)
 				.json({ error: "User not found" });
@@ -36,7 +36,8 @@ export class UserController implements IUserController {
 	public getMany = async (req: IRequest, res: IResponse): Promise<void> => {
 		const users = await this.service.getMany();
 		if (users.length > 0) {
-			res.json(users);
+			const result = users.map(({ password, ...user }) => user);
+			res.json(result);
 		} else {
 			res.status(404);
 			res.json({ error: "No users exist" });
@@ -47,7 +48,8 @@ export class UserController implements IUserController {
 		const id = req.params.id;
 		const users = await this.service.getByShiftId(Number(id));
 		if (users.length > 0) {
-			res.json(users);
+			const result = users.map(({ password, ...user }) => user);
+			res.json(result);
 		} else {
 			res.status(404);
 			res.json({ error: "User not found" });
