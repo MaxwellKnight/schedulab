@@ -9,6 +9,8 @@ import ScheduleEditable from './ScheduleEditable';
 import { useAuthenticatedFetch } from '@/hooks/useAuthFetch';
 import { ShiftType } from '@/types/shifts.dto';
 import { useAuth } from '@/hooks/useAuth/useAuth';
+import MembersList from './MembersList';
+import { UserData } from '@/types';
 
 interface SidebarToggleButtonProps {
 	isOpen: boolean;
@@ -25,11 +27,7 @@ interface SidebarProps {
 	children: React.ReactNode;
 }
 
-const SidebarToggleButton: React.FC<SidebarToggleButtonProps> = ({
-	isOpen,
-	onClick,
-	position
-}) => (
+const SidebarToggleButton: React.FC<SidebarToggleButtonProps> = ({ isOpen, onClick, position }) => (
 	<Button
 		variant="ghost"
 		size="sm"
@@ -61,7 +59,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 	children
 }) => (
 	<Card className={cn(
-		'relative col-span-12 transition-all duration-300',
+		'relative col-span-12 transition-all duration-300 flex flex-col',
 		isOpen ? 'sm:col-span-2' : 'sm:col-span-1 h-12'
 	)}>
 		<SidebarToggleButton
@@ -89,14 +87,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 			</div>
 		</div>
 		<CardContent className={cn(
-			'p-2 transition-all duration-300',
-			!isOpen && 'opacity-0 h-0 overflow-hidden'
+			'p-2 transition-all duration-300 flex-1 overflow-hidden',
+			!isOpen && 'opacity-0 h-0'
 		)}>
 			{children}
 		</CardContent>
 	</Card>
 );
-
 const Schedule: React.FC = () => {
 	const [template, setTemplate] = useState<TemplateScheduleData | null>(null);
 	const [isDirty, setIsDirty] = useState(false);
@@ -110,6 +107,13 @@ const Schedule: React.FC = () => {
 		error: shiftTypesError,
 		fetchData: fetchShiftTypes
 	} = useAuthenticatedFetch<ShiftType[]>(`/shifts/types/${user?.team_id}`);
+
+	const {
+		data: members,
+		loading: membersLoading,
+		error: membersError,
+		fetchData: fetchMembers
+	} = useAuthenticatedFetch<UserData[]>(`/users/team/${user?.team_id}`, { params: { user_role: user?.user_role } });
 
 	const handleTemplateSelect = (selected: TemplateScheduleData | null) => {
 		setTemplate(selected);
@@ -127,16 +131,16 @@ const Schedule: React.FC = () => {
 
 	useEffect(() => {
 		fetchShiftTypes();
-	}, [fetchShiftTypes]);
+		fetchMembers();
+	}, [fetchShiftTypes, fetchMembers]);
 
-	if (shiftTypesLoading) {
-		return <div>Loading shift types...</div>;
+	if (shiftTypesLoading || membersLoading) {
+		return <div>Loading data...</div>;
 	}
 
-	if (shiftTypesError) {
-		return <div>Error loading shift types. Please try again.</div>;
+	if (shiftTypesError || membersError) {
+		return <div>Error loading. Please try again.</div>;
 	}
-
 
 	return (
 		<div className="mx-auto p-4 space-y-4">
@@ -177,11 +181,7 @@ const Schedule: React.FC = () => {
 						icon={<Users />}
 						title="Members"
 					>
-						<div className="space-y-2">
-							<div className="h-8 bg-gray-100 rounded animate-pulse" />
-							<div className="h-8 bg-gray-100 rounded animate-pulse" />
-							<div className="h-8 bg-gray-100 rounded animate-pulse" />
-						</div>
+						<MembersList members={members} />
 					</Sidebar>
 
 					<Card className={cn(

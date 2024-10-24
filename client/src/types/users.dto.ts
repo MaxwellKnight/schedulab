@@ -7,8 +7,8 @@ export interface UserData {
 	first_name: string;
 	middle_name?: string,
 	last_name: string;
+	team_name: string;
 	email: string;
-	password: string;
 	recent_vacations: Omit<VacationData, "user_id">[] | number[];
 	student: boolean;
 	created_at: Date;

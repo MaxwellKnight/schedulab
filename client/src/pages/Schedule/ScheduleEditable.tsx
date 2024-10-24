@@ -140,10 +140,10 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({ template, shiftType
 
 	return (
 		<Card className={`transition-all duration-300 ${isFullScreen ? 'fixed inset-0 z-50 m-0 rounded-none' : ''}`}>
-			<CardHeader className="border-b bg-white sticky top-0 z-20">
+			<CardHeader className="border-b sticky top-0 z-20">
 				<div className="flex justify-between items-center">
 					<CardTitle className="text-lg font-medium">
-						Schedule Playground
+						Playground
 					</CardTitle>
 					<div className="flex items-center space-x-2">
 						<Button
@@ -214,15 +214,15 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({ template, shiftType
 			</CardHeader>
 			<CardContent className={`p-0 ${isFullScreen ? 'h-[calc(100vh-9rem)]' : ''}`}>
 				<ScrollArea className={`${isFullScreen ? 'h-full' : 'max-h-[calc(100vh-16rem)] overflow-y-scroll'}`}>
-					<div className="p-2 max-h-[500px]">
-						<Table>
+					<div className="p-2 max-h-[600px]">
+						<Table className='rounded'>
 							<TableHeader className="sticky top-0 bg-white z-10">
 								<TableRow>
-									<TableHead className="w-16 px-2 bg-gray-50">Time</TableHead>
+									<TableHead className="w-16 px-2 ">Time</TableHead>
 									{dates.map(date => (
 										<TableHead
 											key={date.toISOString()}
-											className="text-center p-1 bg-gray-50"
+											className="text-center p-1 "
 											style={{ minWidth: `${80 * zoomLevel}px` }}
 										>
 											<div className="flex flex-col">
@@ -243,7 +243,7 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({ template, shiftType
 									})
 									.map(timeSlot => (
 										<TableRow key={timeSlot} className="hover:bg-gray-50">
-											<TableCell className="font-mono text-xs px-2 whitespace-nowrap bg-gray-50">
+											<TableCell className="font-mono text-xs px-2 whitespace-nowrap ">
 												{timeSlot}
 											</TableCell>
 											{dates.map(date => (
