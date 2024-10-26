@@ -23,7 +23,6 @@ interface ScheduleEditableProps {
 	members: UserData[] | null;
 }
 
-// Droppable slot component
 const DroppableShiftSlot: React.FC<{
 	shiftTypeId: number;
 	date: Date;
@@ -119,7 +118,6 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 
 		if (!assignment || !members) return null;
 
-		// Convert the string memberId to number for comparison
 		return members.find(m => m.id === Number(assignment.memberId)) || null;
 	};
 
@@ -127,7 +125,6 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 		onRemoveAssignment(assignment);
 	};
 
-	// Update renderShiftGroup to use DroppableShiftSlot
 	const renderShiftGroup = (shifts: TemplateShiftData[], date: Date, timeSlot: string) => {
 		return shifts.map(shift => {
 			const shiftType = shiftTypes?.find(type => type.id === shift.shift_type_id);

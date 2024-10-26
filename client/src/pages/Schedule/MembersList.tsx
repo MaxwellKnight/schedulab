@@ -18,7 +18,6 @@ interface DraggableMemberCardProps {
 	isCurrentUser: boolean;
 }
 
-// Separate the member card UI into a reusable component
 const MemberCard: React.FC<{
 	member: UserData;
 	isCurrentUser: boolean;
