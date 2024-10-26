@@ -9,8 +9,18 @@ import ScheduleEditable from './ScheduleEditable';
 import { useAuthenticatedFetch } from '@/hooks/useAuthFetch';
 import { ShiftType } from '@/types/shifts.dto';
 import { useAuth } from '@/hooks/useAuth/useAuth';
-import MembersList from './MembersList';
+import MembersList, { DraggableMemberOverlay } from './MembersList';
 import { UserData } from '@/types';
+import { DndContext, DragEndEvent, DragOverlay } from '@dnd-kit/core';
+import { restrictToWindowEdges } from '@dnd-kit/modifiers';
+
+interface MemberAssignment {
+	memberId: string;
+	shiftTypeId: number;
+	date: string;
+	timeSlot: string;
+	position: number;
+}
 
 interface SidebarToggleButtonProps {
 	isOpen: boolean;
@@ -94,12 +104,61 @@ const Sidebar: React.FC<SidebarProps> = ({
 		</CardContent>
 	</Card>
 );
+
 const Schedule: React.FC = () => {
 	const [template, setTemplate] = useState<TemplateScheduleData | null>(null);
 	const [isDirty, setIsDirty] = useState(false);
 	const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
 	const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
 	const { user } = useAuth();
+	const [assignments, setAssignments] = useState<MemberAssignment[]>([]);
+	const [draggedMember, setDraggedMember] = useState<{
+		member: UserData;
+		isCurrentUser: boolean;
+	} | null>(null);
+
+	const handleDragEnd = (event: DragEndEvent) => {
+		const { active, over } = event;
+
+		if (!over) return;
+
+		const memberData = active.data.current?.member;
+		const slotData = over.data.current;
+
+		if (memberData && slotData?.type === 'slot') {
+			// Check for existing assignment in this specific position
+			const existingAssignment = assignments.find(
+				a => a.shiftTypeId === slotData.shiftTypeId &&
+					a.date === slotData.date.toISOString() &&
+					a.timeSlot === slotData.timeSlot &&
+					a.position === slotData.position
+			);
+
+			// If position is already filled, don't allow the assignment
+			if (existingAssignment) return;
+
+			const newAssignment: MemberAssignment = {
+				memberId: memberData.id,
+				shiftTypeId: slotData.shiftTypeId,
+				date: slotData.date.toISOString(),
+				timeSlot: slotData.timeSlot,
+				position: slotData.position
+			};
+
+			setAssignments(prev => [...prev, newAssignment]);
+			setIsDirty(true);
+		}
+	};
+
+	const handleRemoveAssignment = (assignment: Partial<MemberAssignment>) => {
+		setAssignments(prev => prev.filter(a =>
+			!(a.shiftTypeId === assignment.shiftTypeId &&
+				a.date === assignment.date &&
+				a.timeSlot === assignment.timeSlot &&
+				a.position === assignment.position)
+		));
+		setIsDirty(true);
+	};
 
 	const {
 		data: shiftTypes,
@@ -118,15 +177,16 @@ const Schedule: React.FC = () => {
 	const handleTemplateSelect = (selected: TemplateScheduleData | null) => {
 		setTemplate(selected);
 		setIsDirty(false);
-	};
-
-	const handlePublish = () => {
-		console.log('Publishing schedule:', template);
+		setAssignments([]); // Clear assignments when template changes
 	};
 
 	const handleSaveDraft = () => {
-		console.log('Saving draft:', template);
+		console.log('Saving draft:', template, assignments);
 		setIsDirty(false);
+	};
+
+	const handlePublish = () => {
+		console.log('Publishing schedule:', template, assignments);
 	};
 
 	useEffect(() => {
@@ -143,86 +203,119 @@ const Schedule: React.FC = () => {
 	}
 
 	return (
-		<div className="mx-auto p-4 space-y-4">
-			<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg shadow-sm">
-				<div className="flex-1 max-w-md">
-					<h1 className="text-sm text-gray-500 mb-2">Template</h1>
-					<Combobox
-						onTemplateSelect={handleTemplateSelect}
-						className="w-full"
-					/>
-				</div>
-				<div className="flex gap-2 w-full sm:w-auto">
-					<Button
-						variant="outline"
-						onClick={handleSaveDraft}
-						disabled={!template || !isDirty}
-						className="flex-1 sm:flex-none"
-					>
-						<Save className="h-4 w-4 mr-2" />
-						Save Draft
-					</Button>
-					<Button
-						onClick={handlePublish}
-						disabled={!template}
-						className="flex-1 sm:flex-none"
-					>
-						Publish Schedule
-					</Button>
-				</div>
-			</div>
-
-			{template ? (
-				<div className="grid grid-cols-12 gap-4">
-					<Sidebar
-						isOpen={leftSidebarOpen}
-						onToggle={() => setLeftSidebarOpen(!leftSidebarOpen)}
-						position="left"
-						icon={<Users />}
-						title="Members"
-					>
-						<MembersList members={members} />
-					</Sidebar>
-
-					<Card className={cn(
-						'col-span-12 transition-all duration-300',
-						leftSidebarOpen && rightSidebarOpen ? 'sm:col-span-8' :
-							(!leftSidebarOpen && !rightSidebarOpen) ? 'sm:col-span-10' :
-								'sm:col-span-9'
-					)}>
-						<div className="p-3 border-b">
-							<div className="flex items-center text-md text-gray-600 font-normal">
-								<Sheet className="h-4 w-4 mr-2" />
-								Schedule Grid
-							</div>
-						</div>
-						<CardContent className="p-2">
-							<ScheduleEditable template={template} shiftTypes={shiftTypes} />
-						</CardContent>
-					</Card>
-
-					<Sidebar
-						isOpen={rightSidebarOpen}
-						onToggle={() => setRightSidebarOpen(!rightSidebarOpen)}
-						position="right"
-						icon={<Settings />}
-						title="Settings"
-					>
-						<div className="space-y-2">
-							<div className="h-8 bg-gray-100 rounded animate-pulse" />
-							<div className="h-8 bg-gray-100 rounded animate-pulse" />
-							<div className="h-8 bg-gray-100 rounded animate-pulse" />
-						</div>
-					</Sidebar>
-				</div>
-			) : (
-				<div className="grid grid-cols-12 gap-4">
-					<div className="col-span-12 h-96 flex items-center justify-center text-gray-500">
-						Select a template to start creating your schedule
+		<DndContext
+			onDragStart={(event) => {
+				const { active } = event;
+				const memberData = active.data.current?.member;
+				if (memberData) {
+					setDraggedMember({
+						member: memberData,
+						isCurrentUser: memberData.id === user?.id
+					});
+				}
+			}}
+			onDragEnd={(event) => {
+				handleDragEnd(event);
+				setDraggedMember(null);
+			}}
+			onDragCancel={() => setDraggedMember(null)}
+			modifiers={[restrictToWindowEdges]}
+		>
+			<div className="mx-auto p-4 space-y-4">
+				<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg shadow-sm">
+					<div className="flex-1 max-w-md">
+						<h1 className="text-sm text-gray-500 mb-2">Template</h1>
+						<Combobox
+							onTemplateSelect={handleTemplateSelect}
+							className="w-full"
+						/>
+					</div>
+					<div className="flex gap-2 w-full sm:w-auto">
+						<Button
+							variant="outline"
+							onClick={handleSaveDraft}
+							disabled={!template || !isDirty}
+							className="flex-1 sm:flex-none"
+						>
+							<Save className="h-4 w-4 mr-2" />
+							Save Draft
+						</Button>
+						<Button
+							onClick={handlePublish}
+							disabled={!template}
+							className="flex-1 sm:flex-none"
+						>
+							Publish Schedule
+						</Button>
 					</div>
 				</div>
-			)}
-		</div>
+
+				{template ? (
+					<div className="grid grid-cols-12 gap-4">
+						<Sidebar
+							isOpen={leftSidebarOpen}
+							onToggle={() => setLeftSidebarOpen(!leftSidebarOpen)}
+							position="left"
+							icon={<Users />}
+							title="Members"
+						>
+							<MembersList members={members} />
+						</Sidebar>
+
+						<Card className={cn(
+							'col-span-12 transition-all duration-300',
+							leftSidebarOpen && rightSidebarOpen ? 'sm:col-span-8' :
+								(!leftSidebarOpen && !rightSidebarOpen) ? 'sm:col-span-10' :
+									'sm:col-span-9'
+						)}>
+							<div className="p-3 border-b">
+								<div className="flex items-center text-md text-gray-600 font-normal">
+									<Sheet className="h-4 w-4 mr-2" />
+									Schedule Grid
+								</div>
+							</div>
+							<CardContent className="p-2">
+								<ScheduleEditable
+									template={template}
+									shiftTypes={shiftTypes}
+									members={members}
+									assignments={assignments}
+									onRemoveAssignment={handleRemoveAssignment}
+								/>
+							</CardContent>
+						</Card>
+
+						<Sidebar
+							isOpen={rightSidebarOpen}
+							onToggle={() => setRightSidebarOpen(!rightSidebarOpen)}
+							position="right"
+							icon={<Settings />}
+							title="Settings"
+						>
+							<div className="space-y-2">
+								<div className="h-8 bg-gray-100 rounded animate-pulse" />
+								<div className="h-8 bg-gray-100 rounded animate-pulse" />
+								<div className="h-8 bg-gray-100 rounded animate-pulse" />
+							</div>
+						</Sidebar>
+					</div>
+				) : (
+					<div className="grid grid-cols-12 gap-4">
+						<div className="col-span-12 h-96 flex items-center justify-center text-gray-500">
+							Select a template to start creating your schedule
+						</div>
+					</div>
+				)}
+			</div>
+			<DragOverlay>
+				{draggedMember ? (
+					<DraggableMemberOverlay
+						member={draggedMember.member}
+						isCurrentUser={draggedMember.isCurrentUser}
+					/>
+				) : null}
+			</DragOverlay>
+		</DndContext>
 	);
 };
 

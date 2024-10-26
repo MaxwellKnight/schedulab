@@ -2,22 +2,198 @@ import React, { useMemo, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, Minimize2, Calendar, } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, Minimize2, Calendar, X } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, } from "@/components/ui/card";
 import { TemplateScheduleData, TemplateShiftData } from '@/types/template.dto';
 import { ShiftType } from '@/types/shifts.dto';
+import { UserData } from '@/types';
+import { useDroppable } from '@dnd-kit/core';
+
+interface MemberAssignment {
+	memberId: string;
+	shiftTypeId: number;
+	date: string;
+	timeSlot: string;
+	position: number;
+}
 
 interface ScheduleEditableProps {
 	template: TemplateScheduleData | null;
 	shiftTypes: ShiftType[] | null;
+	members: UserData[] | null;
 }
 
-const ScheduleEditable: React.FC<ScheduleEditableProps> = ({ template, shiftTypes }) => {
+// Droppable slot component
+const DroppableShiftSlot: React.FC<{
+	shiftTypeId: number;
+	date: Date;
+	timeSlot: string;
+	position: number;
+	shiftName: string;
+	assignedMember: UserData | null;
+	className?: string;
+	style?: React.CSSProperties;
+	onRemoveMember?: () => void;
+}> = ({
+	shiftTypeId,
+	date,
+	timeSlot,
+	position,
+	shiftName,
+	assignedMember,
+	className,
+	style,
+	onRemoveMember
+}) => {
+		const { setNodeRef, isOver } = useDroppable({
+			id: `slot-${shiftTypeId}-${date.toISOString()}-${timeSlot}-${position}`,
+			data: {
+				type: 'slot',
+				shiftTypeId,
+				date,
+				timeSlot,
+				position
+			}
+		});
+
+		return (
+			<div
+				ref={setNodeRef}
+				className={`${className} ${isOver ? 'ring-2 ring-blue-400' : ''}`}
+				style={style}
+			>
+				{assignedMember ? (
+					<div className="flex items-center justify-between px-2">
+						<span className="truncate">
+							{assignedMember.first_name} {assignedMember.last_name}
+						</span>
+						{onRemoveMember && (
+							<button
+								onClick={onRemoveMember}
+								className="ml-1 p-0.5 hover:bg-gray-200 rounded"
+							>
+								<X className="h-3 w-3" />
+							</button>
+						)}
+					</div>
+				) : (
+					<span className="text-gray-500">{shiftName}</span>
+				)}
+			</div>
+		);
+	};
+
+interface ScheduleEditableProps {
+	template: TemplateScheduleData | null;
+	shiftTypes: ShiftType[] | null;
+	members: UserData[] | null;
+	assignments: MemberAssignment[];
+	onRemoveAssignment: (assignment: Partial<MemberAssignment>) => void;
+}
+
+
+const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
+	template,
+	shiftTypes,
+	members,
+	assignments,
+	onRemoveAssignment
+}) => {
 	const [zoomLevel, setZoomLevel] = useState(1);
 	const [visibleHoursStart, setVisibleHoursStart] = useState(0);
 	const [visibleHoursEnd, setVisibleHoursEnd] = useState(24);
 	const [isFullScreen, setIsFullScreen] = useState(false);
 
+	const getMemberForPosition = (
+		shiftTypeId: number,
+		date: Date,
+		timeSlot: string,
+		position: number
+	): UserData | null => {
+		const assignment = assignments.find(
+			a => a.shiftTypeId === shiftTypeId &&
+				a.date === date.toISOString() &&
+				a.timeSlot === timeSlot &&
+				a.position === position
+		);
+
+		if (!assignment || !members) return null;
+
+		// Convert the string memberId to number for comparison
+		return members.find(m => m.id === Number(assignment.memberId)) || null;
+	};
+
+	const handleRemoveMember = (assignment: Partial<MemberAssignment>) => {
+		onRemoveAssignment(assignment);
+	};
+
+	// Update renderShiftGroup to use DroppableShiftSlot
+	const renderShiftGroup = (shifts: TemplateShiftData[], date: Date, timeSlot: string) => {
+		return shifts.map(shift => {
+			const shiftType = shiftTypes?.find(type => type.id === shift.shift_type_id);
+			if (!shiftType) return null;
+
+			const baseHeight = 24;
+			const spacing = 6;
+			const scaledBaseHeight = baseHeight * zoomLevel;
+			const scaledSpacing = spacing * zoomLevel;
+			const totalHeight = (scaledBaseHeight * shift.required_count) +
+				(scaledSpacing * (shift.required_count - 1));
+
+			return (
+				<div
+					key={shift.id}
+					className="p-1 first:pt-2 last:pb-2 relative"
+					style={{
+						height: `${totalHeight + 32}px`,
+						minHeight: `${totalHeight + 32}px`
+					}}
+				>
+					<div className="text-xs font-medium text-gray-500 mb-1 px-1">
+						{shift.required_count > 1 ? `${shift.required_count}x ${shiftType.name}` : shiftType.name}
+					</div>
+					<div className="relative">
+						{Array.from({ length: shift.required_count }).map((_, i) => {
+							const assignedMember = getMemberForPosition(
+								shift.shift_type_id,
+								date,
+								timeSlot,
+								i
+							);
+
+							return (
+								<DroppableShiftSlot
+									key={`${shiftType.id}-${i}`}
+									shiftTypeId={shift.shift_type_id}
+									date={date}
+									timeSlot={timeSlot}
+									position={i}
+									shiftName={shiftType.name}
+									assignedMember={assignedMember}
+									className={`absolute rounded border ${shiftColors[shiftType.id]} 
+                    bg-opacity-50 transition-all hover:bg-opacity-75
+                    flex items-center justify-center text-xs shadow-sm hover:shadow-md`}
+									style={{
+										height: `${scaledBaseHeight}px`,
+										top: `${i * (scaledBaseHeight + scaledSpacing)}px`,
+										left: 0,
+										right: 0
+									}}
+									onRemoveMember={() => handleRemoveMember({
+										shiftTypeId: shift.shift_type_id,
+										date: date.toISOString(),
+										timeSlot,
+										position: i
+									})}
+								/>
+							);
+						})}
+					</div>
+					<div className="absolute bottom-0 left-2 right-2 border-b border-gray-200 last:border-0" />
+				</div>
+			);
+		});
+	};
 	const timeSlots = useMemo(() => {
 		if (!template) return [];
 		const uniqueHours = new Set<string>();
@@ -37,7 +213,7 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({ template, shiftType
 			night: 'bg-purple-100 border-purple-300 text-purple-800',
 			oncall: 'bg-yellow-100 border-yellow-300 text-yellow-800',
 			backup: 'bg-pink-100 border-pink-300 text-pink-800',
-			default: 'bg-gray-100 border-gray-300 text-gray-800'
+			default: 'bg-red-100 border-red-300 text-red-800'
 		};
 
 		return shiftTypes?.reduce((acc, type, index) => {
@@ -74,57 +250,6 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({ template, shiftType
 
 	const toggleFullScreen = () => {
 		setIsFullScreen(prev => !prev);
-	};
-
-	const renderShiftGroup = (shifts: TemplateShiftData[]) => {
-		return shifts.map(shift => {
-			const shiftType = shiftTypes?.find(type => type.id === shift.shift_type_id);
-			if (!shiftType) return null;
-
-			const baseHeight = 24;
-			const spacing = 6;
-
-			const scaledBaseHeight = baseHeight * zoomLevel;
-			const scaledSpacing = spacing * zoomLevel;
-
-			const totalHeight = (scaledBaseHeight * shift.required_count) +
-				(scaledSpacing * (shift.required_count - 1));
-
-			return (
-				<div
-					key={shift.id}
-					className="p-1 first:pt-2 last:pb-2 relative"
-					style={{
-						height: `${totalHeight + 32}px`,
-						minHeight: `${totalHeight + 32}px`
-					}}
-				>
-					<div className="text-xs font-medium text-gray-500 mb-1 px-1">
-						{shift.required_count > 1 ? `${shift.required_count}x ${shiftType.name}` : shiftType.name}
-					</div>
-					<div className="relative">
-						{Array.from({ length: shift.required_count }).map((_, i) => (
-							<div
-								key={`${shiftType.id}-${i}`}
-								className={`absolute rounded border ${shiftColors[shiftType.id]} 
-									bg-opacity-50 transition-all hover:bg-opacity-75
-									flex items-center justify-center text-xs shadow-sm hover:shadow-md
-									cursor-pointer`}
-								style={{
-									height: `${scaledBaseHeight}px`,
-									top: `${i * (scaledBaseHeight + scaledSpacing)}px`,
-									left: 0,
-									right: 0
-								}}
-							>
-								{shiftType.name}
-							</div>
-						))}
-					</div>
-					<div className="absolute bottom-0 left-2 right-2 border-b border-gray-200 last:border-0" />
-				</div>
-			);
-		});
 	};
 
 	if (!template || !shiftTypes) {
@@ -262,7 +387,9 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({ template, shiftType
 																return startHour === timeSlot.split(':')[0];
 															});
 															return shift.day_of_week === date.getDay() && shiftRanges;
-														})
+														}),
+														date,
+														timeSlot
 													)}
 												</TableCell>
 											))}
