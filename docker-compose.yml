@@ -13,7 +13,7 @@ services:
       - $DATABASE_LOCAL_PORT:$DATABASE_DOCKER_PORT
     volumes:
       - ./db:/var/lib/mysql
-      - ./sql:/docker-entrypoint-initdb.d
+      - ./server/sql/:/docker-entrypoint-initdb.d
 
   app:
     depends_on:

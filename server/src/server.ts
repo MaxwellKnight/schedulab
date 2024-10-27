@@ -30,4 +30,4 @@ app.use('/vacations', VacationRouter);
 app.use('/schedules', ScheduleRouter);
 app.use('/templates', TemplateRouter);
 
-app.listen(PORT, () => console.log(`server running on ${ip()}:${PORT}`))
+app.listen(PORT, () => console.log(`server running on ${ip() || '127.0.0.1'}:${PORT}`))
