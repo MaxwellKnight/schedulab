@@ -25,7 +25,7 @@ const MemberCard: React.FC<{
 }> = ({ member, isCurrentUser, className = '' }) => (
 	<div
 		className={`
-      group flex items-center gap-3 p-3 rounded-lg
+      group flex items-center gap-3 p-3 rounded-lg w-full
       ${isCurrentUser ? 'bg-blue-50/80 hover:bg-blue-100/90 border border-blue-200' :
 				'hover:bg-gray-50 border border-transparent hover:border-gray-200'}
       ${className}
@@ -84,6 +84,8 @@ const DraggableMemberCard: React.FC<DraggableMemberCardProps> = ({ member, isCur
 	const style = {
 		transform: CSS.Translate.toString(transform),
 		opacity: isDragging ? 0.3 : undefined,
+		width: '100%',
+		maxWidth: '100%'
 	} as React.CSSProperties;
 
 	return (
@@ -92,7 +94,7 @@ const DraggableMemberCard: React.FC<DraggableMemberCardProps> = ({ member, isCur
 			style={style}
 			{...listeners}
 			{...attributes}
-			className="touch-none"
+			className="touch-none w-full"
 		>
 			<MemberCard
 				member={member}
@@ -151,12 +153,12 @@ const MembersList: React.FC<MembersListProps> = ({ members }) => {
 						/>
 					</div>
 				</div>
-				<div className="overflow-x-hidden">
+				<div className="overflow-x-hidden w-full">
 					<ScrollArea className="h-[calc(100vh-25rem)] overflow-x-hidden">
 						{!filteredMembers || filteredMembers.length === 0 ? (
 							<EmptyState searchActive={searchQuery.length > 0} />
 						) : (
-							<div className="space-y-2 pr-4 overflow-x-hidden">
+							<div className="space-y-2 pr-4 overflow-x-hidden w-full">
 								{filteredMembers.map((member) => (
 									<DraggableMemberCard
 										key={member.id}

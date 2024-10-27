@@ -38,7 +38,6 @@ const DroppableShiftSlot: React.FC<{
 	date,
 	timeSlot,
 	position,
-	shiftName,
 	assignedMember,
 	className,
 	style,
@@ -71,12 +70,12 @@ const DroppableShiftSlot: React.FC<{
 								onClick={onRemoveMember}
 								className="ml-1 p-0.5 hover:bg-gray-200 rounded"
 							>
-								<X className="h-3 w-3" />
+								<X className="h-3 w-3 text-red-400" />
 							</button>
 						)}
 					</div>
 				) : (
-					<span className="text-gray-500">{shiftName}</span>
+					<span className="text-gray-500">- - -</span>
 				)}
 			</div>
 		);
@@ -191,6 +190,7 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 			);
 		});
 	};
+
 	const timeSlots = useMemo(() => {
 		if (!template) return [];
 		const uniqueHours = new Set<string>();

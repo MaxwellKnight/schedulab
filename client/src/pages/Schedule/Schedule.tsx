@@ -112,10 +112,22 @@ const Schedule: React.FC = () => {
 	const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
 	const { user } = useAuth();
 	const [assignments, setAssignments] = useState<MemberAssignment[]>([]);
-	const [draggedMember, setDraggedMember] = useState<{
-		member: UserData;
-		isCurrentUser: boolean;
-	} | null>(null);
+	const [draggedMember, setDraggedMember] = useState<{ member: UserData; isCurrentUser: boolean; } | null>(null);
+
+	const {
+		data: shiftTypes,
+		loading: shiftTypesLoading,
+		error: shiftTypesError,
+		fetchData: fetchShiftTypes
+	} = useAuthenticatedFetch<ShiftType[]>(`/shifts/types/${user?.team_id}`);
+
+	const {
+		data: members,
+		loading: membersLoading,
+		error: membersError,
+		fetchData: fetchMembers
+	} = useAuthenticatedFetch<UserData[]>(`/users/team/${user?.team_id}`, { params: { user_role: user?.user_role } });
+
 
 	const handleDragEnd = (event: DragEndEvent) => {
 		const { active, over } = event;
@@ -160,19 +172,6 @@ const Schedule: React.FC = () => {
 		setIsDirty(true);
 	};
 
-	const {
-		data: shiftTypes,
-		loading: shiftTypesLoading,
-		error: shiftTypesError,
-		fetchData: fetchShiftTypes
-	} = useAuthenticatedFetch<ShiftType[]>(`/shifts/types/${user?.team_id}`);
-
-	const {
-		data: members,
-		loading: membersLoading,
-		error: membersError,
-		fetchData: fetchMembers
-	} = useAuthenticatedFetch<UserData[]>(`/users/team/${user?.team_id}`, { params: { user_role: user?.user_role } });
 
 	const handleTemplateSelect = (selected: TemplateScheduleData | null) => {
 		setTemplate(selected);
