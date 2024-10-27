@@ -9,5 +9,9 @@ export default defineConfig({
 		alias: {
 			"@": path.resolve(__dirname, "./src")
 		}
+	},
+	server: {
+		host: '0.0.0.0', // Allow connections from outside the container
+		port: 5173       // Ensure it's set to 5173
 	}
 })
