@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   mysqldb:
     platform: linux/x86_64
@@ -12,6 +14,7 @@ services:
     volumes:
       - ./db:/var/lib/mysql
       - ./sql:/docker-entrypoint-initdb.d
+
   app:
     depends_on:
       - mysqldb
@@ -28,6 +31,23 @@ services:
       - DATABASE_PORT=$DATABASE_LOCAL_PORT
     stdin_open: true
     tty: true
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+
+  client:
+    build:
+      context: ./client
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      - app
+    env_file: ./.env
+    environment:
+      - VITE_API_URL=http://localhost:$NODE_LOCAL_PORT
 
 volumes: 
   db:

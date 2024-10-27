@@ -129,18 +129,6 @@ export class TemplateScheduleRepository implements ITemplateScheduleRepository {
 	}
 
 	private async getTemplateShifts(templateScheduleId: number): Promise<TemplateShift[]> {
-		// First, log raw data before GROUP_CONCAT
-		const rawJoinCheck = await this.db.execute(
-			`SELECT ts.id, ttr.id as range_id, ttr.start_time, ttr.end_time
-         FROM template_shifts ts
-         LEFT JOIN template_time_ranges ttr ON ts.id = ttr.template_shift_id
-         WHERE ts.template_schedule_id = ?
-         LIMIT 5`,
-			[templateScheduleId]
-		);
-		console.log('Raw Join Check:', rawJoinCheck);
-
-		// Then try the GROUP_CONCAT query
 		const shifts = await this.db.execute<(TemplateShift & { time_ranges: string | null })[]>(
 			`SELECT ts.*, 
                 GROUP_CONCAT(
@@ -173,7 +161,7 @@ export class TemplateScheduleRepository implements ITemplateScheduleRepository {
 						end_time: end
 					} as TemplateTimeRange;
 				})
-				: [] // Return empty array if no time ranges
+				: []
 		}));
 	}
 
