@@ -8,7 +8,7 @@ dotenv.config();
 
 const app = express();
 
-const PORT = process.env.NODE_LOCAL_PORT || 8080;
+const PORT = process.env.NODE_LOCAL_PORT || 5713;
 
 app.use(cookieParser());
 app.use(express.json());
