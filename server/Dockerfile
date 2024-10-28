@@ -1,26 +1,34 @@
+# Use full Node image instead of alpine
 FROM node:18.20.4
-
-# Add node user for better security and permissions
-RUN mkdir -p /app && chown -R node:node /app
 
 # Set working directory
 WORKDIR /app
 
-# Switch to node user
-USER node
+# Install necessary build tools (in case they're needed)
+RUN apt-get update && \
+    apt-get install -y python3 make g++ && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy package files with correct ownership
-COPY --chown=node:node package*.json ./
+# Copy package files
+COPY package*.json ./
 
-# Clean install with troubleshooting flags
+# Show npm and node versions for debugging
+RUN node -v && npm -v
+
+# Clean npm cache and install dependencies with additional flags
 RUN npm cache clean --force && \
-    npm install --verbose --legacy-peer-deps
+    npm cache verify && \
+    npm install -g npm@10.7.0 && \
+    npm install --verbose --legacy-peer-deps --no-optional
 
-# Copy rest of the code with correct ownership
-COPY --chown=node:node . .
+# Copy the rest of the application
+COPY . .
 
-# Expose port
+# Expose the port
 EXPOSE 5713
 
-# Start development server
+# Set NODE_ENV
+ENV NODE_ENV=development
+
+# Start the application
 CMD ["npm", "run", "dev", "--", "--host"]
