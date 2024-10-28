@@ -1,41 +1,34 @@
+# Use full Node image
 FROM node:18.20.4
-
-# Install debugging tools and build essentials
-RUN apt-get update && \
-    apt-get install -y python3 make g++ && \
-    rm -rf /var/lib/apt/lists/*
-
-# Create app directory and set permissions
-RUN mkdir -p /app && \
-    chown -R node:node /app
 
 # Set working directory
 WORKDIR /app
 
-# Switch to node user
-USER node
+# Install necessary build tools
+RUN apt-get update && \
+    apt-get install -y python3 make g++ && \
+    rm -rf /var/lib/apt/lists/*
 
-# Print versions for debugging
+# Show versions for debugging
 RUN node -v && npm -v
 
-# Copy package files with correct ownership
-COPY --chown=node:node package*.json ./
+# Copy package files
+COPY package*.json ./
 
-# Install specific npm version and clear cache
-RUN npm install -g npm@10.7.0 && \
-    npm cache clean --force && \
-    npm cache verify && \
-    npm install --verbose --legacy-peer-deps --production=false
+# Fix permissions and install dependencies
+RUN mkdir -p /root/.npm && \
+    chmod -R 777 /root/.npm && \
+    npm config set unsafe-perm true && \
+    npm install --verbose --legacy-peer-deps --no-optional
 
-# Copy rest of the code with correct ownership
-COPY --chown=node:node . .
+# Copy the rest of the application
+COPY . .
 
-# Expose port
+# Expose the port
 EXPOSE 5713
 
-# Add healthcheck
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5713/ || exit 1
+# Set NODE_ENV
+ENV NODE_ENV=development
 
-# Start development server
+# Start the application
 CMD ["npm", "run", "dev", "--", "--host"]
