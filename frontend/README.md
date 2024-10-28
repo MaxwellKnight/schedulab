@@ -1,30 +1,230 @@
-# React + TypeScript + Vite
+# Schedula Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript frontend for Schedula, a shift scheduling system built with Vite, React, TypeScript, and shadcn/ui.
 
-Currently, two official plugins are available:
+## Quick Start 🚀
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+# Install dependencies
+npm install
 
-## Expanding the ESLint configuration
+# Start development server
+npm run dev
+```
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+Frontend will start on `http://localhost:3000`
 
-- Configure the top-level `parserOptions` property like this:
+## Project Structure 📁
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
+```
+src/
+├── components/              # Reusable components
+│   ├── ui/                 # shadcn/ui components
+│   │   ├── alert.tsx
+│   │   ├── button.tsx
+│   │   ├── dialog.tsx
+│   │   └── ...
+│   ├── layout/            # Layout components
+│   │   └── Layout.tsx
+│   ├── navigation/        # Navigation components
+│   │   └── Navigation.tsx
+│   ├── combobox/         
+│   │   └── Combobox.tsx
+│   └── date-picker/
+│       └── DatePicker.tsx
+├── pages/                  # Page components
+│   ├── Home/
+│   ├── Login/
+│   ├── Members/
+│   ├── Schedule/
+│   │   ├── Schedule.tsx
+│   │   └── ScheduleEditable.tsx
+│   └── ScheduleBuilder/
+│       ├── ConstraintBuilder.tsx
+│       ├── ScheduleBuilder.tsx
+│       └── ScheduleForm.tsx
+├── context/               # React Context
+│   └── AuthContext.tsx
+├── hooks/                # Custom hooks
+│   ├── useAuth/
+│   ├── useAuthFetch.ts
+│   ├── useFetch/
+│   └── use-toast.ts
+├── types/                # TypeScript types
+│   ├── preferences.dto.ts
+│   ├── schedules.dto.ts
+│   ├── shifts.dto.ts
+│   └── users.dto.ts
+└── utils/                # Utility functions
+    └── colors.ts
+```
+
+## Available Scripts 📜
+
+```bash
+# Development
+npm run dev           # Start development server
+npm run build        # Build for production
+npm run preview      # Preview production build
+
+# Code Quality
+npm run lint        # Run ESLint
+npm run format      # Format code with Prettier
+```
+
+## Key Features 🌟
+
+### Authentication
+- JWT-based authentication
+- Protected routes
+- Login persistence
+- Token refresh mechanism
+
+### Schedule Management
+- Interactive schedule builder
+- Drag-and-drop interface
+- Constraint handling
+- Template system
+
+### Team Management
+- Member overview
+- Preference submission
+- Vacation requests
+- Shift assignments
+
+## Component System 🧩
+
+### UI Components
+Using shadcn/ui for consistent design:
+```typescript
+import { Button } from "@/components/ui/button"
+import { Dialog } from "@/components/ui/dialog"
+import { Alert } from "@/components/ui/alert"
+```
+
+### Custom Components
+```typescript
+import { DatePicker } from "@/components/date-picker/DatePicker"
+import { Combobox } from "@/components/combobox/Combobox"
+```
+
+## API Integration 🔌
+
+Backend connection configured in `src/lib/axios/index.ts`:
+```typescript
+baseURL: 'http://localhost:5713',
+headers: {
+  'Content-Type': 'application/json'
 }
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+## State Management 🔄
+
+Using React Context for global state:
+```typescript
+import { AuthContext } from "@/context/AuthContext"
+```
+
+Custom hooks for data fetching:
+```typescript
+import { useFetch } from "@/hooks/useFetch"
+import { useAuth } from "@/hooks/useAuth"
+```
+
+## Styling 🎨
+
+Using Tailwind CSS with custom configuration:
+```bash
+# tailwind.config.js
+module.exports = {
+  darkMode: ["class"],
+  content: ["./src/**/*.{ts,tsx}"],
+  theme: {
+    extend: {
+      // Custom configurations
+    }
+  }
+}
+```
+
+## Development Guidelines 📝
+
+1. **Component Creation**
+   - Use TypeScript interfaces
+   - Follow shadcn/ui patterns
+   - Include prop documentation
+
+2. **State Management**
+   - Use context for global state
+   - Local state for component-specific data
+   - Custom hooks for reusable logic
+
+3. **Styling**
+   - Use Tailwind utilities
+   - Follow component-based styling
+   - Maintain consistency with shadcn/ui
+
+4. **Error Handling**
+   - Use ErrorBoundary components
+   - Implement toast notifications
+   - Proper error states in forms
+
+## Routes Structure 🛣️
+
+```typescript
+/                  # Home
+/login             # Authentication
+/schedule          # Schedule view
+/schedule/builder  # Schedule creation
+/members           # Team management
+```
+
+## Error Handling 🚨
+
+Using toast notifications:
+```typescript
+import { useToast } from "@/hooks/use-toast"
+
+const { toast } = useToast()
+toast({
+  title: "Error",
+  description: "Something went wrong",
+  variant: "destructive"
+})
+```
+
+## Troubleshooting 🔍
+
+1. **API Connection Issues**
+   - Verify backend is running on port 5713
+   - Check CORS configuration
+   - Validate API endpoints
+
+2. **Authentication Problems**
+   - Clear localStorage
+   - Check token expiration
+   - Verify API credentials
+
+3. **Build Issues**
+   ```bash
+   # Clear node_modules
+   rm -rf node_modules
+   npm install
+   
+   # Clear Vite cache
+   npm run clean
+   ```
+
+## Browser Support 🌐
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+
+## Performance Considerations 📈
+
+- Lazy loading for routes
+- Optimized bundle size
+- Efficient state updates
+- Memoized components

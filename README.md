@@ -1,135 +1,145 @@
+# Schedula
 
-# Scheduler
+Intelligent shift scheduling system that combines automated scheduling with preference management. Built with TypeScript, Node.js, and React.
 
-## Overview
+*Schedule Smarter, Work Better*
 
-**Scheduler** is an automated employee scheduling system designed to generate shift schedules based on employee preferences, availability, and business needs. It provides role-based authentication and authorization using JSON Web Tokens (JWT) and uses MySQL for data storage.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Node](https://img.shields.io/badge/node-v16+-green.svg)
+![TypeScript](https://img.shields.io/badge/typescript-v4.9+-blue.svg)
 
-The project consists of a Node.js server that handles the scheduling logic, user management, and API endpoints.
+## ✨ Key Features
 
-## Table of Contents
+- **Smart Scheduling**
+  - AI-powered schedule generation
+  - Constraint-based optimization
+  - Fair shift distribution
+  - Conflict detection and resolution
 
-- [Features](#features)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [API Endpoints](#api-endpoints)
-- [Technologies](#technologies)
-- [Contributing](#contributing)
-- [License](#license)
+- **Team Empowerment**
+  - Preference submission system
+  - Vacation management
+  - Availability tracking
+  - Schedule templates
 
-## Features
+- **Intuitive Interface**
+  - Drag-and-drop scheduling
+  - Real-time updates
+  - Mobile-friendly design
+  - Clear schedule visualization
 
-- **JWT Authentication**: Secure login and session management for users.
-- **Role-Based Access Control (RBAC)**: Different user roles (Admin, Manager, Employee) with specific permissions.
-- **Employee Preferences**: Allows employees to submit their preferences for scheduling.
-- **Automated Scheduling**: Automatically generates optimal schedules based on employee availability and preferences.
-- **RESTful API**: Exposes endpoints to manage users, preferences, and schedules.
+## 🏗️ Tech Stack
 
-## Installation
+- **Backend**
+  - Node.js + TypeScript
+  - PostgreSQL
+  - Express.js
+  
+- **Frontend**
+  - React + TypeScript
+  - Tailwind CSS
+  - shadcn/ui components
 
-### Prerequisites
+## 🚀 Quick Start
 
-Make sure you have the following installed:
-- [Node.js](https://nodejs.org/) (v22.4.0 or higher)
-- [MySQL](https://www.mysql.com/)
-
-### Steps
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/MaxwellKnight/scheduler.git
-   cd scheduler/server
-   ```
-
-2. **Install server dependencies**:
-   ```bash
-   npm install
-   ```
-
-3. **Set up MySQL database**:
-   - Create a new MySQL database.
-   - Update the `.env` file with your database credentials (see [Configuration](#configuration)).
-
-4. **Run the server**:
-   ```bash
-   npm start
-   ```
-
-The server should now be running on `http://localhost:5713`.
-
-## Configuration
-
-Create a `.env` file in the `server/` directory with the following content:
-
-```
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=yourpassword
-DB_NAME=scheduler
-JWT_SECRET=your_jwt_secret
-PORT=5713
-```
-
-- `DB_HOST`: MySQL database host (e.g., `localhost`)
-- `DB_USER`: MySQL user (e.g., `root`)
-- `DB_PASSWORD`: MySQL password
-- `DB_NAME`: Name of the MySQL database (e.g., `scheduler`)
-- `JWT_SECRET`: Secret key for JWT token signing
-- `PORT`: Port number for the server (default is 5713)
-
-## Usage
-
-Once the server is running, you can interact with it via HTTP requests using tools like Postman, cURL, or any frontend client. The server exposes several API endpoints to manage users, schedules, and preferences.
-
-### Running Locally
-
+1. **Clone the repository**
 ```bash
-npm start
+git clone https://github.com/maxwellknight/schedula.git
+cd schedula
 ```
 
-This will start the server on `http://localhost:5713)`.
+2. **Start with Docker**
+```bash
+docker-compose up
+```
 
-### Example Requests
+3. **Or start services individually**
+```bash
+# Terminal 1 - Backend
+cd backend
+npm install
+npm run dev
 
-1. **User Registration**:
-   ```bash
-   POST /api/auth/register
-   ```
+# Terminal 2 - Frontend
+cd frontend
+npm install
+npm run dev
+```
 
-2. **User Login**:
-   ```bash
-   POST /api/auth/login
-   ```
+See individual README files in [backend](./backend/README.md) and [frontend](./frontend/README.md) directories for detailed setup instructions.
 
-3. **Get Schedule**:
-   ```bash
-   GET /api/schedule
-   ```
+## 📁 Project Structure
 
-## Example API Endpoints
+```
+.
+├── backend/                 # Node.js + TypeScript backend
+│   ├── src/
+│   │   ├── algorithms/     # Scheduling logic
+│   │   ├── controllers/    # Route handlers
+│   │   ├── models/        # Database models
+│   │   └── services/      # Business logic
+│   └── docs/              # API documentation
+├── frontend/               # React + TypeScript frontend
+│   └── src/
+│       ├── components/    # Reusable components
+│       ├── pages/         # Page components
+│       └── hooks/         # Custom hooks
+└── docker-compose.yml     # Docker configuration
+```
 
-| Method | Endpoint                 | Description                            |
-|--------|--------------------------|----------------------------------------|
-| POST   | `/api/auth/register`     | Register a new user                    |
-| POST   | `/api/auth/login`        | Log in an existing user                |
-| GET    | `/api/schedule`          | Get the schedule for employees         |
-| POST   | `/api/schedule/generate` | Generate a new schedule                |
-| PUT    | `/api/preferences`       | Update employee scheduling preferences |
+## 📋 Prerequisites
 
-## Technologies
+- Node.js 16+
+- MySQL 9.0.1+
+- Docker (optional)
 
-- **Node.js**: Backend server
-- **Express.js**: Web framework
-- **MySQL**: Relational database
-- **JWT**: Authentication
-- **BCrypt**: Password hashing
-- **Joi**: Validating api requests 
+## 📖 Documentation
 
-## Contributing
+- [Backend Documentation](./backend/README.md)
+  - API endpoints
+  - Database schema
+  - Authentication system
+  
+- [Frontend Documentation](./frontend/README.md)
+  - Component structure
+  - State management
+  - Routing system
 
-Contributions will be made available once the project releases v1.0.0
+## 🛠️ Development
 
-## License
+### Environment Setup
+1. Copy example environment files
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+2. Update environment variables as needed
+
+### Database Setup
+```bash
+cd backend
+# Run database setup
+psql -U your_db_user -d your_db_name -f dump/dump.sql
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please check the [Contributing Guide](CONTRIBUTING.md) for guidelines.
+
+## 📝 Roadmap
+
+- [ ] Add comprehensive test suite
+- [ ] Implement real-time notifications
+- [ ] Add schedule export options
+- [ ] Enhance scheduling algorithm
+- [ ] Add advanced reporting
+- [ ] Mobile app development
+
+## 📫 Contact
+
+For questions or feedback, please open an issue or contact the maintainer.
+
+## 📜 License
+
+This project is private and proprietary. All rights reserved.
