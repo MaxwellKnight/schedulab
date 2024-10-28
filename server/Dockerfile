@@ -1,34 +1,41 @@
-# Use full Node image instead of alpine
 FROM node:18.20.4
 
-# Set working directory
-WORKDIR /app
-
-# Install necessary build tools (in case they're needed)
+# Install debugging tools and build essentials
 RUN apt-get update && \
     apt-get install -y python3 make g++ && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy package files
-COPY package*.json ./
+# Create app directory and set permissions
+RUN mkdir -p /app && \
+    chown -R node:node /app
 
-# Show npm and node versions for debugging
+# Set working directory
+WORKDIR /app
+
+# Switch to node user
+USER node
+
+# Print versions for debugging
 RUN node -v && npm -v
 
-# Clean npm cache and install dependencies with additional flags
-RUN npm cache clean --force && \
+# Copy package files with correct ownership
+COPY --chown=node:node package*.json ./
+
+# Install specific npm version and clear cache
+RUN npm install -g npm@10.7.0 && \
+    npm cache clean --force && \
     npm cache verify && \
-    npm install -g npm@10.7.0 && \
-    npm install --verbose --legacy-peer-deps --no-optional
+    npm install --verbose --legacy-peer-deps --production=false
 
-# Copy the rest of the application
-COPY . .
+# Copy rest of the code with correct ownership
+COPY --chown=node:node . .
 
-# Expose the port
+# Expose port
 EXPOSE 5713
 
-# Set NODE_ENV
-ENV NODE_ENV=development
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:5713/ || exit 1
 
-# Start the application
+# Start development server
 CMD ["npm", "run", "dev", "--", "--host"]
