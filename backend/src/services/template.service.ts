@@ -22,7 +22,7 @@ export class TemplateService implements ITemplateService {
 		}));
 
 		const transformedConstraints: TemplateConstraintData[][] = constraints.map(pair =>
-			pair.map(constraint => ({
+			pair.filter(constraint => constraint !== null).map(constraint => ({
 				id: constraint.id,
 				template_schedule_id: constraint.template_schedule_id,
 				shift_type: constraint.shift_type,
@@ -31,6 +31,8 @@ export class TemplateService implements ITemplateService {
 				created_at: constraint.created_at
 			}))
 		);
+
+		console.log("here");
 
 		return {
 			id,

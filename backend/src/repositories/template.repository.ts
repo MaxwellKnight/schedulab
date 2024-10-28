@@ -142,11 +142,6 @@ export class TemplateScheduleRepository implements ITemplateScheduleRepository {
 			[templateScheduleId]
 		);
 
-		console.log('Shifts with time_ranges:', shifts.map(s => ({
-			id: s.id,
-			time_ranges: s.time_ranges
-		})));
-
 		return shifts.map(shift => ({
 			...shift,
 			ranges: shift.time_ranges

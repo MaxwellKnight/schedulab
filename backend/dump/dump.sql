@@ -1,7 +1,7 @@
 -- Drop database if it exists and create a new onesql
-DROP DATABASE IF EXISTS scheduler;
-CREATE DATABASE scheduler;
-USE scheduler;
+DROP DATABASE IF EXISTS schedula;
+CREATE DATABASE schedula;
+USE schedula;
 
 -- Table: teams
 CREATE TABLE teams (
@@ -291,3 +291,255 @@ CREATE TABLE template_constraints (
   FOREIGN KEY (shift_type_id) REFERENCES shift_types(id),
   FOREIGN KEY (next_shift_type_id) REFERENCES shift_types(id)
 );
+
+-- Insert into teams
+INSERT INTO teams (name) VALUES ("700");
+
+-- Insert multiple users with specified roles
+INSERT INTO users (id, team_id, user_role, first_name, middle_name, last_name, password, email, student, created_at) VALUES
+-- Admin
+(2, 1, 'admin', 'Sarah', NULL, 'Johnson', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'sarah.j@gmail.com', 0, '2024-10-21 10:00:00'),
+
+-- Chiefs
+(3, 1, 'chief', 'Michael', 'James', 'Smith', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'michael.s@gmail.com', 0, '2024-10-21 10:15:00'),
+(4, 1, 'chief', 'Emily', NULL, 'Davis', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'emily.d@gmail.com', 0, '2024-10-21 10:30:00'),
+
+-- Supervisors
+(5, 1, 'supervisor', 'David', NULL, 'Wilson', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'david.w@gmail.com', 0, '2024-10-21 11:00:00'),
+(6, 1, 'supervisor', 'Lisa', 'Marie', 'Brown', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'lisa.b@gmail.com', 0, '2024-10-21 11:30:00'),
+(7, 1, 'supervisor', 'James', NULL, 'Taylor', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'james.t@gmail.com', 0, '2024-10-21 12:00:00'),
+
+-- Managers
+(8, 1, 'manager', 'Jessica', 'Ann', 'Martinez', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'jessica.m@gmail.com', 0, '2024-10-21 12:30:00'),
+(9, 1, 'manager', 'Robert', NULL, 'Anderson', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'robert.a@gmail.com', 0, '2024-10-21 13:00:00'),
+(10, 1, 'manager', 'Michelle', NULL, 'Thomas', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'michelle.t@gmail.com', 0, '2024-10-21 13:30:00'),
+
+-- Regular Users
+(11, 1, 'user', 'William', 'John', 'Garcia', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'william.g@gmail.com', 1, '2024-10-21 14:00:00'),
+(12, 1, 'user', 'Jennifer', NULL, 'Miller', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'jennifer.m@gmail.com', 1, '2024-10-21 14:30:00'),
+(13, 1, 'user', 'Christopher', 'Lee', 'Wong', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'chris.w@gmail.com', 1, '2024-10-21 15:00:00'),
+(14, 1, 'user', 'Amanda', NULL, 'Lopez', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'amanda.l@gmail.com', 1, '2024-10-21 15:30:00'),
+(15, 1, 'user', 'Daniel', NULL, 'Lee', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'daniel.l@gmail.com', 1, '2024-10-21 16:00:00'),
+(16, 1, 'user', 'Rachel', 'Anne', 'Kim', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'rachel.k@gmail.com', 1, '2024-10-21 16:30:00'),
+(17, 1, 'user', 'Kevin', NULL, 'Chen', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'kevin.c@gmail.com', 1, '2024-10-21 17:00:00'),
+(18, 1, 'user', 'Maria', NULL, 'Rodriguez', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'maria.r@gmail.com', 1, '2024-10-21 17:30:00'),
+(19, 1, 'user', 'Thomas', 'William', 'Wilson', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'thomas.w@gmail.com', 1, '2024-10-21 18:00:00'),
+(20, 1, 'user', 'Sophie', NULL, 'Park', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'sophie.p@gmail.com', 1, '2024-10-21 18:30:00');
+
+
+-- Start transaction to ensure data consistency
+START TRANSACTION;
+
+-- Create additional shift types
+INSERT INTO shift_types (id, name, team_id) VALUES 
+(1, 'Regular Staff', 1),
+(2, 'Supervisor', 1),
+(3, 'Senior Specialist', 1),
+(4, 'On-Call Staff', 1),
+(5, 'Emergency Response', 1)
+ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+-- Create template schedule
+INSERT INTO template_schedules (team_id, name, start_date, end_date, notes) 
+VALUES (
+    1, 
+    'Hospital Complex Schedule', 
+    '2024-10-24', 
+    '2024-10-30', 
+    'Complex weekly schedule with varying staff requirements, multiple shift types, and specialized weekend coverage'
+);
+
+SET @template_schedule_id = LAST_INSERT_ID();
+
+-- Regular Staff - Weekday Morning Shifts (4 staff on Mon-Fri, 3 on weekends)
+INSERT INTO template_shifts (template_schedule_id, shift_type_id, shift_name, required_count, day_of_week)
+SELECT 
+    @template_schedule_id,
+    1,
+    'Regular Morning',
+    CASE 
+        WHEN day BETWEEN 1 AND 5 THEN 4  -- Mon-Fri
+        ELSE 3                           -- Sat-Sun
+    END,
+    day
+FROM (
+    SELECT 0 AS day UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6
+) days;
+
+-- Regular Staff - Peak Hours (additional staff during busy hours)
+INSERT INTO template_shifts (template_schedule_id, shift_type_id, shift_name, required_count, day_of_week)
+SELECT 
+    @template_schedule_id,
+    1,
+    'Peak Hours',
+    CASE 
+        WHEN day BETWEEN 1 AND 5 THEN 2  -- Mon-Fri
+        WHEN day = 6 THEN 3              -- Saturday
+        ELSE 2                           -- Sunday
+    END,
+    day
+FROM (
+    SELECT 0 AS day UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6
+) days;
+
+-- Senior Specialist Coverage (varying requirements)
+INSERT INTO template_shifts (template_schedule_id, shift_type_id, shift_name, required_count, day_of_week)
+SELECT 
+    @template_schedule_id,
+    3,
+    'Senior Specialist',
+    CASE 
+        WHEN day BETWEEN 1 AND 4 THEN 2  -- Mon-Thu
+        WHEN day = 5 THEN 3              -- Friday
+        ELSE 1                           -- Weekends
+    END,
+    day
+FROM (
+    SELECT 0 AS day UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6
+) days;
+
+-- Emergency Response Team (24/7 coverage)
+INSERT INTO template_shifts (template_schedule_id, shift_type_id, shift_name, required_count, day_of_week)
+SELECT 
+    @template_schedule_id,
+    5,
+    'Emergency Response',
+    CASE 
+        WHEN day IN (5, 6) THEN 2        -- Fri-Sat
+        ELSE 1                           -- Other days
+    END,
+    day
+FROM (
+    SELECT 0 AS day UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6
+) days;
+
+-- On-Call Staff (night coverage)
+INSERT INTO template_shifts (template_schedule_id, shift_type_id, shift_name, required_count, day_of_week)
+SELECT 
+    @template_schedule_id,
+    4,
+    'Night On-Call',
+    1,
+    day
+FROM (
+    SELECT 0 AS day UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6
+) days;
+
+-- Insert time ranges with more complex patterns
+-- Regular Morning
+INSERT INTO template_time_ranges (template_shift_id, start_time, end_time)
+SELECT 
+    id,
+    '07:00',
+    '15:30'
+FROM template_shifts 
+WHERE template_schedule_id = @template_schedule_id 
+AND shift_name = 'Regular Morning';
+
+-- Peak Hours (overlapping shifts)
+INSERT INTO template_time_ranges (template_shift_id, start_time, end_time)
+SELECT 
+    id,
+    '10:00',
+    '18:30'
+FROM template_shifts 
+WHERE template_schedule_id = @template_schedule_id 
+AND shift_name = 'Peak Hours';
+
+-- Senior Specialist (split shifts)
+INSERT INTO template_time_ranges (template_shift_id, start_time, end_time)
+SELECT 
+    id,
+    '08:00',
+    '12:00'
+FROM template_shifts 
+WHERE template_schedule_id = @template_schedule_id 
+AND shift_name = 'Senior Specialist';
+
+INSERT INTO template_time_ranges (template_shift_id, start_time, end_time)
+SELECT 
+    id,
+    '13:00',
+    '17:00'
+FROM template_shifts 
+WHERE template_schedule_id = @template_schedule_id 
+AND shift_name = 'Senior Specialist';
+
+-- Emergency Response (24-hour coverage in 12-hour shifts)
+INSERT INTO template_time_ranges (template_shift_id, start_time, end_time)
+SELECT 
+    id,
+    '07:00',
+    '19:00'
+FROM template_shifts 
+WHERE template_schedule_id = @template_schedule_id 
+AND shift_name = 'Emergency Response';
+
+-- Night On-Call
+INSERT INTO template_time_ranges (template_shift_id, start_time, end_time)
+SELECT 
+    id,
+    '23:00',
+    '07:00'
+FROM template_shifts 
+WHERE template_schedule_id = @template_schedule_id 
+AND shift_name = 'Night On-Call';
+
+-- Add complex constraints
+-- Cannot work night shift followed by any morning shift
+INSERT INTO template_constraints (template_schedule_id, shift_type_id, next_shift_type_id)
+SELECT DISTINCT
+    @template_schedule_id,
+    ts1.shift_type_id,
+    ts2.shift_type_id
+FROM template_shifts ts1
+CROSS JOIN template_shifts ts2
+WHERE ts1.template_schedule_id = @template_schedule_id 
+AND ts2.template_schedule_id = @template_schedule_id
+AND ts1.shift_name IN ('Night On-Call', 'Emergency Response')
+AND ts2.shift_name IN ('Regular Morning', 'Senior Specialist');
+
+-- Maximum one Emergency Response shift per 48 hours
+INSERT INTO template_constraints (template_schedule_id, shift_type_id, next_shift_type_id)
+SELECT DISTINCT
+    @template_schedule_id,
+    shift_type_id,
+    shift_type_id
+FROM template_shifts
+WHERE template_schedule_id = @template_schedule_id 
+AND shift_name = 'Emergency Response';
+
+-- Verify the data
+SELECT 'Complex Template Schedule Created:' as message;
+SELECT * FROM template_schedules WHERE id = @template_schedule_id;
+
+SELECT 'Complex Shifts Created:' as message;
+SELECT 
+    ts.*, 
+    st.name as shift_type_name,
+    CASE 
+        WHEN day_of_week = 0 THEN 'Sunday'
+        WHEN day_of_week = 1 THEN 'Monday'
+        WHEN day_of_week = 2 THEN 'Tuesday'
+        WHEN day_of_week = 3 THEN 'Wednesday'
+        WHEN day_of_week = 4 THEN 'Thursday'
+        WHEN day_of_week = 5 THEN 'Friday'
+        WHEN day_of_week = 6 THEN 'Saturday'
+    END as day_name
+FROM template_shifts ts
+JOIN shift_types st ON ts.shift_type_id = st.id
+WHERE template_schedule_id = @template_schedule_id
+ORDER BY day_of_week, shift_name;
+
+SELECT 'Time Ranges Created:' as message;
+SELECT 
+    tr.*, 
+    ts.shift_name,
+    st.name as shift_type_name
+FROM template_time_ranges tr
+JOIN template_shifts ts ON tr.template_shift_id = ts.id
+JOIN shift_types st ON ts.shift_type_id = st.id
+WHERE ts.template_schedule_id = @template_schedule_id
+ORDER BY ts.day_of_week, ts.shift_name, tr.start_time;
+
+COMMIT;
