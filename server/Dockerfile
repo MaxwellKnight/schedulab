@@ -1,24 +1,26 @@
-# Use a specific Node version instead of just node:18
-FROM node:18.20.4-alpine
+FROM node:18.20.4
+
+# Add node user for better security and permissions
+RUN mkdir -p /app && chown -R node:node /app
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Switch to node user
+USER node
 
-# Clean npm cache and install dependencies with additional flags for troubleshooting
+# Copy package files with correct ownership
+COPY --chown=node:node package*.json ./
+
+# Clean install with troubleshooting flags
 RUN npm cache clean --force && \
-    npm install --verbose --legacy-peer-deps --no-optional
+    npm install --verbose --legacy-peer-deps
 
-# Copy the rest of the application
-COPY . .
+# Copy rest of the code with correct ownership
+COPY --chown=node:node . .
 
-# Expose the port
+# Expose port
 EXPOSE 5713
 
-# Set NODE_ENV
-ENV NODE_ENV=development
-
-# Start the application
+# Start development server
 CMD ["npm", "run", "dev", "--", "--host"]
