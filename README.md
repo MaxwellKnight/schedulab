@@ -9,11 +9,13 @@ Intelligent shift scheduling system that combines automated scheduling with pref
 
 ## 🖼️ Interface Preview
 
-<p float="left">
-  <img src="imgs/login-page.png" width="300" />
-  <img src="imgs/schedule-page.png" width="300" /> 
-  <img src="imgs/confirmation-step.png" width="300" />
-</p>
+<div align="center">
+  <p style="display: inline-block;">
+    <img src="imgs/login-page.png" width="300" hspace="10"/>
+    <img src="imgs/confirmation-step.png" width="300" hspace="10"/>
+    <img src="imgs/schedule-page.png" width="300" hspace="10"/>
+  </p>
+</div>
 
 ## ✨ Key Features
 
