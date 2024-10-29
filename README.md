@@ -19,6 +19,10 @@ Intelligent shift scheduling system that combines automated scheduling with pref
       <img src="imgs/confirmation-step.png" alt="Confirmation Step" width="400"/>
       <p><em>Confirmation Process</em></p>
     </div>
+    <div>
+      <img src="imgs/login-page.png" alt="Confirmation Step" width="400"/>
+      <p><em>Confirmation Process</em></p>
+    </div>
   </div>
 </div>
 
