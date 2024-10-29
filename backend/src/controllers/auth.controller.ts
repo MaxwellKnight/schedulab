@@ -1,15 +1,16 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
-import { IAuthController, IRequest, IResponse, IUserService } from "../interfaces";
+import { IRequest, IResponse } from "../interfaces";
+import { UserService } from '../services';
 
 dotenv.config();
 
-export class AuthController implements IAuthController {
-	private readonly service: IUserService;
+export class AuthController {
+	private readonly service: UserService;
 	private readonly salt: number;
 
-	constructor(service: IUserService) {
+	constructor(service: UserService) {
 		this.service = service;
 		this.salt = 12;
 	}

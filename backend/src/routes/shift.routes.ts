@@ -80,11 +80,4 @@ router.route("/date/:date")
 		adaptMiddleware(controller.getByDate)
 	);
 
-router.route("/dates/:start_date/:end_date")
-	.get(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(controller.getByDates)
-	);
-
 export default router

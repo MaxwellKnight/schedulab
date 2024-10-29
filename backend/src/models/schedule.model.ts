@@ -3,7 +3,7 @@ export interface Schedule {
 	team_id: number;
 	start_date: Date;
 	end_date: Date;
-	shifts?: string;
+	shifts?: number[];
 	rating?: number;
 	likes: number;
 	notes: string | null;

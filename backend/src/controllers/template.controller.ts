@@ -1,12 +1,11 @@
 import { TemplateScheduleData } from "../interfaces/dto";
-import { ITemplateService } from "../interfaces/services.interface";
-import { ITemplateController } from "../interfaces/controllers.interface";
 import { IRequest, IResponse } from "../interfaces/http.interface";
+import { TemplateService } from "../services";
 
-export class TemplateController implements ITemplateController {
-	private service: ITemplateService;
+export class TemplateController {
+	private service: TemplateService;
 
-	constructor(service: ITemplateService) {
+	constructor(service: TemplateService) {
 		this.service = service;
 	}
 

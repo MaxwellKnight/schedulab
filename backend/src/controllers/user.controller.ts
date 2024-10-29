@@ -1,12 +1,11 @@
 import { UserData } from "../interfaces/dto";
-import { IUserService } from "../interfaces/services.interface";
-import { IUserController } from "../interfaces/controllers.interface";
 import { IResponse, IRequest } from "../interfaces/http.interface";
+import { UserService } from "../services";
 
-export class UserController implements IUserController {
+export class UserController {
 
-	private service: IUserService;
-	constructor(service: IUserService) {
+	private service: UserService;
+	constructor(service: UserService) {
 		this.service = service;
 	}
 
@@ -33,11 +32,10 @@ export class UserController implements IUserController {
 		}
 	}
 
-	public getMany = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getMany = async (_: IRequest, res: IResponse): Promise<void> => {
 		const users = await this.service.getMany();
 		if (users.length > 0) {
-			const result = users.map(({ password, ...user }) => user);
-			res.json(result);
+			res.json(users);
 		} else {
 			res.status(404);
 			res.json({ error: "No users exist" });
@@ -48,8 +46,7 @@ export class UserController implements IUserController {
 		const id = req.params.id;
 		const users = await this.service.getByShiftId(Number(id));
 		if (users.length > 0) {
-			const result = users.map(({ password, ...user }) => user);
-			res.json(result);
+			res.json(users);
 		} else {
 			res.status(404);
 			res.json({ error: "User not found" });
@@ -60,8 +57,7 @@ export class UserController implements IUserController {
 		const team_id = req.params.team_id;
 		const users = await this.service.getByTeamId(Number(team_id));
 		if (users.length > 0) {
-			const result = users.map(({ password, ...user }) => user);
-			res.json(result);
+			res.json(users);
 		} else {
 			res.status(404);
 			res.json({ error: "User not found" });

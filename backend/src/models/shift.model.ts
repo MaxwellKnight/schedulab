@@ -1,6 +1,6 @@
 export interface TimeRange {
 	id?: number;
-	shift_id?: number;
+	shift_id: number;
 	start_time: Date;
 	end_time: Date;
 }
@@ -14,7 +14,7 @@ export interface Shift {
 	actual_count: number;
 	shift_name: string;
 	timeRanges: TimeRange[];
-	users?: string;
+	users?: number[];
 	likes: number;
 	date: Date;
 	created_at: Date;

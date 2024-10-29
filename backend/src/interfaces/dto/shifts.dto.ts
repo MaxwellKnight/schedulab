@@ -22,8 +22,10 @@ export interface ShiftType {
 	created_at: Date;
 }
 
-export interface TimeRange {
-	id?: number;  // Optional as it might not be set when creating a new time range
+interface TimeRange {
+	id?: number;
+	shift_id: number;
 	start_time: Date;
 	end_time: Date;
 }
+

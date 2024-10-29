@@ -1,11 +1,9 @@
-import { createPool, OkPacketParams, Pool, QueryError, QueryResult, RowDataPacket } from "mysql2";
+import { createPool, Pool, RowDataPacket, ResultSetHeader } from "mysql2";
 import * as dotenv from 'dotenv';
-import { IDatabase } from "../interfaces/db.interface";
-
 dotenv.config();
 
-class DB implements IDatabase {
-	private static _instance: DB;
+export class Database {
+	private static _instance: Database;
 	private _connection: Pool;
 
 	private constructor() {
@@ -24,26 +22,29 @@ class DB implements IDatabase {
 		return this._connection;
 	}
 
-	static get instance(): DB {
-		if(!DB._instance) {
-			DB._instance = new DB();
+	static get instance(): Database {
+		if (!Database._instance) {
+			Database._instance = new Database();
 		}
-		return DB._instance;
+		return Database._instance;
 	}
 
-	public execute<T = RowDataPacket | OkPacketParams>(sql: string, params: unknown[] = []): Promise<T> {
+	public execute<T extends RowDataPacket[] | ResultSetHeader>(
+		sql: string,
+		params: unknown[] = []
+	): Promise<[T]> {
 		return new Promise((resolve, reject) => {
-			this._connection.query<(T extends QueryResult ? T : never)>(sql, params, (error, results: T) => {
+			this._connection.query<T>(sql, params, (error, results: T, _) => {
 				if (error) {
 					reject(error);
 				} else {
-					resolve(results);
+					resolve([results]);
 				}
 			});
 		});
 	}
 }
 
-export const makeSQL = (): IDatabase => {
-	return DB.instance;
+export const makeSQL = (): Database => {
+	return Database.instance;
 }

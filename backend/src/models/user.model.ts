@@ -9,8 +9,8 @@ export interface User {
 	email: string;
 	student: boolean;
 	created_at: Date;
-	recent_shifts?: string;
-	recent_vacations?: string;
+	recent_shifts?: number[];
+	recent_vacations?: number[];
 	team_name?: string;
 }
 

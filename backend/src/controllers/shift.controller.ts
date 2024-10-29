@@ -1,13 +1,12 @@
 import { ShiftData } from "../interfaces/dto";
-import { IShiftService } from "../interfaces/services.interface";
-import { IShiftController } from "../interfaces/controllers.interface";
 import { IRequest, IResponse } from "../interfaces/http.interface";
+import { ShiftService } from "../services";
 
 
-export class ShiftController implements IShiftController {
+export class ShiftController {
 
-	private service: IShiftService;
-	constructor(service: IShiftService) {
+	private service: ShiftService;
+	constructor(service: ShiftService) {
 		this.service = service;
 	}
 
@@ -40,17 +39,6 @@ export class ShiftController implements IShiftController {
 		} else {
 			res.status(404);
 			res.json({ error: "No shifts exist" });
-		}
-	}
-
-	public getByDates = async (req: IRequest, res: IResponse): Promise<void> => {
-		const { start_date, end_date } = req.params;
-		const shifts = await this.service.getByDates(new Date(start_date), new Date(end_date));
-		if (shifts.length > 0) {
-			res.json(shifts);
-		} else {
-			res.status(404);
-			res.json({ error: "Shift not found" });
 		}
 	}
 
@@ -124,7 +112,7 @@ export class ShiftController implements IShiftController {
 			return;
 		}
 
-		const result = await this.service.update({ ...shift, ...rest });
+		const result = await this.service.update({ id, ...shift, ...rest });
 		if (result === 0) {
 			res.status(404);
 			res.json({ error: "Could not update user" });
