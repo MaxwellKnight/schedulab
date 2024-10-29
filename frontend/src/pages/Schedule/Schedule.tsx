@@ -11,7 +11,7 @@ import { ShiftType } from '@/types/shifts.dto';
 import { useAuth } from '@/hooks/useAuth/useAuth';
 import MembersList, { DraggableMemberOverlay } from './MembersList';
 import { UserData } from '@/types';
-import { DndContext, DragEndEvent, DragOverlay } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 
 interface MemberAssignment {
@@ -129,49 +129,97 @@ const Schedule: React.FC = () => {
 	} = useAuthenticatedFetch<UserData[]>(`/users/team/${user?.team_id}`, { params: { user_role: user?.user_role } });
 
 
+	const handleDragStart = (event: DragStartEvent) => {
+		const { active } = event;
+		if (active.data.current?.type === 'new-member') {
+			const memberData = active.data.current.member;
+			setDraggedMember({
+				member: memberData,
+				isCurrentUser: memberData.id === user?.id
+			});
+		} else if (active.data.current?.type === 'member') {
+			const memberData = active.data.current.member;
+			setDraggedMember({
+				member: memberData,
+				isCurrentUser: memberData.id === user?.id
+			});
+		}
+	};
+
 	const handleDragEnd = (event: DragEndEvent) => {
 		const { active, over } = event;
+		setDraggedMember(null);
 
-		if (!over) return;
+		if (!over) {
+			// Handle dropping outside any droppable area
+			if (active.data.current?.type === 'member') {
+				const dragData = active.data.current;
+				const newAssignments = assignments.filter(a =>
+					!(a.memberId === dragData.memberId &&
+						a.shiftTypeId === dragData.shiftTypeId &&
+						a.date === dragData.date &&
+						a.timeSlot === dragData.timeSlot &&
+						a.position === dragData.position)
+				);
+				setAssignments(newAssignments);
+				setIsDirty(true);
+			}
+			return;
+		}
 
-		const memberData = active.data.current?.member;
-		const slotData = over.data.current;
+		const dropData = over.data.current;
+		if (!dropData?.type || dropData.type !== 'slot') return;
 
-		if (memberData && slotData?.type === 'slot') {
-			// Check for existing assignment in this specific position
-			const existingAssignment = assignments.find(
-				a => a.shiftTypeId === slotData.shiftTypeId &&
-					a.date === slotData.date.toISOString() &&
-					a.timeSlot === slotData.timeSlot &&
-					a.position === slotData.position
+		// Check if the slot is already occupied
+		const isSlotOccupied = assignments.some(a =>
+			a.shiftTypeId === dropData.shiftTypeId &&
+			a.date === dropData.date.toISOString() &&
+			a.timeSlot === dropData.timeSlot &&
+			a.position === dropData.position
+		);
+
+		if (isSlotOccupied) return;
+
+		if (active.data.current?.type === 'new-member') {
+			// Dragging from MembersList
+			const memberData = active.data.current.member;
+			const newAssignment: MemberAssignment = {
+				memberId: memberData.id.toString(),
+				shiftTypeId: dropData.shiftTypeId,
+				date: dropData.date.toISOString(),
+				timeSlot: dropData.timeSlot,
+				position: dropData.position
+			};
+			setAssignments(prev => [...prev, newAssignment]);
+			setIsDirty(true);
+		} else if (active.data.current?.type === 'member') {
+			// Dragging from one slot to another
+			const dragData = active.data.current;
+			const newAssignments = assignments.filter(a =>
+				!(a.memberId === dragData.memberId &&
+					a.shiftTypeId === dragData.shiftTypeId &&
+					a.date === dragData.date &&
+					a.timeSlot === dragData.timeSlot &&
+					a.position === dragData.position)
 			);
 
-			// If position is already filled, don't allow the assignment
-			if (existingAssignment) return;
+			newAssignments.push({
+				memberId: dragData.memberId,
+				shiftTypeId: dropData.shiftTypeId,
+				date: dropData.date.toISOString(),
+				timeSlot: dropData.timeSlot,
+				position: dropData.position
+			});
 
-			const newAssignment: MemberAssignment = {
-				memberId: memberData.id,
-				shiftTypeId: slotData.shiftTypeId,
-				date: slotData.date.toISOString(),
-				timeSlot: slotData.timeSlot,
-				position: slotData.position
-			};
-
-			setAssignments(prev => [...prev, newAssignment]);
+			setAssignments(newAssignments);
 			setIsDirty(true);
 		}
 	};
 
-	const handleRemoveAssignment = (assignment: Partial<MemberAssignment>) => {
-		setAssignments(prev => prev.filter(a =>
-			!(a.shiftTypeId === assignment.shiftTypeId &&
-				a.date === assignment.date &&
-				a.timeSlot === assignment.timeSlot &&
-				a.position === assignment.position)
-		));
+	const handleAssignmentChange = (newAssignments: MemberAssignment[]) => {
+		setAssignments(newAssignments);
 		setIsDirty(true);
 	};
-
 
 	const handleTemplateSelect = (selected: TemplateScheduleData | null) => {
 		setTemplate(selected);
@@ -203,20 +251,8 @@ const Schedule: React.FC = () => {
 
 	return (
 		<DndContext
-			onDragStart={(event) => {
-				const { active } = event;
-				const memberData = active.data.current?.member;
-				if (memberData) {
-					setDraggedMember({
-						member: memberData,
-						isCurrentUser: memberData.id === user?.id
-					});
-				}
-			}}
-			onDragEnd={(event) => {
-				handleDragEnd(event);
-				setDraggedMember(null);
-			}}
+			onDragStart={handleDragStart}
+			onDragEnd={handleDragEnd}
 			onDragCancel={() => setDraggedMember(null)}
 			modifiers={[restrictToWindowEdges]}
 		>
@@ -279,7 +315,7 @@ const Schedule: React.FC = () => {
 									shiftTypes={shiftTypes}
 									members={members}
 									assignments={assignments}
-									onRemoveAssignment={handleRemoveAssignment}
+									onAssignmentChange={handleAssignmentChange}
 								/>
 							</CardContent>
 						</Card>

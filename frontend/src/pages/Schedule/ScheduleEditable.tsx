@@ -1,13 +1,13 @@
 import React, { useMemo, useState } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, Minimize2, Calendar, X } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent, } from "@/components/ui/card";
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, Minimize2, Calendar, Users } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { TemplateScheduleData, TemplateShiftData } from '@/types/template.dto';
 import { ShiftType } from '@/types/shifts.dto';
 import { UserData } from '@/types';
-import { useDroppable } from '@dnd-kit/core';
+import { useDroppable, useDraggable, DragOverlay, DragStartEvent, DragEndEvent, DndContext } from '@dnd-kit/core';
 
 interface MemberAssignment {
 	memberId: string;
@@ -17,12 +17,55 @@ interface MemberAssignment {
 	position: number;
 }
 
-interface ScheduleEditableProps {
-	template: TemplateScheduleData | null;
-	shiftTypes: ShiftType[] | null;
-	members: UserData[] | null;
-}
+const getShiftAbbreviation = (name: string): string => {
+	const words = name.split(' ');
+	if (words.length === 1) {
+		return name.slice(0, 3);
+	}
+	return words.map(word => word[0]).join('');
+};
 
+const DraggableMember: React.FC<{
+	memberId: string;
+	shiftTypeId: number;
+	date: string;
+	timeSlot: string;
+	position: number;
+	member: UserData;
+	className?: string;
+}> = ({ memberId, shiftTypeId, date, timeSlot, position, member, className }) => {
+	const { attributes, listeners, setNodeRef, transform } = useDraggable({
+		id: `member-${memberId}-${shiftTypeId}-${date}-${timeSlot}-${position}`,
+		data: {
+			type: 'member',
+			memberId,
+			shiftTypeId,
+			date,
+			timeSlot,
+			position,
+			member
+		}
+	});
+
+	const style = transform ? {
+		transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+		zIndex: 50
+	} : undefined;
+
+	return (
+		<div
+			ref={setNodeRef}
+			{...listeners}
+			{...attributes}
+			className={`${className} cursor-move`}
+			style={style}
+		>
+			<span className="truncate">
+				{member.first_name} {member.last_name}
+			</span>
+		</div>
+	);
+};
 const DroppableShiftSlot: React.FC<{
 	shiftTypeId: number;
 	date: Date;
@@ -32,7 +75,6 @@ const DroppableShiftSlot: React.FC<{
 	assignedMember: UserData | null;
 	className?: string;
 	style?: React.CSSProperties;
-	onRemoveMember?: () => void;
 }> = ({
 	shiftTypeId,
 	date,
@@ -41,9 +83,8 @@ const DroppableShiftSlot: React.FC<{
 	assignedMember,
 	className,
 	style,
-	onRemoveMember
 }) => {
-		const { setNodeRef, isOver } = useDroppable({
+		const { setNodeRef, isOver, active } = useDroppable({
 			id: `slot-${shiftTypeId}-${date.toISOString()}-${timeSlot}-${position}`,
 			data: {
 				type: 'slot',
@@ -54,75 +95,65 @@ const DroppableShiftSlot: React.FC<{
 			}
 		});
 
+		const isValidDrop = active?.data?.current?.type === 'new-member' || active?.data?.current?.type === 'member';
+
 		return (
 			<div
 				ref={setNodeRef}
-				className={`${className} ${isOver ? 'ring-2 ring-blue-400' : ''}`}
+				className={`
+        ${className}
+        ${isOver && isValidDrop ? 'ring-2 ring-blue-400 opacity-100 !bg-opacity-75' : ''}
+        ${!assignedMember ? 'min-h-[24px]' : ''}
+      `}
 				style={style}
 			>
 				{assignedMember ? (
-					<div className="flex items-center justify-between px-2">
-						<span className="truncate">
-							{assignedMember.first_name} {assignedMember.last_name}
-						</span>
-						{onRemoveMember && (
-							<button
-								onClick={onRemoveMember}
-								className="ml-1 p-0.5 hover:bg-gray-200 rounded"
-							>
-								<X className="h-3 w-3 text-red-400" />
-							</button>
-						)}
-					</div>
+					<DraggableMember
+						memberId={assignedMember.id.toString()}
+						shiftTypeId={shiftTypeId}
+						date={date.toISOString()}
+						timeSlot={timeSlot}
+						position={position}
+						member={assignedMember}
+						className="flex items-center px-2"
+					/>
 				) : (
-					<span className="text-gray-500">- - -</span>
+					isOver && isValidDrop && <span className="text-gray-500">Drop here</span>
 				)}
 			</div>
 		);
 	};
+
+const ShiftOccupancyBadge: React.FC<{
+	filled: number;
+	total: number;
+}> = ({ filled, total }) => (
+	<div className="flex items-center text-xs bg-gray-100 rounded-full px-2 py-0.5 ml-2">
+		<Users className="w-3 h-3 mr-1" />
+		<span className={filled === total ? 'text-green-600' : 'text-amber-600'}>
+			{filled}/{total}
+		</span>
+	</div>
+);
 
 interface ScheduleEditableProps {
 	template: TemplateScheduleData | null;
 	shiftTypes: ShiftType[] | null;
 	members: UserData[] | null;
 	assignments: MemberAssignment[];
-	onRemoveAssignment: (assignment: Partial<MemberAssignment>) => void;
+	onAssignmentChange: (newAssignments: MemberAssignment[]) => void;
 }
-
 
 const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 	template,
 	shiftTypes,
 	members,
 	assignments,
-	onRemoveAssignment
 }) => {
-	const [zoomLevel, setZoomLevel] = useState(1);
+	const [zoomLevel, setZoomLevel] = useState(1.75);
 	const [visibleHoursStart, setVisibleHoursStart] = useState(0);
 	const [visibleHoursEnd, setVisibleHoursEnd] = useState(24);
 	const [isFullScreen, setIsFullScreen] = useState(false);
-
-	const getMemberForPosition = (
-		shiftTypeId: number,
-		date: Date,
-		timeSlot: string,
-		position: number
-	): UserData | null => {
-		const assignment = assignments.find(
-			a => a.shiftTypeId === shiftTypeId &&
-				a.date === date.toISOString() &&
-				a.timeSlot === timeSlot &&
-				a.position === position
-		);
-
-		if (!assignment || !members) return null;
-
-		return members.find(m => m.id === Number(assignment.memberId)) || null;
-	};
-
-	const handleRemoveMember = (assignment: Partial<MemberAssignment>) => {
-		onRemoveAssignment(assignment);
-	};
 
 	const renderShiftGroup = (shifts: TemplateShiftData[], date: Date, timeSlot: string) => {
 		return shifts.map(shift => {
@@ -133,30 +164,44 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 			const spacing = 6;
 			const scaledBaseHeight = baseHeight * zoomLevel;
 			const scaledSpacing = spacing * zoomLevel;
+
+			// Show all available positions up to required_count
+			const positions = Array.from({ length: shift.required_count });
+			const assignedSlots = assignments
+				.filter(a =>
+					a.shiftTypeId === shift.shift_type_id &&
+					a.date === date.toISOString() &&
+					a.timeSlot === timeSlot
+				)
+				.map(a => ({
+					position: a.position,
+					member: members?.find(m => m.id.toString() === a.memberId)
+				}))
+				.filter((slot): slot is { position: number; member: UserData } => slot.member != null);
+
+			// Calculate total height for all required positions
 			const totalHeight = (scaledBaseHeight * shift.required_count) +
 				(scaledSpacing * (shift.required_count - 1));
 
 			return (
 				<div
 					key={shift.id}
-					className="p-1 first:pt-2 last:pb-2 relative"
+					className="p-1 first:pt-2 last:pb-2 relative group"
 					style={{
 						height: `${totalHeight + 32}px`,
 						minHeight: `${totalHeight + 32}px`
 					}}
 				>
-					<div className="text-xs font-medium text-gray-500 mb-1 px-1">
-						{shift.required_count > 1 ? `${shift.required_count}x ${shiftType.name}` : shiftType.name}
+					<div className="flex items-center text-xs font-medium text-gray-500 mb-1 px-1">
+						<span className="font-mono">{getShiftAbbreviation(shiftType.name)}</span>
+						<ShiftOccupancyBadge
+							filled={assignedSlots.length}
+							total={shift.required_count}
+						/>
 					</div>
 					<div className="relative">
-						{Array.from({ length: shift.required_count }).map((_, i) => {
-							const assignedMember = getMemberForPosition(
-								shift.shift_type_id,
-								date,
-								timeSlot,
-								i
-							);
-
+						{positions.map((_, i) => {
+							const assignment = assignedSlots.find(s => s.position === i);
 							return (
 								<DroppableShiftSlot
 									key={`${shiftType.id}-${i}`}
@@ -165,22 +210,19 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 									timeSlot={timeSlot}
 									position={i}
 									shiftName={shiftType.name}
-									assignedMember={assignedMember}
-									className={`absolute rounded border ${shiftColors[shiftType.id]} 
-                    bg-opacity-50 transition-all hover:bg-opacity-75
-                    flex items-center justify-center text-xs shadow-sm hover:shadow-md`}
+									assignedMember={assignment?.member || null}
+									className={`
+                  absolute rounded border ${shiftColors[shiftType.id]} 
+                  bg-opacity-50 transition-all duration-200
+                  ${assignment ? 'opacity-100' : 'opacity-50'}
+                  flex items-center justify-center text-xs shadow-sm hover:shadow-md
+                `}
 									style={{
 										height: `${scaledBaseHeight}px`,
 										top: `${i * (scaledBaseHeight + scaledSpacing)}px`,
 										left: 0,
 										right: 0
 									}}
-									onRemoveMember={() => handleRemoveMember({
-										shiftTypeId: shift.shift_type_id,
-										date: date.toISOString(),
-										timeSlot,
-										position: i
-									})}
 								/>
 							);
 						})}
@@ -288,9 +330,11 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 							<div
 								key={type.id}
 								className={`px-3 py-1.5 rounded-full text-xs font-medium ${shiftColors[type.id]} 
-									shadow-sm transition-all hover:shadow-md cursor-pointer`}
+                  shadow-sm transition-all hover:shadow-md cursor-pointer flex items-center space-x-1`}
 							>
-								{type.name}
+								<span className="font-mono">{getShiftAbbreviation(type.name)}</span>
+								<span className="text-xs text-gray-500">|</span>
+								<span className="text-xs">{type.name}</span>
 							</div>
 						))}
 					</div>
@@ -340,11 +384,11 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 						<Table className='rounded'>
 							<TableHeader className="sticky top-0 bg-white z-10">
 								<TableRow>
-									<TableHead className="w-16 px-2 ">Time</TableHead>
+									<TableHead className="w-16 px-2">Time</TableHead>
 									{dates.map(date => (
 										<TableHead
 											key={date.toISOString()}
-											className="text-center p-1 "
+											className="text-center p-1"
 											style={{ minWidth: `${80 * zoomLevel}px` }}
 										>
 											<div className="flex flex-col">
@@ -365,7 +409,7 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 									})
 									.map(timeSlot => (
 										<TableRow key={timeSlot} className="hover:bg-gray-50">
-											<TableCell className="font-mono text-xs px-2 whitespace-nowrap ">
+											<TableCell className="font-mono text-xs px-2 whitespace-nowrap">
 												{timeSlot}
 											</TableCell>
 											{dates.map(date => (

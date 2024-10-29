@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useDraggable } from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
+import { cn } from '@/lib/utils';
 
 interface MembersListProps {
 	members: UserData[] | null;
@@ -26,6 +26,7 @@ const MemberCard: React.FC<{
 	<div
 		className={`
       group flex items-center gap-3 p-3 rounded-lg w-full
+      transition-all duration-200 ease-in-out
       ${isCurrentUser ? 'bg-blue-50/80 hover:bg-blue-100/90 border border-blue-200' :
 				'hover:bg-gray-50 border border-transparent hover:border-gray-200'}
       ${className}
@@ -58,7 +59,10 @@ const MemberCard: React.FC<{
 						</span>
 					)}
 				</p>
-				<Badge variant={isCurrentUser ? "secondary" : "outline"} className="whitespace-nowrap">
+				<Badge
+					variant={isCurrentUser ? "secondary" : "outline"}
+					className="whitespace-nowrap"
+				>
 					{member.user_role}
 				</Badge>
 			</div>
@@ -73,34 +77,32 @@ const MemberCard: React.FC<{
 );
 
 const DraggableMemberCard: React.FC<DraggableMemberCardProps> = ({ member, isCurrentUser }) => {
-	const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
 		id: `member-${member.id}`,
 		data: {
-			type: 'member',
+			type: 'new-member',
 			member
 		}
 	});
 
-	const style = {
-		transform: CSS.Translate.toString(transform),
-		opacity: isDragging ? 0.3 : undefined,
-		width: '100%',
-		maxWidth: '100%'
-	} as React.CSSProperties;
-
 	return (
 		<div
 			ref={setNodeRef}
-			style={style}
 			{...listeners}
 			{...attributes}
-			className="touch-none w-full"
+			className="w-full relative touch-none"
+			style={{ height: '72px' }}
 		>
-			<MemberCard
-				member={member}
-				isCurrentUser={isCurrentUser}
-				className={isDragging ? 'cursor-grabbing' : 'cursor-grab'}
-			/>
+			<div className={cn(
+				"absolute inset-0 transition-opacity duration-200",
+				isDragging ? "opacity-50" : "opacity-100"
+			)}>
+				<MemberCard
+					member={member}
+					isCurrentUser={isCurrentUser}
+					className={`cursor-grab ${isDragging ? 'pointer-events-none' : ''}`}
+				/>
+			</div>
 		</div>
 	);
 };
@@ -120,11 +122,18 @@ export const DraggableMemberOverlay: React.FC<{
 	member: UserData;
 	isCurrentUser: boolean;
 }> = ({ member, isCurrentUser }) => (
-	<div className="w-[200px] shadow-lg opacity-70">
+	<div
+		className="
+      w-[250px] shadow-xl cursor-grabbing
+      animate-in zoom-in-95 duration-200
+      rounded-lg overflow-hidden
+      bg-white ring-2 ring-primary/10
+    "
+	>
 		<MemberCard
 			member={member}
 			isCurrentUser={isCurrentUser}
-			className="cursor-grabbing bg-white"
+			className="bg-white/95 backdrop-blur-sm cursor-grabbing"
 		/>
 	</div>
 );
@@ -149,27 +158,25 @@ const MembersList: React.FC<MembersListProps> = ({ members }) => {
 							placeholder="Search members..."
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
-							className="pl-9 bg-gray-50 border-gray-200 focus:bg-white"
+							className="pl-9 bg-gray-50 border-gray-200 focus:bg-white transition-colors duration-200"
 						/>
 					</div>
 				</div>
-				<div className="overflow-x-hidden w-full">
-					<ScrollArea className="h-[calc(100vh-25rem)] overflow-x-hidden">
-						{!filteredMembers || filteredMembers.length === 0 ? (
-							<EmptyState searchActive={searchQuery.length > 0} />
-						) : (
-							<div className="space-y-2 pr-4 overflow-x-hidden w-full">
-								{filteredMembers.map((member) => (
-									<DraggableMemberCard
-										key={member.id}
-										member={member}
-										isCurrentUser={member.id === user?.id}
-									/>
-								))}
-							</div>
-						)}
-					</ScrollArea>
-				</div>
+				<ScrollArea className="h-[calc(100vh-25rem)]">
+					{!filteredMembers || filteredMembers.length === 0 ? (
+						<EmptyState searchActive={searchQuery.length > 0} />
+					) : (
+						<div className="space-y-2 pr-4">
+							{filteredMembers.map((member) => (
+								<DraggableMemberCard
+									key={member.id}
+									member={member}
+									isCurrentUser={member.id === user?.id}
+								/>
+							))}
+						</div>
+					)}
+				</ScrollArea>
 			</CardContent>
 		</Card>
 	);
