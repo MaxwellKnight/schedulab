@@ -4,14 +4,20 @@ Intelligent shift scheduling system that combines automated scheduling with pref
 
 *Schedule Smarter, Work Better*
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Node](https://img.shields.io/badge/node-v16+-green.svg)
 ![TypeScript](https://img.shields.io/badge/typescript-v4.9+-blue.svg)
+
+## 🖼️ Interface Preview
+
+### Schedule Management
+![Schedule Page](imgs/schedule-page.png)
+
+### Confirmation Process
+![Confirmation Step](imgs/confirmation-step.png)
 
 ## ✨ Key Features
 
 - **Smart Scheduling**
-  - AI-powered schedule generation
   - Constraint-based optimization
   - Fair shift distribution
   - Conflict detection and resolution
