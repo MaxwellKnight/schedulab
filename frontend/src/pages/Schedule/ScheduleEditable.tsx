@@ -7,15 +7,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { TemplateScheduleData, TemplateShiftData } from '@/types/template.dto';
 import { ShiftType } from '@/types/shifts.dto';
 import { UserData } from '@/types';
-import { useDroppable, useDraggable, DragOverlay, DragStartEvent, DragEndEvent, DndContext } from '@dnd-kit/core';
-
-interface MemberAssignment {
-	memberId: string;
-	shiftTypeId: number;
-	date: string;
-	timeSlot: string;
-	position: number;
-}
+import { useDroppable, useDraggable } from '@dnd-kit/core';
+import { MemberAssignment } from './Schedule';
 
 const getShiftAbbreviation = (name: string): string => {
 	const words = name.split(' ');
@@ -66,6 +59,7 @@ const DraggableMember: React.FC<{
 		</div>
 	);
 };
+
 const DroppableShiftSlot: React.FC<{
 	shiftTypeId: number;
 	date: Date;
@@ -415,7 +409,7 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 											{dates.map(date => (
 												<TableCell
 													key={`${date.toISOString()}-${timeSlot}`}
-													className="p-0 border-gray-200"
+													className="p-2 border-gray-200"
 													style={{
 														minHeight: `${48 * zoomLevel}px`,
 														verticalAlign: 'top'

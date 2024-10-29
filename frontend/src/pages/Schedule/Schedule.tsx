@@ -14,7 +14,7 @@ import { UserData } from '@/types';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 
-interface MemberAssignment {
+export interface MemberAssignment {
 	memberId: string;
 	shiftTypeId: number;
 	date: string;

@@ -8,6 +8,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useDraggable } from '@dnd-kit/core';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Separator } from '@/components/ui/separator';
 
 interface MembersListProps {
 	members: UserData[] | null;
@@ -18,62 +20,67 @@ interface DraggableMemberCardProps {
 	isCurrentUser: boolean;
 }
 
+
 const MemberCard: React.FC<{
 	member: UserData;
 	isCurrentUser: boolean;
 	className?: string;
 }> = ({ member, isCurrentUser, className = '' }) => (
-	<div
-		className={`
-      group flex items-center gap-3 p-3 rounded-lg w-full
-      transition-all duration-200 ease-in-out
-      ${isCurrentUser ? 'bg-blue-50/80 hover:bg-blue-100/90 border border-blue-200' :
-				'hover:bg-gray-50 border border-transparent hover:border-gray-200'}
-      ${className}
-    `}
-	>
-		<div className="flex-shrink-0 relative">
-			<img
-				src="https://img.freepik.com/premium-vector/anonymous-user-circle-icon-vector-illustration-flat-style-with-long-shadow_520826-1931.jpg?w=1800"
-				alt={`${member.first_name} ${member.last_name}`}
-				className={`
-          h-8 w-8 rounded-full object-cover
-          ${isCurrentUser ? 'ring-2 ring-blue-400 ring-offset-2' :
-						'group-hover:ring-2 group-hover:ring-gray-200 group-hover:ring-offset-1'}
-        `}
-			/>
-			{isCurrentUser && (
-				<div className="absolute -top-1 -right-1 bg-blue-500 rounded-full w-3 h-3 border-2 border-white" />
-			)}
-		</div>
-		<div className="min-w-0 flex-1">
-			<div className="flex items-center justify-between gap-2">
-				<p className={`
-          text-sm font-medium truncate
-          ${isCurrentUser ? 'text-blue-900' : 'text-gray-900'}
-        `}>
-					{member.first_name} {member.last_name}
-					{isCurrentUser && (
-						<span className="ml-2 text-xs font-normal text-blue-600">
-							(You)
-						</span>
-					)}
-				</p>
-				<Badge
-					variant={isCurrentUser ? "secondary" : "outline"}
-					className="whitespace-nowrap"
+	<TooltipProvider>
+		<Tooltip>
+			<TooltipTrigger asChild>
+				<div
+					className={`
+            group flex items-center gap-3 p-3 rounded-lg w-full
+            transition-all duration-200 ease-in-out
+            ${isCurrentUser ? 'bg-blue-50/80 hover:bg-blue-100/90 border border-blue-200' :
+							'hover:bg-gray-50 border border-transparent hover:border-gray-200'}
+            ${className}
+          `}
 				>
-					{member.user_role}
-				</Badge>
-			</div>
-			<p className={`
-        text-xs truncate mt-0.5
-        ${isCurrentUser ? 'text-blue-600' : 'text-gray-500'}
-      `}>
-				{member.team_name}
-			</p>
-		</div>
-	</div>
+					<div className="flex-shrink-0 relative">
+						<img
+							src="https://img.freepik.com/premium-vector/anonymous-user-circle-icon-vector-illustration-flat-style-with-long-shadow_520826-1931.jpg?w=1800"
+							alt={`${member.first_name} ${member.last_name}`}
+							className={`
+                h-8 w-8 rounded-full object-cover
+                ${isCurrentUser ? 'ring-2 ring-blue-400 ring-offset-2' :
+									'group-hover:ring-2 group-hover:ring-gray-200 group-hover:ring-offset-1'}
+              `}
+							draggable={false}
+						/>
+						{isCurrentUser && (
+							<div className="absolute -top-1 -right-1 bg-blue-500 rounded-full w-3 h-3 border-2 border-white" />
+						)}
+					</div>
+					<div className="min-w-0 flex-1">
+						<p className={`
+              text-sm font-medium truncate
+              ${isCurrentUser ? 'text-blue-900' : 'text-gray-900'}
+            `}>
+							{member.first_name} {member.last_name}
+							{isCurrentUser && (
+								<span className="block text-xs font-normal text-blue-600">
+									(You)
+								</span>
+							)}
+						</p>
+					</div>
+				</div>
+			</TooltipTrigger>
+			<TooltipContent side="right" className="p-4 space-y-3">
+				<div className="space-y-1">
+					<p className="text-xs font-medium text-gray-500 uppercase">Role</p>
+					<p className="text-sm font-medium">{member.user_role}</p>
+				</div>
+				<Separator orientation="horizontal" />
+				<div className="space-y-1">
+					<p className="text-xs font-medium text-gray-500 uppercase">Team</p>
+					<p className="text-sm font-medium">{member.team_name}</p>
+				</div>
+			</TooltipContent>
+		</Tooltip>
+	</TooltipProvider>
 );
 
 const DraggableMemberCard: React.FC<DraggableMemberCardProps> = ({ member, isCurrentUser }) => {
@@ -90,17 +97,20 @@ const DraggableMemberCard: React.FC<DraggableMemberCardProps> = ({ member, isCur
 			ref={setNodeRef}
 			{...listeners}
 			{...attributes}
-			className="w-full relative touch-none"
+			className={cn(
+				"w-full relative touch-none",
+				isDragging && "pointer-events-none"
+			)}
 			style={{ height: '72px' }}
 		>
 			<div className={cn(
-				"absolute inset-0 transition-opacity duration-200",
-				isDragging ? "opacity-50" : "opacity-100"
+				"absolute inset-0 transition-all duration-200",
+				isDragging ? "opacity-0" : "opacity-100"
 			)}>
 				<MemberCard
 					member={member}
 					isCurrentUser={isCurrentUser}
-					className={`cursor-grab ${isDragging ? 'pointer-events-none' : ''}`}
+					className={`cursor-grab active:cursor-grabbing ${isDragging ? 'pointer-events-none' : ''}`}
 				/>
 			</div>
 		</div>
@@ -127,13 +137,14 @@ export const DraggableMemberOverlay: React.FC<{
       w-[250px] shadow-xl cursor-grabbing
       animate-in zoom-in-95 duration-200
       rounded-lg overflow-hidden
-      bg-white ring-2 ring-primary/10
+      bg-white/90 backdrop-blur-sm
+      pointer-events-none 
     "
 	>
 		<MemberCard
 			member={member}
 			isCurrentUser={isCurrentUser}
-			className="bg-white/95 backdrop-blur-sm cursor-grabbing"
+			className="cursor-grabbing"
 		/>
 	</div>
 );
