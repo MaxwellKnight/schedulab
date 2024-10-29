@@ -32,7 +32,6 @@ export class TemplateService implements ITemplateService {
 			}))
 		);
 
-		console.log("here");
 
 		return {
 			id,

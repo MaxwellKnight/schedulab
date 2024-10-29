@@ -10,14 +10,14 @@ import { userSchema } from "../validations/user.validation";
 const router = Router();
 
 const userRepository = new UserRepository(makeSQL());
-const userService 	= new UserService(userRepository);
-const controller 		= new AuthController(userService);
+const userService = new UserService(userRepository);
+const controller = new AuthController(userService);
 
 const validator = makeValidator(userSchema);
 
 router.route("/login")
 	.post(adaptMiddleware(controller.login));
-	
+
 router.route("/logout")
 	.post(adaptMiddleware(controller.logout));
 
