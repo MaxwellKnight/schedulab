@@ -237,13 +237,13 @@ CREATE TABLE feedback (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
--- Table: expired
 CREATE TABLE expired (
-  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  token VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    token TEXT NOT NULL,              -- Using TEXT instead of VARCHAR for larger tokens
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_created_at (created_at),  -- Index for faster cleanup queries
+    INDEX idx_token (token(255))        -- Index first 255 characters of token for lookups
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Table: template_schedules
 CREATE TABLE template_schedules (
