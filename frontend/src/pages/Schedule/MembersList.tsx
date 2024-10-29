@@ -67,12 +67,14 @@ const MemberCard: React.FC<{
 					</div>
 				</div>
 			</TooltipTrigger>
-			<TooltipContent side="right" className="p-4 space-y-3">
+			<TooltipContent side="right" className="flex gap-2 p-4">
 				<div className="space-y-1">
 					<p className="text-xs font-medium text-gray-500 uppercase">Role</p>
-					<p className="text-sm font-medium">{member.user_role}</p>
+					<p className="text-sm font-medium">{member.user_role.toUpperCase()}</p>
 				</div>
-				<Separator orientation="horizontal" />
+				<div>
+					<Separator orientation="vertical" />
+				</div>
 				<div className="space-y-1">
 					<p className="text-xs font-medium text-gray-500 uppercase">Team</p>
 					<p className="text-sm font-medium">{member.team_name}</p>
