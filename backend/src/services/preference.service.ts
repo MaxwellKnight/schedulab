@@ -1,10 +1,11 @@
 import { Preference } from "../models";
-import { IPreferenceService, IPreferenceRepository, PreferenceData } from "../interfaces";
+import { PreferenceData } from "../interfaces";
+import { PreferenceRepository } from "../repositories";
 
-export class PreferenceService implements IPreferenceService {
+export class PreferenceService {
 
-	private readonly repo: IPreferenceRepository;
-	constructor(repo: IPreferenceRepository) {
+	private readonly repo: PreferenceRepository;
+	constructor(repo: PreferenceRepository) {
 		this.repo = repo;
 	}
 
@@ -29,9 +30,9 @@ export class PreferenceService implements IPreferenceService {
 
 	public async getOne(id: number): Promise<PreferenceData | null> {
 		const pref = await this.repo.getOne(id);
-		if(pref.length === 0) return null;
+		if (!pref) return null;
 
-		return this.transform(pref[0]);
+		return this.transform(pref);
 	}
 
 	public async getMany(): Promise<PreferenceData[]> {
@@ -40,16 +41,16 @@ export class PreferenceService implements IPreferenceService {
 		return Promise.all(result.map(pref => this.transform(pref)));
 	}
 
-	
+
 	public async getByDates(start_date: Date, end_date: Date): Promise<PreferenceData[]> {
 		const result = await this.repo.getByDates(start_date, end_date);
-		
+
 		return Promise.all(result.map(pref => this.transform(pref)));
 	}
-		
+
 	public async getByUserId(id: number): Promise<PreferenceData[]> {
-		const result =  await this.repo.getByUserId(id);
-		
+		const result = await this.repo.getByUserId(id);
+
 		return Promise.all(result.map(pref => this.transform(pref)));
 	}
 

@@ -1,11 +1,11 @@
-import { ITemplateScheduleRepository, ITemplateService } from "../interfaces";
 import { TemplateConstraintData, TemplateScheduleData, TemplateShiftData } from "../interfaces/dto";
 import { TemplateSchedule } from "../models";
+import { TemplateScheduleRepository } from "../repositories";
 
-export class TemplateService implements ITemplateService {
-	private readonly repo: ITemplateScheduleRepository;
+export class TemplateService {
+	private readonly repo: TemplateScheduleRepository;
 
-	constructor(repo: ITemplateScheduleRepository) {
+	constructor(repo: TemplateScheduleRepository) {
 		this.repo = repo;
 	}
 
@@ -52,8 +52,9 @@ export class TemplateService implements ITemplateService {
 
 	public async getOne(id: number): Promise<TemplateScheduleData | null> {
 		const result = await this.repo.getOne(id);
-		if (result.length === 0) return null;
-		return this.transform(result[0]);
+		if (!result) return null;
+
+		return this.transform(result);
 	}
 
 	public async getMany(): Promise<TemplateScheduleData[]> {

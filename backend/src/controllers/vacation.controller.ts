@@ -1,21 +1,20 @@
 import { Vacation } from "../models";
-import { IVacationService } from "../interfaces/services.interface";
-import { IVacationController } from "../interfaces/controllers.interface";
 import { IRequest, IResponse } from "../interfaces/http.interface";
+import { VacationService } from "../services";
 
-export class VacationController implements IVacationController{
+export class VacationController {
 
-	private service: IVacationService;
-	constructor(service: IVacationService) {
+	private service: VacationService;
+	constructor(service: VacationService) {
 		this.service = service;
 	}
 
 	public create = async (req: IRequest, res: IResponse): Promise<void> => {
 		const vacation = req.body;
-		try{
+		try {
 			const result = await this.service.create(vacation);
 			res.json({ message: "vacation created", id: result });
-		}catch(error) {
+		} catch (error) {
 			res.status(400);
 			res.json({ error: "vacation already exist" });
 		}
@@ -24,7 +23,7 @@ export class VacationController implements IVacationController{
 	public getOne = async (req: IRequest, res: IResponse): Promise<void> => {
 		const id = req.params.id;
 		const vacations = await this.service.getOne(Number(id));
-		if(vacations) {
+		if (vacations) {
 			res.json(vacations);
 		} else {
 			res.status(404);
@@ -32,9 +31,9 @@ export class VacationController implements IVacationController{
 		}
 	}
 
-	public getMany = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getMany = async (_: IRequest, res: IResponse): Promise<void> => {
 		const vacations = await this.service.getMany();
-		if(vacations.length > 0) {
+		if (vacations.length > 0) {
 			res.json(vacations);
 		} else {
 			res.status(404);
@@ -43,9 +42,9 @@ export class VacationController implements IVacationController{
 	}
 
 	public getByDates = async (req: IRequest, res: IResponse): Promise<void> => {
-		const {start_date, end_date} = req.params;
+		const { start_date, end_date } = req.params;
 		const vacations = await this.service.getByDates(new Date(start_date), new Date(end_date));
-		if(vacations.length > 0) {
+		if (vacations.length > 0) {
 			res.json(vacations);
 		} else {
 			res.status(404);
@@ -57,7 +56,7 @@ export class VacationController implements IVacationController{
 	public getByDate = async (req: IRequest, res: IResponse): Promise<void> => {
 		const date = req.params.date;
 		const vacations = await this.service.getByDate(new Date(date));
-		if(vacations.length > 0) {
+		if (vacations.length > 0) {
 			res.json(vacations);
 		} else {
 			res.status(404);
@@ -68,7 +67,7 @@ export class VacationController implements IVacationController{
 	public getByUserId = async (req: IRequest, res: IResponse): Promise<void> => {
 		const id = req.params.id;
 		const vacations = await this.service.getByUserId(Number(id));
-		if(vacations.length > 0) {
+		if (vacations.length > 0) {
 			res.json(vacations);
 		} else {
 			res.status(404);
@@ -80,13 +79,13 @@ export class VacationController implements IVacationController{
 	public update = async (req: IRequest, res: IResponse): Promise<void> => {
 		const vacation: Vacation = req.body;
 		const vac = await this.service.getOne(vacation.id);
-		if(!vac) {
+		if (!vac) {
 			res.status(404);
 			res.json({ error: "vacation not found" });
 			return;
 		}
 		const result = await this.service.update({ ...vac, ...vacation });
-		if(result === 0) {
+		if (result === 0) {
 			res.status(404);
 			res.json({ error: "vacation not found" });
 		}
@@ -95,8 +94,8 @@ export class VacationController implements IVacationController{
 
 	public delete = async (req: IRequest, res: IResponse): Promise<void> => {
 		const id = req.params.id;
-		const result  = await this.service.delete(Number(id));
-		if(result === 0) {
+		const result = await this.service.delete(Number(id));
+		if (result === 0) {
 			res.status(404);
 			res.json({ error: "vacation not found" });
 		}

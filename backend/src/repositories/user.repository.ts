@@ -2,28 +2,39 @@ import { User } from "../models";
 import { ShiftRepository } from "./shift.repository";
 import { VacationRepository } from "./vacation.repository";
 import { PreferenceRepository } from "./preferences.repository";
-import { IDatabase, IPreferenceRepository, IShiftRepository, IUserRepository, IVacationRepository } from "../interfaces";
+import { Database } from "../configs/db.config";
+import { RowDataPacket, ResultSetHeader } from "mysql2";
 
-export class UserRepository implements IUserRepository {
-	private readonly db: IDatabase;
-	private readonly shift_repo: IShiftRepository;
-	private readonly preference_repo: IPreferenceRepository;
-	private readonly vacation_repo: IVacationRepository;
+interface UserRow extends RowDataPacket, Omit<User, 'created_at' | 'recent_shifts' | 'recent_vacations'> {
+	created_at: string;
+	recent_shifts: string | null;
+	recent_vacations: string | null;
+	team_name?: string;
+}
 
-	constructor(db: IDatabase) {
+export class UserRepository {
+	private readonly db: Database;
+	private readonly shift_repo: ShiftRepository;
+	private readonly preference_repo: PreferenceRepository;
+	private readonly vacation_repo: VacationRepository;
+
+	constructor(db: Database) {
 		this.db = db;
 		this.shift_repo = new ShiftRepository(db);
 		this.preference_repo = new PreferenceRepository(db);
 		this.vacation_repo = new VacationRepository(db);
 	}
 
-	public async create(user: User): Promise<number> {
-		const result = await this.db.execute("INSERT INTO users SET ?", [user]);
-		return result.insertId;
+	public async create(user: Omit<User, 'id' | 'created_at'>): Promise<number> {
+		const result = await this.db.execute<ResultSetHeader>(
+			"INSERT INTO users SET ?",
+			[user]
+		);
+		return result[0].insertId;
 	}
 
-	public async getOne(id: number): Promise<User[]> {
-		const result = await this.db.execute(`
+	public async getOne(id: number): Promise<User | null> {
+		const [rows] = await this.db.execute<UserRow[]>(`
             SELECT 
                 u.*,
                 (
@@ -50,11 +61,12 @@ export class UserRepository implements IUserRepository {
             GROUP BY u.id`,
 			[id, id]
 		);
-		return result;
+
+		return rows.length ? this.mapToUser(rows[0]) : null;
 	}
 
 	public async getMany(): Promise<User[]> {
-		return await this.db.execute(`
+		const [rows] = await this.db.execute<UserRow[]>(`
             SELECT 
                 u.*,
                 (
@@ -79,10 +91,12 @@ export class UserRepository implements IUserRepository {
                 teams t ON u.team_id = t.id
             GROUP BY u.id`
 		);
+
+		return rows.map(row => this.mapToUser(row));
 	}
 
 	public async getByShiftId(id: number): Promise<User[]> {
-		return await this.db.execute(`
+		const [rows] = await this.db.execute<UserRow[]>(`
             SELECT 
                 u.*, t.name AS team_name
             FROM 
@@ -95,10 +109,12 @@ export class UserRepository implements IUserRepository {
                 us.shift_id = ?`,
 			[id]
 		);
+
+		return rows.map(row => this.mapToUser(row));
 	}
 
 	public async getByEmail(email: string): Promise<User | null> {
-		const result = await this.db.execute(`
+		const [rows] = await this.db.execute<UserRow[]>(`
             SELECT 
                 u.*,
                 (
@@ -125,11 +141,12 @@ export class UserRepository implements IUserRepository {
             GROUP BY u.id`,
 			[email]
 		);
-		return result[0] || null;
+
+		return rows.length ? this.mapToUser(rows[0]) : null;
 	}
 
 	public async getByTeamId(teamId: number): Promise<User[]> {
-		return await this.db.execute(`
+		const [rows] = await this.db.execute<UserRow[]>(`
             SELECT 
                 u.*,
                 (
@@ -156,11 +173,16 @@ export class UserRepository implements IUserRepository {
             GROUP BY u.id`,
 			[teamId]
 		);
+
+		return rows.map(row => this.mapToUser(row));
 	}
 
-	public async update(user: User): Promise<number> {
-		const result = await this.db.execute("UPDATE users SET ? WHERE id = ?", [user, user.id]);
-		return result.affectedRows;
+	public async update(user: Partial<User> & { id: number }): Promise<number> {
+		const result = await this.db.execute<ResultSetHeader>(
+			"UPDATE users SET ? WHERE id = ?",
+			[user, user.id]
+		);
+		return result[0].affectedRows;
 	}
 
 	public async delete(id: number): Promise<number> {
@@ -168,7 +190,19 @@ export class UserRepository implements IUserRepository {
 		await this.preference_repo.deleteByUserId(id);
 		await this.shift_repo.removeUser(id);
 
-		let result = await this.db.execute("DELETE FROM users WHERE id = ?", [id]);
-		return result.affectedRows;
+		const result = await this.db.execute<ResultSetHeader>(
+			"DELETE FROM users WHERE id = ?",
+			[id]
+		);
+		return result[0].affectedRows;
+	}
+
+	private mapToUser(row: UserRow): User {
+		return {
+			...row,
+			created_at: new Date(row.created_at),
+			recent_shifts: row.recent_shifts ? row.recent_shifts.split(',').map(Number) : [],
+			recent_vacations: row.recent_vacations ? row.recent_vacations.split(',').map(Number) : []
+		};
 	}
 }

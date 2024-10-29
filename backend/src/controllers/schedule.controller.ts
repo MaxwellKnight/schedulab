@@ -1,12 +1,11 @@
 import { ScheduleData } from "../interfaces/dto";
-import { IScheduleService } from "../interfaces/services.interface";
-import { IScheduleController } from "../interfaces/controllers.interface";
 import { IRequest, IResponse } from "../interfaces/http.interface";
+import { ScheduleService } from "../services";
 
-export class ScheduleController implements IScheduleController{
+export class ScheduleController {
 
-	private service: IScheduleService;
-	constructor(service: IScheduleService) {
+	private service: ScheduleService;
+	constructor(service: ScheduleService) {
 		this.service = service;
 	}
 
@@ -15,7 +14,7 @@ export class ScheduleController implements IScheduleController{
 		try {
 			const id = await this.service.create(schedule);
 			res.json({ message: "schedule created", id });
-		} catch(err) {
+		} catch (err) {
 			res.status(400);
 			res.json({ error: "schedule already exist" });
 		}
@@ -24,7 +23,7 @@ export class ScheduleController implements IScheduleController{
 	public getOne = async (req: IRequest, res: IResponse): Promise<void> => {
 		const id = req.params.id;
 		const schedules = await this.service.getOne(Number(id));
-		if(schedules) {
+		if (schedules) {
 			res.json(schedules);
 		} else {
 			res.status(404);
@@ -34,7 +33,7 @@ export class ScheduleController implements IScheduleController{
 
 	public getMany = async (req: IRequest, res: IResponse): Promise<void> => {
 		const schedules = await this.service.getMany();
-		if(schedules.length > 0) {
+		if (schedules.length > 0) {
 			res.json(schedules);
 		} else {
 			res.status(404);
@@ -46,7 +45,7 @@ export class ScheduleController implements IScheduleController{
 		const { start_date, end_date } = req.params;
 		const schedules = await this.service.getByDates(new Date(start_date), new Date(end_date));
 
-		if(schedules.length > 0) {
+		if (schedules.length > 0) {
 			res.json(schedules);
 		} else {
 			res.status(404);
@@ -59,7 +58,7 @@ export class ScheduleController implements IScheduleController{
 		const id = req.params.id;
 		const schedules = await this.service.getByUserId(Number(id));
 
-		if(schedules.length > 0) {
+		if (schedules.length > 0) {
 			res.json(schedules);
 		} else {
 			res.status(404);
@@ -71,14 +70,14 @@ export class ScheduleController implements IScheduleController{
 	public update = async (req: IRequest, res: IResponse): Promise<void> => {
 		const { id, ...rest }: ScheduleData = req.body;
 		const schedule = await this.service.getOne(id);
-		if(!schedule){
+		if (!schedule) {
 			res.status(404);
 			res.json({ errror: "schedule not found" });
 			return;
 		}
 
 		const result = await this.service.update({ ...schedule, ...rest });
-		if(!result) {
+		if (!result) {
 			res.status(400);
 			res.json({ error: "could not update schedule" });
 			return;

@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { VacationData } from '../interfaces';
+import { VacationData } from '../interfaces/dto';
 
 const schema = Joi.object<VacationData>({
 	id: Joi.number()
