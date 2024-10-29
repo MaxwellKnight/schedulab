@@ -9,20 +9,18 @@ Intelligent shift scheduling system that combines automated scheduling with pref
 
 ## 🖼️ Interface Preview
 
-<div align="center">
-  <div style="display: flex; justify-content: center; gap: 20px;">
-    <div>
-      <img src="imgs/schedule-page.png" alt="Schedule Page" width="400"/>
-      <p><em>Schedule Management</em></p>
-    </div>
-    <div>
-      <img src="imgs/confirmation-step.png" alt="Confirmation Step" width="400"/>
-      <p><em>Confirmation Process</em></p>
-    </div>
-    <div>
-      <img src="imgs/login-page.png" alt="Confirmation Step" width="400"/>
-      <p><em>Confirmation Process</em></p>
-    </div>
+<div style="display: flex; flex-direction: row; gap: 20px;">
+  <div style="flex: 1; text-align: center;">
+    <img src="imgs/login-page.png" alt="Login Page" width="300"/>
+    <p><em>Login Page</em></p>
+  </div>
+  <div style="flex: 1; text-align: center;">
+    <img src="imgs/schedule-page.png" alt="Schedule Page" width="300"/>
+    <p><em>Schedule Management</em></p>
+  </div>
+  <div style="flex: 1; text-align: center;">
+    <img src="imgs/confirmation-step.png" alt="Confirmation Step" width="300"/>
+    <p><em>Confirmation Process</em></p>
   </div>
 </div>
 
