@@ -286,7 +286,7 @@ const Schedule: React.FC = () => {
 				</div>
 
 				{template ? (
-					<div className="grid grid-cols-12 gap-4">
+					<div className="xl:grid xl:grid-cols-12 gap-4 flex flex-col xl:flex-none">
 						<Sidebar
 							isOpen={leftSidebarOpen}
 							onToggle={() => setLeftSidebarOpen(!leftSidebarOpen)}

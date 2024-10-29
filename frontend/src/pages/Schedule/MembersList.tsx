@@ -3,7 +3,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, UserCircle } from "lucide-react";
 import { UserData } from "@/types";
 import { useAuth } from '@/hooks/useAuth/useAuth';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useDraggable } from '@dnd-kit/core';
@@ -98,7 +97,7 @@ const DraggableMemberCard: React.FC<DraggableMemberCardProps> = ({ member, isCur
 			{...listeners}
 			{...attributes}
 			className={cn(
-				"w-full relative touch-none",
+				"xl:w-full w-40 shrink-0 relative touch-none",
 				isDragging && "pointer-events-none"
 			)}
 			style={{ height: '72px' }}
@@ -173,11 +172,11 @@ const MembersList: React.FC<MembersListProps> = ({ members }) => {
 						/>
 					</div>
 				</div>
-				<ScrollArea className="h-[calc(100vh-25rem)]">
+				<ScrollArea className="xl:h-[calc(100vh-25rem)]">
 					{!filteredMembers || filteredMembers.length === 0 ? (
 						<EmptyState searchActive={searchQuery.length > 0} />
 					) : (
-						<div className="space-y-2 pr-4">
+						<div className="flex flex-row xl:flex-col gap-2 xl:gap-2 overflow-x-auto xl:overflow-x-visible pr-4">
 							{filteredMembers.map((member) => (
 								<DraggableMemberCard
 									key={member.id}
