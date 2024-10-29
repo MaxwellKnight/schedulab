@@ -133,7 +133,7 @@ cp frontend/.env.example frontend/.env
 ```bash
 cd backend
 # Run database setup
-mysql -u <username> -p < backend/dump/dump.sql
+mysql -u <username> -p < dump/dump.sql
 ```
 
 ## 📝 Roadmap
