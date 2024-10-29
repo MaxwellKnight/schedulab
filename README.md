@@ -9,11 +9,18 @@ Intelligent shift scheduling system that combines automated scheduling with pref
 
 ## 🖼️ Interface Preview
 
-### Schedule Management
-![Schedule Page](imgs/schedule-page.png)
-
-### Confirmation Process
-![Confirmation Step](imgs/confirmation-step.png)
+<div align="center">
+  <div style="display: flex; justify-content: center; gap: 20px;">
+    <div>
+      <img src="imgs/schedule-page.png" alt="Schedule Page" width="400"/>
+      <p><em>Schedule Management</em></p>
+    </div>
+    <div>
+      <img src="imgs/confirmation-step.png" alt="Confirmation Step" width="400"/>
+      <p><em>Confirmation Process</em></p>
+    </div>
+  </div>
+</div>
 
 ## ✨ Key Features
 
