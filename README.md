@@ -10,10 +10,25 @@ Intelligent shift scheduling system that combines automated scheduling with pref
 ## 🖼️ Interface Preview
 
 <div align="center">
-  <p style="display: inline-block;">
-    <img src="imgs/login-page.png" width="300" hspace="10"/>
-    <img src="imgs/confirmation-step.png" width="300" hspace="10"/>
-    <img src="imgs/schedule-page.png" width="300" hspace="10"/>
+  <p>
+    <img src="imgs/login-page.png" width="800"/>
+    <br>
+    <h3>Login Page</h3>
+    Secure authentication through Google SSO, providing a seamless login experience
+  </p>
+
+  <p>
+    <img src="imgs/confirmation-step.png" width="800"/>
+    <br>
+    <h3>Schedule Builder</h3>
+    Review and confirm schedule parameters before final generation
+  </p>
+
+  <p>
+    <img src="imgs/schedule-page.png" width="800"/>
+    <br>
+    <h3>Schedule View</h3>
+    Interactive weekly schedule display with shift assignments and team member details
   </p>
 </div>
 
