@@ -5,12 +5,11 @@ services:
     image: mysql:8.0.40
     platform: linux/arm64/v8
     restart: unless-stopped
-    env_file: ./.env
     environment:
-      MYSQL_ROOT_PASSWORD: $DATABASE_PASSWORD
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
     ports:
-      - "$DATABASE_LOCAL_PORT:$DATABASE_DOCKER_PORT"
+      - "${DATABASE_LOCAL_PORT}:${DATABASE_DOCKER_PORT}"
     volumes:
       - ./db:/var/lib/mysql
       - ./backend/dump/:/docker-entrypoint-initdb.d
@@ -20,13 +19,16 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     restart: unless-stopped
-    env_file: ./.env
+    environment:
+      DATABASE_HOST: mysqldb
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_PORT: ${DATABASE_DOCKER_PORT}
     depends_on:
       - mysqldb
     ports:
-      - "$NODE_LOCAL_PORT:$NODE_DOCKER_PORT"
-    environment:
-      DATABASE_HOST: mysqldb
+      - "${NODE_LOCAL_PORT}:${NODE_DOCKER_PORT}"
     volumes:
       - ./backend:/app
       - /app/node_modules  
@@ -39,9 +41,8 @@ services:
       - "5173:5173"
     depends_on:
       - backend
-    env_file: ./.env
     environment:
-      VITE_API_URL: http://backend:$NODE_DOCKER_PORT
+      VITE_API_URL: http://backend:${NODE_DOCKER_PORT}
     volumes:
       - ./frontend:/app
-      - /app/node_modules  
+      - /app/node_modules
