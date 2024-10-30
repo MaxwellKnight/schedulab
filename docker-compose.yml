@@ -11,8 +11,8 @@ services:
     ports:
       - "${DATABASE_LOCAL_PORT}:${DATABASE_DOCKER_PORT}"
     volumes:
-      - ./db:/var/lib/mysql
-      - /tmp/dump:/docker-entrypoint-initdb.d
+      - /tmp/db:/var/lib/mysql 
+      - /tmp/dump:/docker-entrypoint-initdb.d 
   backend:
     build: 
       context: ./backend
