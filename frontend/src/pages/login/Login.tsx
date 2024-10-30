@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '@/hooks/useAuth/useAuth';
 import { Label } from '@radix-ui/react-label';
-import { Mail, Lock, Loader2, User, AlertCircle, Zap } from 'lucide-react';
+import { Mail, Lock, Loader2, User, AlertCircle, Zap, Calendar, Clock } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -137,16 +137,34 @@ const Login: React.FC = () => {
 		setError('');
 	};
 
+	const features = [
+		{
+			icon: <Clock className="h-6 w-6 mb-2" />,
+			title: "Priority",
+			subtitle: "Smart Handling"
+		},
+		{
+			icon: <Zap className="h-6 w-6 mb-2" />,
+			title: "Instant",
+			subtitle: "Coordination"
+		},
+		{
+			icon: <Calendar className="h-6 w-6 mb-2" />,
+			title: "Effortless",
+			subtitle: "Planning"
+		}
+	];
+
 	return (
-		<div className="min-h-screen w-full flex bg-gray-50">
+		<div className="min-h-screen w-full flex flex-col lg:flex-row bg-gradient-to-br from-indigo-700 via-purple-700 to-purple-800 items-center justify-center">
 			{/* Illustration Section */}
 			<motion.div
-				initial={{ opacity: 0, x: -50 }}
-				animate={{ opacity: 1, x: 0 }}
+				initial={{ opacity: 0, y: -50 }}
+				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.6 }}
-				className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-700 items-center justify-center p-12"
+				className="hidden lg:flex lg:w-1/2 items-center justify-center p-8 relative"
 			>
-				<div className="max-w-lg text-center space-y-8">
+				<div className="relative max-w-lg text-center space-y-8">
 					<motion.div
 						animate={{
 							scale: [1, 1.1, 1],
@@ -157,42 +175,40 @@ const Login: React.FC = () => {
 							repeat: Infinity,
 							repeatType: "reverse"
 						}}
-						className="flex justify-center mb-8"
+						className="flex justify-center"
 					>
-						<Zap className="h-20 w-20 text-white" />
+						<Calendar className="h-20 w-20 text-white/90" />
 					</motion.div>
+
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ delay: 0.3 }}
 					>
 						<h2 className="text-5xl font-bold text-white mb-6">
-							Streamline Your
-							<br />
-							<span className="text-blue-200">Workflow</span>
+							Welcome to<br />
+							<span className="text-indigo-200">Schedula</span>
 						</h2>
-						<p className="text-2xl text-blue-100 mb-12">
-							Intelligent scheduling that works for you
+						<p className="text-xl text-indigo-100">
+							Streamlined scheduling that puts your priorities first
 						</p>
 					</motion.div>
+
 					<motion.div
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						transition={{ delay: 0.6 }}
-						className="grid grid-cols-3 gap-8 text-blue-50"
+						className="grid grid-cols-1 md:grid-cols-3 gap-4"
 					>
-						{[
-							{ title: "24/7", subtitle: "Support" },
-							{ title: "100%", subtitle: "Automated" },
-							{ title: "1-Click", subtitle: "Deploy" }
-						].map((item, index) => (
+						{features.map((item, index) => (
 							<motion.div
 								key={index}
-								whileHover={{ scale: 1.05 }}
-								className="bg-blue-600/30 rounded-lg p-4 backdrop-blur-sm"
+								whileHover={{ scale: 1.05, backgroundColor: 'rgba(79, 70, 229, 0.4)' }}
+								className="bg-white/10 backdrop-blur-lg rounded-xl p-4 flex flex-col items-center"
 							>
-								<div className="text-3xl font-bold">{item.title}</div>
-								<div className="text-sm">{item.subtitle}</div>
+								{item.icon}
+								<div className="text-lg font-bold text-white">{item.title}</div>
+								<div className="text-sm text-indigo-200">{item.subtitle}</div>
 							</motion.div>
 						))}
 					</motion.div>
@@ -201,20 +217,18 @@ const Login: React.FC = () => {
 
 			{/* Form Section */}
 			<motion.div
-				initial={{ opacity: 0, x: 50 }}
-				animate={{ opacity: 1, x: 0 }}
-				transition={{ duration: 0.6 }}
-				className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-gradient-to-br from-gray-50 to-gray-100"
+				initial={{ opacity: 0, y: 50 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 1 }}
+				className="w-full lg:w-1/2 flex items-center justify-center p-4 lg:p-8 shadow-[0_8px_30px_rgba(79,70,229,0.15)] backdrop-blur-sm"
 			>
-				<Card className="w-full max-w-md">
+				<Card className="w-full max-w-md bg-white/95 backdrop-blur-sm border-indigo-100">
 					<CardHeader className="space-y-2">
-						<CardTitle className="text-3xl font-bold tracking-tight text-center">
-							{activeTab === 'login' ? 'Welcome back!' : 'Join us today'}
+						<CardTitle className="text-2xl lg:text-3xl font-bold tracking-tight text-center text-indigo-900">
+							{activeTab === 'login' ? 'Welcome back!' : 'Join Schedula'}
 						</CardTitle>
-						<CardDescription className="text-center text-lg">
-							{activeTab === 'login'
-								? "We're glad to see you again"
-								: "Start your journey with us"}
+						<CardDescription className="text-center text-base lg:text-lg text-indigo-600">
+							{activeTab === 'login' ? "Ready to plan smarter" : "Start organizing efficiently"}
 						</CardDescription>
 					</CardHeader>
 
@@ -227,18 +241,25 @@ const Login: React.FC = () => {
 							}}
 							className="space-y-6"
 						>
-							<TabsList className="grid w-full grid-cols-2">
-								<TabsTrigger value="login">Login</TabsTrigger>
-								<TabsTrigger value="register">Register</TabsTrigger>
+							<TabsList className="grid w-full grid-cols-2 bg-indigo-50">
+								<TabsTrigger
+									value="login"
+									className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
+								>
+									Login
+								</TabsTrigger>
+								<TabsTrigger
+									value="register"
+									className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white"
+								>
+									Register
+								</TabsTrigger>
 							</TabsList>
 
 							<AnimatePresence mode="wait">
-								<motion.div
-									key={activeTab}
-								>
-									{/* Login Form */}
+								<motion.div key={activeTab}>
 									<TabsContent value="login" className="space-y-4">
-										<form className="space-y-4" onSubmit={handleLogin}>
+										<form onSubmit={handleLogin} className="space-y-4">
 											<motion.div
 												initial={{ opacity: 0, height: 0 }}
 												animate={{ opacity: 1, height: "auto" }}
@@ -250,7 +271,6 @@ const Login: React.FC = () => {
 												}}
 												className="space-y-4"
 											>
-												{/* Email Field */}
 												<motion.div
 													className="space-y-2"
 													initial={{ x: -20, opacity: 0 }}
@@ -268,18 +288,12 @@ const Login: React.FC = () => {
 														whileFocus={{ scale: 1.02 }}
 														transition={{ type: "spring", stiffness: 400, damping: 25 }}
 													>
-														<motion.div
-															initial={{ scale: 0.5, opacity: 0 }}
-															animate={{ scale: 1, opacity: 1 }}
-															transition={{ delay: 0.2 }}
-														>
-															<Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-														</motion.div>
+														<Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
 														<Input
 															id="email"
 															type="email"
 															placeholder="name@example.com"
-															className="pl-10 transition-shadow duration-200 focus:shadow-lg"
+															className="pl-10"
 															value={email}
 															onChange={(e) => setEmail(e.target.value)}
 															required
@@ -288,7 +302,6 @@ const Login: React.FC = () => {
 													</motion.div>
 												</motion.div>
 
-												{/* Password Field */}
 												<motion.div
 													className="space-y-2"
 													initial={{ x: -20, opacity: 0 }}
@@ -306,18 +319,12 @@ const Login: React.FC = () => {
 														whileFocus={{ scale: 1.02 }}
 														transition={{ type: "spring", stiffness: 400, damping: 25 }}
 													>
-														<motion.div
-															initial={{ scale: 0.5, opacity: 0 }}
-															animate={{ scale: 1, opacity: 1 }}
-															transition={{ delay: 0.3 }}
-														>
-															<Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-														</motion.div>
+														<Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
 														<Input
 															id="password"
 															type="password"
 															placeholder="Enter your password"
-															className="pl-10 transition-shadow duration-200 focus:shadow-lg"
+															className="pl-10"
 															value={password}
 															onChange={(e) => setPassword(e.target.value)}
 															required
@@ -326,33 +333,22 @@ const Login: React.FC = () => {
 													</motion.div>
 												</motion.div>
 
-												{/* Login Button */}
 												<motion.div
 													initial={{ y: 20, opacity: 0 }}
 													animate={{ y: 0, opacity: 1 }}
-													transition={{
-														type: "spring",
-														stiffness: 300,
-														damping: 20,
-														delay: 0.3
-													}}
+													transition={{ delay: 0.3 }}
 												>
 													<motion.div
 														whileHover={{ scale: 1.02 }}
 														whileTap={{ scale: 0.98 }}
-														transition={{
-															type: "spring",
-															stiffness: 400,
-															damping: 25
-														}}
 													>
 														<Button
-															className="w-full bg-blue-600 hover:bg-blue-700 relative overflow-hidden group"
+															className="w-full bg-indigo-600 hover:bg-indigo-700 relative overflow-hidden group"
 															type="submit"
 															disabled={loading}
 														>
 															<motion.div
-																className="absolute inset-0 bg-blue-500 opacity-0 group-hover:opacity-20"
+																className="absolute inset-0 bg-indigo-500 opacity-0 group-hover:opacity-20"
 																initial={false}
 																animate={loading ? { x: ["0%", "100%"] } : { x: "0%" }}
 																transition={{
@@ -386,9 +382,8 @@ const Login: React.FC = () => {
 										</form>
 									</TabsContent>
 
-									{/* Register Form */}
 									<TabsContent value="register" className="space-y-4">
-										<form className="space-y-4" onSubmit={handleRegister}>
+										<form onSubmit={handleRegister} className="space-y-4">
 											<motion.div
 												initial={{ opacity: 0, height: 0 }}
 												animate={{ opacity: 1, height: "auto" }}
@@ -400,7 +395,6 @@ const Login: React.FC = () => {
 												}}
 												className="space-y-4"
 											>
-												{/* Username Field */}
 												<motion.div
 													className="space-y-2"
 													initial={{ x: -20, opacity: 0 }}
@@ -416,20 +410,13 @@ const Login: React.FC = () => {
 													<motion.div
 														className="relative"
 														whileFocus={{ scale: 1.02 }}
-														transition={{ type: "spring", stiffness: 400, damping: 25 }}
 													>
-														<motion.div
-															initial={{ scale: 0.5, opacity: 0 }}
-															animate={{ scale: 1, opacity: 1 }}
-															transition={{ delay: 0.2 }}
-														>
-															<User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-														</motion.div>
+														<User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
 														<Input
 															id="username"
 															type="text"
 															placeholder="Choose a username"
-															className="pl-10 transition-shadow duration-200 focus:shadow-lg"
+															className="pl-10"
 															value={username}
 															onChange={(e) => setUsername(e.target.value)}
 															required
@@ -438,7 +425,6 @@ const Login: React.FC = () => {
 													</motion.div>
 												</motion.div>
 
-												{/* Register Email Field */}
 												<motion.div
 													className="space-y-2"
 													initial={{ x: -20, opacity: 0 }}
@@ -454,20 +440,13 @@ const Login: React.FC = () => {
 													<motion.div
 														className="relative"
 														whileFocus={{ scale: 1.02 }}
-														transition={{ type: "spring", stiffness: 400, damping: 25 }}
 													>
-														<motion.div
-															initial={{ scale: 0.5, opacity: 0 }}
-															animate={{ scale: 1, opacity: 1 }}
-															transition={{ delay: 0.3 }}
-														>
-															<Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-														</motion.div>
+														<Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
 														<Input
 															id="register-email"
 															type="email"
 															placeholder="name@example.com"
-															className="pl-10 transition-shadow duration-200 focus:shadow-lg"
+															className="pl-10"
 															value={email}
 															onChange={(e) => setEmail(e.target.value)}
 															required
@@ -476,7 +455,6 @@ const Login: React.FC = () => {
 													</motion.div>
 												</motion.div>
 
-												{/* Register Password Field */}
 												<motion.div
 													className="space-y-2"
 													initial={{ x: -20, opacity: 0 }}
@@ -492,20 +470,13 @@ const Login: React.FC = () => {
 													<motion.div
 														className="relative"
 														whileFocus={{ scale: 1.02 }}
-														transition={{ type: "spring", stiffness: 400, damping: 25 }}
 													>
-														<motion.div
-															initial={{ scale: 0.5, opacity: 0 }}
-															animate={{ scale: 1, opacity: 1 }}
-															transition={{ delay: 0.4 }}
-														>
-															<Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-														</motion.div>
+														<Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
 														<Input
 															id="register-password"
 															type="password"
 															placeholder="Create a password"
-															className="pl-10 transition-shadow duration-200 focus:shadow-lg"
+															className="pl-10"
 															value={password}
 															onChange={(e) => setPassword(e.target.value)}
 															required
@@ -514,33 +485,22 @@ const Login: React.FC = () => {
 													</motion.div>
 												</motion.div>
 
-												{/* Register Button */}
 												<motion.div
 													initial={{ y: 20, opacity: 0 }}
 													animate={{ y: 0, opacity: 1 }}
-													transition={{
-														type: "spring",
-														stiffness: 300,
-														damping: 20,
-														delay: 0.4
-													}}
+													transition={{ delay: 0.4 }}
 												>
 													<motion.div
 														whileHover={{ scale: 1.02 }}
 														whileTap={{ scale: 0.98 }}
-														transition={{
-															type: "spring",
-															stiffness: 400,
-															damping: 25
-														}}
 													>
 														<Button
-															className="w-full bg-blue-600 hover:bg-blue-700 relative overflow-hidden group"
+															className="w-full bg-indigo-600 hover:bg-indigo-700 relative overflow-hidden group"
 															type="submit"
 															disabled={loading}
 														>
 															<motion.div
-																className="absolute inset-0 bg-blue-500 opacity-0 group-hover:opacity-20"
+																className="absolute inset-0 bg-indigo-500 opacity-0 group-hover:opacity-20"
 																initial={false}
 																animate={loading ? { x: ["0%", "100%"] } : { x: "0%" }}
 																transition={{
@@ -577,7 +537,6 @@ const Login: React.FC = () => {
 							</AnimatePresence>
 						</Tabs>
 
-						{/* Error Alert */}
 						<AnimatePresence>
 							{error && (
 								<motion.div
@@ -594,7 +553,6 @@ const Login: React.FC = () => {
 							)}
 						</AnimatePresence>
 
-						{/* Separator */}
 						<motion.div
 							className="relative"
 							initial={{ opacity: 0 }}
@@ -605,31 +563,20 @@ const Login: React.FC = () => {
 								<Separator className="w-full" />
 							</div>
 							<div className="relative flex justify-center text-xs uppercase">
-								<span className="bg-background px-2 text-muted-foreground">
+								<span className="bg-white px-2 text-gray-500">
 									Or continue with
 								</span>
 							</div>
 						</motion.div>
 
-						{/* Social Login */}
 						<motion.div
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
-							transition={{
-								type: "spring",
-								stiffness: 200,
-								damping: 20,
-								delay: 0.5
-							}}
+							transition={{ delay: 0.5 }}
 						>
 							<motion.div
 								whileHover={{ scale: 1.02 }}
 								whileTap={{ scale: 0.98 }}
-								transition={{
-									type: "spring",
-									stiffness: 400,
-									damping: 25
-								}}
 							>
 								<Button
 									variant="outline"
@@ -666,10 +613,9 @@ const Login: React.FC = () => {
 						</motion.div>
 					</CardContent>
 
-					{/* Footer */}
 					<CardFooter className="flex flex-col items-center justify-center space-y-2">
 						<motion.div
-							className="text-sm text-muted-foreground"
+							className="text-sm text-gray-500"
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
 							transition={{ delay: 0.6 }}
@@ -677,7 +623,7 @@ const Login: React.FC = () => {
 							{activeTab === 'login' ? "Don't have an account?" : "Already have an account?"}
 							<Button
 								variant="link"
-								className="pl-1"
+								className="pl-1 text-indigo-600"
 								onClick={() => {
 									setActiveTab(activeTab === 'login' ? 'register' : 'login');
 									resetForm();
