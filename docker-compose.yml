@@ -29,8 +29,8 @@ services:
     ports:
       - "${NODE_LOCAL_PORT}:${NODE_DOCKER_PORT}"
     volumes:
-      - ./backend:/app
-      - /app/node_modules  
+      - /tmp/backend:/app  
+      - /tmp/node_modules:/app/node_modules 
 
   frontend:
     build:
@@ -43,5 +43,5 @@ services:
     environment:
       VITE_API_URL: http://backend:${NODE_DOCKER_PORT}
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - /tmp/frontend:/app 
+      - /tmp/node_modules:/app/node_modules  
