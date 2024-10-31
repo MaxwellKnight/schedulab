@@ -46,8 +46,6 @@ services:
       - /app/node_modules
     depends_on:
       - backend
-    environment:
-      VITE_API_URL: "http://localhost:${NODE_LOCAL_PORT}"
 
 volumes:
   db_data:
