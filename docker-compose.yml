@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
   mysqldb:
     image: mysql:8.0.40
-    platform: linux/x86_64/v8
+    platform: linux/arm64/v8
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: "${DATABASE_PASSWORD}"
@@ -11,9 +9,9 @@ services:
     ports:
       - "${DATABASE_LOCAL_PORT}:${DATABASE_DOCKER_PORT}"
     volumes:
-      - db_data:/var/lib/mysql
-      - dump_data:/docker-entrypoint-initdb.d
-
+      - db:/var/lib/mysql
+      - ./backend/dump:/docker-entrypoint-initdb.d    # Changed this line
+  
   backend:
     depends_on:
       - mysqldb
@@ -32,9 +30,9 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      - backend_data:/app
+      - ./backend:/app    # Changed this line
       - /app/node_modules
-
+  
   frontend:
     build:
       context: ./frontend/
@@ -42,13 +40,10 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - frontend_data:/app
+      - ./frontend:/app    # Changed this line
       - /app/node_modules
     depends_on:
       - backend
 
 volumes:
-  db_data:
-  dump_data:
-  backend_data:
-  frontend_data:
+  db:
