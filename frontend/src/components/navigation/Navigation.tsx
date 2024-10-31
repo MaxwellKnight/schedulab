@@ -6,6 +6,77 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CalendarRange, Bell, Menu, X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth/useAuth';
 
+const Logo = () => (
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 90" className="h-12 w-auto">
+		<defs>
+			<linearGradient id="calendarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+				<stop offset="0%" style={{ stopColor: "#6366F1" }} />
+				<stop offset="100%" style={{ stopColor: "#4338CA" }} />
+			</linearGradient>
+
+			<linearGradient id="shineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+				<stop offset="0%" style={{ stopColor: "rgba(255,255,255,0)" }} />
+				<stop offset="50%" style={{ stopColor: "rgba(255,255,255,0.2)" }} />
+				<stop offset="100%" style={{ stopColor: "rgba(255,255,255,0)" }} />
+				<animate attributeName="x1" from="-100%" to="100%" dur="3s" repeatCount="indefinite" />
+				<animate attributeName="x2" from="0%" to="200%" dur="3s" repeatCount="indefinite" />
+			</linearGradient>
+
+			<filter id="premium-shadow" x="-50%" y="-50%" width="200%" height="200%">
+				<feOffset dx="2" dy="2" in="SourceAlpha" result="offsetblur" />
+				<feGaussianBlur in="offsetblur" stdDeviation="2" result="blur" />
+				<feComponentTransfer>
+					<feFuncA type="linear" slope="0.3" />
+				</feComponentTransfer>
+				<feMerge>
+					<feMergeNode />
+					<feMergeNode in="SourceGraphic" />
+				</feMerge>
+			</filter>
+		</defs>
+
+		<g transform="translate(30,20)" filter="url(#premium-shadow)">
+			<circle cx="25" cy="25" r="25" fill="url(#calendarGradient)" />
+			<circle cx="25" cy="25" r="25" fill="url(#shineGradient)" />
+
+			<g transform="translate(25,25)">
+				<g stroke="white" strokeWidth="1.5" strokeOpacity="0.6">
+					<line x1="0" y1="-20" x2="0" y2="-17" />
+					<line x1="20" y1="0" x2="17" y2="0" />
+					<line x1="0" y1="20" x2="0" y2="17" />
+					<line x1="-20" y1="0" x2="-17" y2="0" />
+				</g>
+
+				<g>
+					<line x1="0" y1="0" x2="0" y2="-12" stroke="white" strokeWidth="3" strokeLinecap="round">
+						<animateTransform attributeName="transform"
+							type="rotate"
+							from="0 0 0"
+							to="360 0 0"
+							dur="12s"
+							repeatCount="indefinite" />
+					</line>
+					<line x1="0" y1="0" x2="14" y2="0" stroke="white" strokeWidth="3" strokeLinecap="round">
+						<animateTransform attributeName="transform"
+							type="rotate"
+							from="0 0 0"
+							to="360 0 0"
+							dur="6s"
+							repeatCount="indefinite" />
+					</line>
+					<circle r="2.5" fill="white" />
+				</g>
+			</g>
+		</g>
+
+		<g transform="translate(90,53)">
+			<text fontFamily="Arial, sans-serif" fontSize="38" fontWeight="600" fill="#1F2937" letterSpacing="0">
+				schedula
+			</text>
+		</g>
+	</svg>
+);
+
 export const Navigation = () => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const { logout, user } = useAuth();
@@ -24,11 +95,7 @@ export const Navigation = () => {
 				<div className="flex items-center justify-between h-16">
 					<div className="flex items-center">
 						<Link to="/" className="flex-shrink-0">
-							<img
-								src="https://tecdn.b-cdn.net/img/logo/te-transparent-noshadows.webp"
-								alt="TE Logo"
-								className="h-8 w-auto"
-							/>
+							<Logo />
 						</Link>
 						<div className="hidden md:block ml-10">
 							<div className="flex items-baseline space-x-4">
@@ -147,8 +214,12 @@ export const Navigation = () => {
 								</Avatar>
 							</div>
 							<div className="ml-3">
-								<div className="text-base font-medium leading-none text-white">{user?.first_name}</div>
-								<div className="text-sm font-medium leading-none text-gray-400">{user?.email}</div>
+								<div className="text-base font-medium leading-none text-white">
+									{user?.first_name}
+								</div>
+								<div className="text-sm font-medium leading-none text-gray-400">
+									{user?.email}
+								</div>
 							</div>
 						</div>
 						<div className="mt-3 px-2 space-y-1">
