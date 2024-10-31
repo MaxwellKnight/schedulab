@@ -3,7 +3,7 @@ version: '3.8'
 services:
   mysqldb:
     image: mysql:8.0.40
-    platform: linux/arm64/v8
+    platform: linux/x86_64/v8
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: "${DATABASE_PASSWORD}"
@@ -11,13 +11,13 @@ services:
     ports:
       - "${DATABASE_LOCAL_PORT}:${DATABASE_DOCKER_PORT}"
     volumes:
-      - ./db:/var/lib/mysql
-      - ./backend/dump/:/docker-entrypoint-initdb.d
+      - db_data:/var/lib/mysql
+      - dump_data:/docker-entrypoint-initdb.d
 
   backend:
     depends_on:
       - mysqldb
-    build: 
+    build:
       context: ./backend
       dockerfile: Dockerfile
     restart: unless-stopped
@@ -32,7 +32,7 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      - ./backend:/app
+      - backend_data:/app
       - /app/node_modules
 
   frontend:
@@ -42,12 +42,15 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend:/app
+      - frontend_data:/app
       - /app/node_modules
     depends_on:
       - backend
     environment:
       VITE_API_URL: "http://localhost:${NODE_LOCAL_PORT}"
 
-volumes: 
-  db:
+volumes:
+  db_data:
+  dump_data:
+  backend_data:
+  frontend_data:
