@@ -224,7 +224,7 @@ const Schedule: React.FC = () => {
 	const handleTemplateSelect = (selected: TemplateScheduleData | null) => {
 		setTemplate(selected);
 		setIsDirty(false);
-		setAssignments([]); // Clear assignments when template changes
+		setAssignments([]);
 	};
 
 	const handleSaveDraft = () => {

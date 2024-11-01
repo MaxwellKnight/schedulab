@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import axios, { AxiosRequestConfig, AxiosError } from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 interface FetchState<T> {
@@ -11,6 +11,7 @@ interface FetchState<T> {
 interface UseAuthenticatedFetchResult<T> extends FetchState<T> {
 	fetchData: () => Promise<void>;
 	clearError: () => void;
+	clearData: () => void;
 }
 
 interface RefreshTokenResponse {
@@ -18,46 +19,75 @@ interface RefreshTokenResponse {
 	refreshToken: string;
 }
 
+interface AuthTokens {
+	accessToken: string;
+	refreshToken: string;
+}
+
+const CONFIG = {
+	BASE_URL: 'http://localhost:5713',
+	MAX_RETRIES: 3,
+	STORAGE_KEYS: {
+		ACCESS_TOKEN: 'authToken',
+		REFRESH_TOKEN: 'refreshToken',
+		USER: 'user'
+	}
+} as const;
+
 // Configure axios defaults
-axios.defaults.baseURL = 'http://localhost:5713';
+axios.defaults.baseURL = CONFIG.BASE_URL;
 axios.defaults.withCredentials = true;
 
-// Token refresh promise to prevent multiple refresh requests
-let refreshingTokenPromise: Promise<string> | null = null;
+// Token refresh promise singleton
+let refreshingTokenPromise: Promise<AuthTokens> | null = null;
 
-// Queue of failed requests to retry after token refresh
-// eslint-disable-next-line @typescript-eslint/ban-types
-const failedQueue: { resolve: Function; reject: Function }[] = [];
+// Queue for failed requests
+interface QueueItem {
+	resolve: (token: string) => void;
+	reject: (error: Error) => void;
+}
 
-const processQueue = (error: Error | null, token: string | null = null) => {
+const failedQueue: QueueItem[] = [];
+
+const processQueue = (error: Error | null, tokens: AuthTokens | null = null) => {
 	failedQueue.forEach(promise => {
 		if (error) {
 			promise.reject(error);
-		} else {
-			promise.resolve(token);
+		} else if (tokens) {
+			promise.resolve(tokens.accessToken);
 		}
 	});
 	failedQueue.length = 0;
 };
 
-const refreshToken = async (): Promise<string> => {
+const clearAuthStorage = () => {
+	Object.values(CONFIG.STORAGE_KEYS).forEach(key => {
+		localStorage.removeItem(key);
+	});
+};
+
+const refreshToken = async (): Promise<AuthTokens> => {
 	try {
-		const refreshToken = localStorage.getItem('refreshToken');
-		if (!refreshToken) throw new Error('No refresh token available');
+		const refreshToken = localStorage.getItem(CONFIG.STORAGE_KEYS.REFRESH_TOKEN);
+		if (!refreshToken) {
+			throw new Error('No refresh token available');
+		}
 
 		const response = await axios.post<RefreshTokenResponse>('/auth/refresh', {
 			refreshToken
 		});
 
-		const { accessToken, refreshToken: newRefreshToken } = response.data;
-		localStorage.setItem('authToken', accessToken);
-		localStorage.setItem('refreshToken', newRefreshToken);
+		const tokens: AuthTokens = {
+			accessToken: response.data.accessToken,
+			refreshToken: response.data.refreshToken
+		};
 
-		return accessToken;
+		localStorage.setItem(CONFIG.STORAGE_KEYS.ACCESS_TOKEN, tokens.accessToken);
+		localStorage.setItem(CONFIG.STORAGE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
+
+		return tokens;
 	} catch (error) {
-		localStorage.removeItem('authToken');
-		localStorage.removeItem('refreshToken');
-		localStorage.removeItem('user');
+		clearAuthStorage();
 		throw error;
 	}
 };
@@ -76,7 +106,6 @@ export const useAuthenticatedFetch = <T,>(
 	const optionsRef = useRef(options);
 	const navigate = useNavigate();
 	const retryCount = useRef(0);
-	const MAX_RETRIES = 3;
 
 	useEffect(() => {
 		optionsRef.current = options;
@@ -95,30 +124,44 @@ export const useAuthenticatedFetch = <T,>(
 		}
 	}, []);
 
-	const executeRequest = useCallback(async (token: string): Promise<T> => {
-		const response = await axios.request<T>({
-			url,
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${token}`,
-				...optionsRef.current.headers
-			},
-			...optionsRef.current
-		});
-		return response.data;
+	const clearData = useCallback(() => {
+		if (mounted.current) {
+			setState(prev => ({ ...prev, data: null }));
+		}
+	}, []);
+
+	const executeRequest = useCallback(async (token: string): Promise<T | null> => {
+		try {
+			const response = await axios.request<T>({
+				url,
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${token}`,
+					...optionsRef.current.headers
+				},
+				...optionsRef.current
+			});
+			return response.data;
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				const errorMessage = error.response?.data?.message || error.message;
+				console.log(errorMessage);
+			}
+		}
+		return null;
 	}, [url]);
 
-	const handleTokenRefresh = useCallback(async () => {
+	const handleTokenRefresh = useCallback(async (): Promise<string> => {
 		try {
 			if (!refreshingTokenPromise) {
 				refreshingTokenPromise = refreshToken();
 			}
-			const newToken = await refreshingTokenPromise;
+			const tokens = await refreshingTokenPromise;
 			refreshingTokenPromise = null;
-			processQueue(null, newToken);
-			return newToken;
+			processQueue(null, tokens);
+			return tokens.accessToken;
 		} catch (error) {
-			processQueue(error as Error);
+			processQueue(error instanceof Error ? error : new Error('Token refresh failed'));
 			navigate('/login');
 			throw error;
 		}
@@ -130,7 +173,7 @@ export const useAuthenticatedFetch = <T,>(
 		setState(prev => ({ ...prev, loading: true, error: null }));
 
 		try {
-			const token = localStorage.getItem('authToken');
+			const token = localStorage.getItem(CONFIG.STORAGE_KEYS.ACCESS_TOKEN);
 			if (!token) {
 				throw new Error('Authentication token not found');
 			}
@@ -138,23 +181,17 @@ export const useAuthenticatedFetch = <T,>(
 			try {
 				const data = await executeRequest(token);
 				if (mounted.current) {
-					setState({
-						data,
-						loading: false,
-						error: null
-					});
+					setState({ data, loading: false, error: null });
 				}
 				retryCount.current = 0;
 			} catch (error) {
 				if (axios.isAxiosError(error)) {
-					const axiosError = error as AxiosError;
-
-					if (axiosError.response?.status === 403) {
-						if (retryCount.current < MAX_RETRIES) {
+					if (error.response?.status === 403) {
+						if (retryCount.current < CONFIG.MAX_RETRIES) {
 							retryCount.current++;
 
 							if (refreshingTokenPromise) {
-								await new Promise((resolve, reject) => {
+								await new Promise<string>((resolve, reject) => {
 									failedQueue.push({ resolve, reject });
 								});
 							}
@@ -163,11 +200,7 @@ export const useAuthenticatedFetch = <T,>(
 							const data = await executeRequest(newToken);
 
 							if (mounted.current) {
-								setState({
-									data,
-									loading: false,
-									error: null
-								});
+								setState({ data, loading: false, error: null });
 							}
 						} else {
 							throw new Error('Maximum retry attempts reached');
@@ -189,7 +222,7 @@ export const useAuthenticatedFetch = <T,>(
 				}));
 
 				if (axios.isAxiosError(err) &&
-					(err.response?.status === 401 || err.response?.status === 403)) {
+					[401, 403].includes(err.response?.status || 0)) {
 					navigate('/login');
 				}
 			}
@@ -203,6 +236,7 @@ export const useAuthenticatedFetch = <T,>(
 	return {
 		...state,
 		fetchData,
-		clearError
+		clearError,
+		clearData
 	};
 };

@@ -23,8 +23,9 @@ export class UserService {
 			user_role: user.user_role,
 			first_name: user.first_name,
 			last_name: user.last_name,
+			picture: user.picture,
+			display_name: user.display_name,
 			email: user.email,
-			student: user.student,
 			created_at: user.created_at,
 			team_name: user.team_name,
 			recent_shifts: shifts,
@@ -64,13 +65,13 @@ export class UserService {
 
 	public async create(userData: CreateUserData): Promise<number> {
 		const user: Omit<User, 'id' | 'recent_shifts' | 'recent_vacations' | 'team_name'> = {
+			...userData,
 			team_id: userData.team_id,
 			user_role: userData.user_role,
 			first_name: userData.first_name,
 			last_name: userData.last_name,
 			email: userData.email,
 			password: userData.password,
-			student: userData.student,
 			created_at: new Date()
 		};
 
@@ -119,7 +120,6 @@ export class UserService {
 			...(userData.first_name !== undefined && { first_name: userData.first_name }),
 			...(userData.last_name !== undefined && { last_name: userData.last_name }),
 			...(userData.email !== undefined && { email: userData.email }),
-			...(userData.student !== undefined && { student: userData.student }),
 			...(userData.created_at !== undefined && { created_at: userData.created_at })
 		};
 

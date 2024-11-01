@@ -11,45 +11,8 @@ import { Label } from '@radix-ui/react-label';
 import { Mail, Lock, Loader2, User, AlertCircle, Zap, Calendar, Clock } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { motion, AnimatePresence } from 'framer-motion';
-
-// Setup axios defaults
-axios.defaults.baseURL = 'http://localhost:5713';
-axios.defaults.withCredentials = true;
-axios.defaults.headers.common['Content-Type'] = 'application/json';
-
-// Setup axios interceptors for token handling
-axios.interceptors.response.use(
-	(response) => response,
-	async (error) => {
-		const originalRequest = error.config;
-
-		if (error.response.status === 403 && !originalRequest._retry) {
-			originalRequest._retry = true;
-
-			try {
-				const refreshToken = localStorage.getItem('refreshToken');
-				const response = await axios.post('/auth/refresh', { refreshToken });
-				const { accessToken, refreshToken: newRefreshToken } = response.data;
-
-				localStorage.setItem('authToken', accessToken);
-				localStorage.setItem('refreshToken', newRefreshToken);
-
-				axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-				originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
-
-				return axios(originalRequest);
-			} catch (refreshError) {
-				localStorage.removeItem('authToken');
-				localStorage.removeItem('refreshToken');
-				localStorage.removeItem('user');
-				window.location.href = '/login';
-				return Promise.reject(refreshError);
-			}
-		}
-
-		return Promise.reject(error);
-	}
-);
+import { UserData } from '@/types';
+import { toast } from '@/hooks/use-toast';
 
 interface RegisterData {
 	username: string;
@@ -75,13 +38,25 @@ const Login: React.FC = () => {
 		}
 	}, [navigate]);
 
+	const handleGoogleLogin = () => {
+		window.location.href = `${axios.defaults.baseURL}/auth/google`;
+	};
+
 	const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();
 		setError('');
 		setLoading(true);
 
 		try {
-			const response = await axios.post('/auth/login', { email, password });
+			const response = await axios.post<{
+				accessToken: string;
+				refreshToken: string;
+				user: UserData;
+			}>('/auth/login', {
+				email,
+				password
+			});
+
 			const { accessToken, refreshToken, user } = response.data;
 
 			localStorage.setItem('authToken', accessToken);
@@ -92,8 +67,17 @@ const Login: React.FC = () => {
 			login(accessToken, user);
 			navigate('/');
 		} catch (err) {
-			if (axios.isAxiosError(err) && err.response) {
-				setError(err.response.data.message || 'An error occurred during login');
+			if (axios.isAxiosError(err)) {
+				const errorMessage = err.response?.data?.message || err.message;
+				setError(errorMessage);
+
+				if (err.response?.status === 401) {
+					setError('Invalid email or password');
+				} else if (err.response?.status === 429) {
+					setError('Too many login attempts. Please try again later.');
+				} else {
+					setError(errorMessage || 'An error occurred during login');
+				}
 			} else {
 				setError('An unexpected error occurred');
 			}
@@ -114,14 +98,32 @@ const Login: React.FC = () => {
 		};
 
 		try {
-			await axios.post('/auth/register', registerData);
-			setActiveTab('login');
-			setEmail('');
-			setPassword('');
-			setUsername('');
+			const response = await axios.post('/auth/register', registerData);
+
+			if (response.status === 201 || response.status === 200) {
+				setActiveTab('login');
+				setEmail('');
+				setPassword('');
+				setUsername('');
+				// Optional: Show success message
+				toast({
+					title: "Account created successfully!",
+					description: "Please log in with your new account.",
+					variant: "default"
+				});
+			}
 		} catch (err) {
-			if (axios.isAxiosError(err) && err.response) {
-				setError(err.response.data.message || 'An error occurred during registration');
+			if (axios.isAxiosError(err)) {
+				const errorMessage = err.response?.data?.message || err.message;
+
+				// Handle specific registration errors
+				if (err.response?.status === 409) {
+					setError('Email or username already exists');
+				} else if (err.response?.status === 400) {
+					setError(errorMessage || 'Invalid registration data');
+				} else {
+					setError(errorMessage || 'An error occurred during registration');
+				}
 			} else {
 				setError('An unexpected error occurred');
 			}
@@ -581,7 +583,7 @@ const Login: React.FC = () => {
 								<Button
 									variant="outline"
 									className="w-full relative overflow-hidden group"
-									onClick={() => console.log("Google sign-in")}
+									onClick={handleGoogleLogin}
 									disabled={loading}
 								>
 									<motion.div

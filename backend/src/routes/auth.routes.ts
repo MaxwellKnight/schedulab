@@ -1,10 +1,11 @@
-import Router from "express";
+import { Router } from "express";
+import passport from "passport";
 import { UserRepository } from "../repositories";
 import { makeSQL } from "../configs/db.config";
 import { UserService } from "../services";
 import { AuthController } from "../controllers/auth.controller";
 import { adaptMiddleware } from "../helpers/adapters";
-import { makeValidator } from "../middlewares/middlewares";
+import { makeValidator, verifyToken } from "../middlewares/middlewares";
 import { userSchema } from "../validations/user.validation";
 import { loginSchema, refreshTokenSchema } from "../validations/auth.validation";
 
@@ -19,7 +20,7 @@ const userValidator = makeValidator(userSchema);
 const refreshTokenValidator = makeValidator(refreshTokenSchema);
 const loginValidator = makeValidator(loginSchema);
 
-// Auth routes
+// Basic auth routes
 router.route("/register")
 	.post(
 		adaptMiddleware(userValidator),
@@ -44,13 +45,58 @@ router.route("/logout")
 		adaptMiddleware(controller.logout)
 	);
 
-// Protected routes example
-router.route("/protected")
-	.get(
-		adaptMiddleware(controller.authenticate),
-		(req, res) => {
-			res.json({ message: 'Access granted to protected route', user: req.body.user });
-		}
-	);
+// Google OAuth routes
+router.get('/google',
+	passport.authenticate('google', {
+		scope: ['profile', 'email']
+	})
+);
 
+router.get('/google/callback',
+	passport.authenticate('google', {
+		failureRedirect: '/login',
+		session: false
+	}),
+	async (req, res) => {
+		try {
+			const tokens = controller.generateTokens(req.user);
+
+			const redirectUrl = new URL(`${process.env.FRONTEND_URL}/auth/callback`);
+			redirectUrl.searchParams.append('accessToken', tokens.accessToken);
+			redirectUrl.searchParams.append('refreshToken', tokens.refreshToken);
+
+			res.redirect(redirectUrl.toString());
+		} catch (error) {
+			console.error('Google auth callback error:', error);
+			res.redirect(`${process.env.FRONTEND_URL}/login?error=authentication-failed`);
+		}
+	}
+);
+
+router.get('/google/user',
+	verifyToken,
+	async (req, res) => {
+		try {
+			if (!req.user?.email) {
+				console.log('No email in token payload');
+				return res.status(401).json({
+					message: 'Invalid token payload - no email found',
+					debug: { tokenPayload: req.user }
+				});
+			}
+
+			const user = await userService.getByEmail(req.user.email);
+			console.log(user);
+			if (!user) {
+				return res.status(404).json({ message: 'User not found' });
+			}
+
+			const { password, ...userWithoutPassword } = user;
+			res.json({ user: userWithoutPassword });
+		} catch (error) {
+			console.error('Error fetching user data:', error);
+			res.status(500).json({ message: 'Error fetching user data' });
+		}
+	}
+);
 export default router;
