@@ -27,8 +27,7 @@
     "mysql2": "^3.10.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
-    "ts-node": "^10.9.2",
-    "types": "file:../../../../../../../jsonwebtoken"
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.7",

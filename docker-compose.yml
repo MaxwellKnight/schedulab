@@ -10,41 +10,43 @@ services:
       - "${DATABASE_LOCAL_PORT}:${DATABASE_DOCKER_PORT}"
     volumes:
       - db:/var/lib/mysql
-      - ./backend/dump:/docker-entrypoint-initdb.d    # Changed this line
+      - ./backend/dump:/docker-entrypoint-initdb.d    
   
   backend:
-    depends_on:
-      - mysqldb
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    environment:
-      DATABASE_HOST: "mysqldb"
-      DATABASE_USER: "${DATABASE_USER}"
-      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
-      DATABASE_NAME: "${DATABASE_NAME}"
-      DATABASE_PORT: "${DATABASE_DOCKER_PORT}"
-      GOOGLE_CLIENT_ID: "{GOOGLE_CLIENT_ID}"
-      GOOGLE_CLIENT_SECRET: "{GOOGLE_CLIENT_SECRET}"
-      GOOGLE_CALLBACK_URL: "{GOOGLE_CALLBACK_URL}"
-      FRONTEND_URL: "{FRONTEND_URL}"
-    ports:
-      - "${NODE_LOCAL_PORT}:${NODE_DOCKER_PORT}"
-    stdin_open: true
-    tty: true
-    volumes:
-      - ./backend:/app    # Changed this line
-      - /app/node_modules
+      depends_on:
+        - mysqldb
+      build:
+        context: ./backend
+        dockerfile: Dockerfile
+      restart: unless-stopped
+      environment:
+        DATABASE_HOST: "mysqldb"
+        DATABASE_USER: "${DATABASE_USER}"
+        DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
+        DATABASE_NAME: "${DATABASE_NAME}"
+        DATABASE_PORT: "${DATABASE_DOCKER_PORT}"
+        GOOGLE_CLIENT_ID: "{GOOGLE_CLIENT_ID}"
+        GOOGLE_CLIENT_SECRET: "{GOOGLE_CLIENT_SECRET}"
+        GOOGLE_CALLBACK_URL: "{GOOGLE_CALLBACK_URL}"
+        FRONTEND_URL: "{FRONTEND_URL}"
+      ports:
+        - "${NODE_LOCAL_PORT}:${NODE_DOCKER_PORT}"
+      stdin_open: true
+      tty: true
+      volumes:
+        - ./backend/src:/app/src    
+        - ./backend/package.json:/app/package.json    
+        - ./backend/package-lock.json:/app/package-lock.json    
   
   frontend:
     build:
       context: ./frontend/
       dockerfile: Dockerfile
+    platform: linux/amd64 
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend:/app    # Changed this line
+      - ./frontend:/app  
       - /app/node_modules
     depends_on:
       - backend
