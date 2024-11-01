@@ -1,8 +1,6 @@
 import { Router } from "express";
 import { makeSQL } from "../configs/db.config";
 import { AuthController, TemplateController } from "../controllers";
-import { adaptMiddleware } from "../helpers/adapters";
-import { access } from "../middlewares/middlewares";
 import { TemplateScheduleRepository, UserRepository } from "../repositories";
 import { TemplateService, UserService } from "../services";
 
@@ -20,38 +18,32 @@ const router = Router();
 
 router.route('/')
 	.get(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(templateController.getMany)
+		authController.authenticate,
+		templateController.getMany
 	)
 	.post(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.ADMIN_ACCESS),
-		adaptMiddleware(templateController.create)
+		authController.authenticate,
+		templateController.create
 	);
 
 router.route('/:id')
 	.get(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(templateController.getOne)
+		authController.authenticate,
+		templateController.getOne
 	)
 	.put(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.ADMIN_ACCESS),
-		adaptMiddleware(templateController.update)
+		authController.authenticate,
+		templateController.update
 	)
 	.delete(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.ADMIN_ACCESS),
-		adaptMiddleware(templateController.delete)
+		authController.authenticate,
+		templateController.delete
 	);
 
-router.route('/templates/team/:teamId')
+router.route('/team/:teamId')
 	.get(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(templateController.getByTeamId)
+		authController.authenticate,
+		templateController.getByTeamId
 	);
 
 export default router;

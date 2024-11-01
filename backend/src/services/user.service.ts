@@ -19,7 +19,6 @@ export class UserService {
 
 		return {
 			id: user.id!,
-			team_id: user.team_id,
 			user_role: user.user_role,
 			first_name: user.first_name,
 			last_name: user.last_name,
@@ -27,7 +26,6 @@ export class UserService {
 			display_name: user.display_name,
 			email: user.email,
 			created_at: user.created_at,
-			team_name: user.team_name,
 			recent_shifts: shifts,
 			recent_vacations: vacs
 		};
@@ -66,7 +64,6 @@ export class UserService {
 	public async create(userData: CreateUserData): Promise<number> {
 		const user: Omit<User, 'id' | 'recent_shifts' | 'recent_vacations' | 'team_name'> = {
 			...userData,
-			team_id: userData.team_id,
 			user_role: userData.user_role,
 			first_name: userData.first_name,
 			last_name: userData.last_name,
@@ -115,7 +112,6 @@ export class UserService {
 	public async update(userData: UpdateUserData): Promise<number> {
 		const user: Partial<User> & { id: number } = {
 			id: userData.id,
-			...(userData.team_id !== undefined && { team_id: userData.team_id }),
 			...(userData.user_role !== undefined && { user_role: userData.user_role }),
 			...(userData.first_name !== undefined && { first_name: userData.first_name }),
 			...(userData.last_name !== undefined && { last_name: userData.last_name }),

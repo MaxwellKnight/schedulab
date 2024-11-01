@@ -277,7 +277,7 @@ CREATE TABLE template_shifts (
   shift_type_id INT NOT NULL,
   shift_name VARCHAR(255) NOT NULL,
   required_count INT NOT NULL,
-  day_of_week INT NOT NULL, -- 0 for Sunday, 1 for Monday, etc.
+  day_of_week INT NOT NULL, 
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (template_schedule_id) REFERENCES template_schedules(id),
   FOREIGN KEY (shift_type_id) REFERENCES shift_types(id)
@@ -324,13 +324,11 @@ BEGIN
     DECLARE is_unique BOOLEAN;
     DECLARE attempts INT DEFAULT 0;
     DECLARE max_attempts INT DEFAULT 10;
-    
     generate_unique_code: REPEAT
         -- Reset code generation
         SET @chars := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         SET @code := '';
         SET @i := 0;
-        
         -- Generate random part
         WHILE @i < 6 DO
             SET @code := CONCAT(
@@ -339,24 +337,20 @@ BEGIN
             );
             SET @i := @i + 1;
         END WHILE;
-        
         -- Combine with prefix
         SET generated_code = CONCAT(
             SUBSTRING(NEW.name, 1, 4),
             '-',
             @code
         );
-        
         -- Check if unique
         SET is_unique = is_code_unique(generated_code);
         SET attempts = attempts + 1;
-        
         -- Exit conditions
         IF attempts >= max_attempts THEN
             SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = 'Failed to generate unique team code after maximum attempts';
         END IF;
-        
     UNTIL is_unique = TRUE END REPEAT generate_unique_code;
     
     SET NEW.team_code = generated_code;

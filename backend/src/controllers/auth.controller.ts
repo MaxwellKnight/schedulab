@@ -1,10 +1,11 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
-import { IRequest, IResponse } from "../interfaces";
 import { UserService } from '../services';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 import { Database } from '../configs/db.config';
+import { Response, Request, NextFunction } from 'express';
+import { TokenPayload } from '../middlewares/middlewares';
 
 dotenv.config();
 
@@ -99,7 +100,7 @@ export class AuthController {
 		}
 	}
 
-	public login = async (req: IRequest, res: IResponse) => {
+	public login = async (req: Request, res: Response) => {
 		try {
 			const { email, password } = req.body;
 			if (!email || !password)
@@ -135,7 +136,7 @@ export class AuthController {
 		}
 	}
 
-	public authenticate = async (req: IRequest, res: IResponse) => {
+	public authenticate = async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { authorization } = req.headers;
 			const token = authorization && authorization.split(' ')[1];
@@ -143,13 +144,14 @@ export class AuthController {
 			if (!token) return res.status(401).json({ message: 'Unauthorized access' });
 
 			const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
-			req.user = decoded;
+			req.user = decoded as TokenPayload;
+			next();
 		} catch (err) {
 			return res.status(403).json({ message: 'Invalid token' });
 		}
 	}
 
-	public refresh = async (req: IRequest, res: IResponse) => {
+	public refresh = async (req: Request, res: Response) => {
 		try {
 			const { refreshToken } = req.body;
 
@@ -177,7 +179,7 @@ export class AuthController {
 		}
 	}
 
-	public logout = async (req: IRequest, res: IResponse) => {
+	public logout = async (req: Request, res: Response) => {
 		try {
 			const { refreshToken } = req.body;
 
@@ -193,7 +195,7 @@ export class AuthController {
 		}
 	}
 
-	public register = async (req: IRequest, res: IResponse) => {
+	public register = async (req: Request, res: Response) => {
 		const { email, password, ...rest } = req.body;
 		const user = await this.service.getByEmail(email);
 

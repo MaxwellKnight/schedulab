@@ -46,7 +46,7 @@ const TemplateCombobox: React.FC<TemplateComboboxProps> = ({
 
 			const { data } = await axios.request({
 				method: 'GET',
-				url: '/templates',
+				url: '/templates/team/1',
 				baseURL: 'http://localhost:5713',
 				headers: {
 					'Content-Type': 'application/json',

@@ -122,10 +122,12 @@ export class TemplateScheduleRepository {
 		return templateScheduleId;
 	}
 
-	async getOne(id: number): Promise<TemplateSchedule | null> {
+	async getOne(id: number, teamId?: number): Promise<TemplateSchedule | null> {
 		const [rows] = await this.db.execute<TemplateScheduleRow[]>(
-			"SELECT * FROM template_schedules WHERE id = ?",
-			[id]
+			`SELECT ts.* 
+         FROM template_schedules ts
+         ${teamId ? 'WHERE ts.id = ? AND ts.team_id = ?' : 'WHERE ts.id = ?'}`,
+			teamId ? [id, teamId] : [id]
 		);
 
 		if (rows.length === 0) {
@@ -204,14 +206,16 @@ export class TemplateScheduleRepository {
 		};
 	}
 
-	async getMany(): Promise<TemplateSchedule[]> {
+	async getMany(teamId?: number): Promise<TemplateSchedule[]> {
 		const [rows] = await this.db.execute<TemplateScheduleRow[]>(
-			"SELECT * FROM template_schedules"
+			`SELECT * FROM template_schedules
+         ${teamId ? 'WHERE team_id = ?' : ''}`,
+			teamId ? [teamId] : []
 		);
 
 		const schedules = await Promise.all(
 			rows.map(async (ts) => {
-				const schedule = await this.getOne(ts.id!);
+				const schedule = await this.getOne(ts.id!, teamId);
 				if (!schedule) {
 					throw new Error(`Template schedule ${ts.id} not found during getMany()`);
 				}
@@ -223,22 +227,7 @@ export class TemplateScheduleRepository {
 	}
 
 	async getByTeamId(teamId: number): Promise<TemplateSchedule[]> {
-		const [rows] = await this.db.execute<TemplateScheduleRow[]>(
-			"SELECT * FROM template_schedules WHERE team_id = ?",
-			[teamId]
-		);
-
-		const schedules = await Promise.all(
-			rows.map(async (ts) => {
-				const schedule = await this.getOne(ts.id!);
-				if (!schedule) {
-					throw new Error(`Template schedule ${ts.id} not found during getByTeamId()`);
-				}
-				return schedule;
-			})
-		);
-
-		return schedules;
+		return this.getMany(teamId);
 	}
 
 	async update(templateSchedule: Omit<TemplateSchedule, "created_at">): Promise<number> {

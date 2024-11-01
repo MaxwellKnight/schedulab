@@ -1,5 +1,5 @@
 import { TemplateScheduleData } from "../interfaces/dto";
-import { IRequest, IResponse } from "../interfaces/http.interface";
+import { Response, Request } from "express";
 import { TemplateService } from "../services";
 
 export class TemplateController {
@@ -9,7 +9,7 @@ export class TemplateController {
 		this.service = service;
 	}
 
-	public create = async (req: IRequest, res: IResponse): Promise<void> => {
+	public create = async (req: Request, res: Response): Promise<void> => {
 		const template: Omit<TemplateScheduleData, "id" | "created_at"> = req.body;
 		try {
 			const id = await this.service.create(template);
@@ -21,7 +21,7 @@ export class TemplateController {
 		}
 	}
 
-	public getOne = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getOne = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
 		const template = await this.service.getOne(Number(id));
 		if (template) {
@@ -32,7 +32,7 @@ export class TemplateController {
 		}
 	}
 
-	public getMany = async (_: IRequest, res: IResponse): Promise<void> => {
+	public getMany = async (req: Request, res: Response): Promise<void> => {
 		const templates = await this.service.getMany();
 		if (templates.length > 0) {
 			res.json(templates);
@@ -42,7 +42,7 @@ export class TemplateController {
 		}
 	}
 
-	public getByTeamId = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getByTeamId = async (req: Request, res: Response): Promise<void> => {
 		const teamId = req.params.teamId;
 		const templates = await this.service.getByTeamId(Number(teamId));
 		if (templates.length > 0) {
@@ -53,7 +53,7 @@ export class TemplateController {
 		}
 	}
 
-	public update = async (req: IRequest, res: IResponse): Promise<void> => {
+	public update = async (req: Request, res: Response): Promise<void> => {
 		const { id, ...rest }: TemplateScheduleData = req.body;
 		const template = await this.service.getOne(id!);
 		if (!template) {
@@ -70,13 +70,13 @@ export class TemplateController {
 		res.json({ message: "Template schedule updated", id });
 	}
 
-	public delete = async (req: IRequest, res: IResponse): Promise<void> => {
+	public delete = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
 		await this.service.delete(Number(id));
 		res.json({ message: "Template schedule deleted", id: id });
 	}
 
-	public createScheduleFromTemplate = async (req: IRequest, res: IResponse): Promise<void> => {
+	public createScheduleFromTemplate = async (req: Request, res: Response): Promise<void> => {
 		const templateId = Number(req.params.id);
 		const { startDate } = req.body;
 		try {

@@ -126,7 +126,7 @@ const Schedule: React.FC = () => {
 		loading: membersLoading,
 		error: membersError,
 		fetchData: fetchMembers
-	} = useAuthenticatedFetch<UserData[]>(`/users/team/${user?.team_id}`, { params: { user_role: user?.user_role } });
+	} = useAuthenticatedFetch<UserData[]>(`/users/team/${user?.team_id}`);
 
 
 	const handleDragStart = (event: DragStartEvent) => {
@@ -256,92 +256,94 @@ const Schedule: React.FC = () => {
 			onDragCancel={() => setDraggedMember(null)}
 			modifiers={[restrictToWindowEdges]}
 		>
-			<div className="mx-auto p-4 space-y-4">
-				<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg shadow-sm">
-					<div className="flex-1 max-w-md">
-						<h1 className="text-sm text-gray-500 mb-2">Template</h1>
-						<Combobox
-							onTemplateSelect={handleTemplateSelect}
-							className="w-full"
-						/>
-					</div>
-					<div className="flex gap-2 w-full sm:w-auto">
-						<Button
-							variant="outline"
-							onClick={handleSaveDraft}
-							disabled={!template || !isDirty}
-							className="flex-1 sm:flex-none"
-						>
-							<Save className="h-4 w-4 mr-2" />
-							Save Draft
-						</Button>
-						<Button
-							onClick={handlePublish}
-							disabled={!template}
-							className="flex-1 sm:flex-none"
-						>
-							Publish Schedule
-						</Button>
-					</div>
-				</div>
-
-				{template ? (
-					<div className="xl:grid xl:grid-cols-12 gap-4 flex flex-col xl:flex-none">
-						<Sidebar
-							isOpen={leftSidebarOpen}
-							onToggle={() => setLeftSidebarOpen(!leftSidebarOpen)}
-							position="left"
-							icon={<Users />}
-							title="Members"
-						>
-							<MembersList members={members} />
-						</Sidebar>
-
-						<Card className={cn(
-							'col-span-12 transition-all duration-300',
-							leftSidebarOpen && rightSidebarOpen ? 'sm:col-span-8' :
-								(!leftSidebarOpen && !rightSidebarOpen) ? 'sm:col-span-10' :
-									'sm:col-span-9'
-						)}>
-							<div className="p-3 border-b">
-								<div className="flex items-center text-md text-gray-600 font-normal">
-									<Sheet className="h-4 w-4 mr-2" />
-									Schedule Grid
-								</div>
-							</div>
-							<CardContent className="p-2">
-								<ScheduleEditable
-									template={template}
-									shiftTypes={shiftTypes}
-									members={members}
-									assignments={assignments}
-									onAssignmentChange={handleAssignmentChange}
-								/>
-							</CardContent>
-						</Card>
-
-						<Sidebar
-							isOpen={rightSidebarOpen}
-							onToggle={() => setRightSidebarOpen(!rightSidebarOpen)}
-							position="right"
-							icon={<Settings />}
-							title="Settings"
-						>
-							<div className="space-y-2">
-								<div className="h-8 bg-gray-100 rounded animate-pulse" />
-								<div className="h-8 bg-gray-100 rounded animate-pulse" />
-								<div className="h-8 bg-gray-100 rounded animate-pulse" />
-							</div>
-						</Sidebar>
-					</div>
-				) : (
-					<div className="grid grid-cols-12 gap-4">
-						<div className="col-span-12 h-96 flex items-center justify-center text-gray-500">
-							Select a template to start creating your schedule
+			{user?.team_id ?
+				<div className="mx-auto p-4 space-y-4">
+					<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg shadow-sm">
+						<div className="flex-1 max-w-md">
+							<h1 className="text-sm text-gray-500 mb-2">Template</h1>
+							<Combobox
+								onTemplateSelect={handleTemplateSelect}
+								className="w-full"
+							/>
+						</div>
+						<div className="flex gap-2 w-full sm:w-auto">
+							<Button
+								variant="outline"
+								onClick={handleSaveDraft}
+								disabled={!template || !isDirty}
+								className="flex-1 sm:flex-none"
+							>
+								<Save className="h-4 w-4 mr-2" />
+								Save Draft
+							</Button>
+							<Button
+								onClick={handlePublish}
+								disabled={!template}
+								className="flex-1 sm:flex-none"
+							>
+								Publish Schedule
+							</Button>
 						</div>
 					</div>
-				)}
-			</div>
+
+					{template ? (
+						<div className="xl:grid xl:grid-cols-12 gap-4 flex flex-col xl:flex-none">
+							<Sidebar
+								isOpen={leftSidebarOpen}
+								onToggle={() => setLeftSidebarOpen(!leftSidebarOpen)}
+								position="left"
+								icon={<Users />}
+								title="Members"
+							>
+								<MembersList members={members} />
+							</Sidebar>
+
+							<Card className={cn(
+								'col-span-12 transition-all duration-300',
+								leftSidebarOpen && rightSidebarOpen ? 'sm:col-span-8' :
+									(!leftSidebarOpen && !rightSidebarOpen) ? 'sm:col-span-10' :
+										'sm:col-span-9'
+							)}>
+								<div className="p-3 border-b">
+									<div className="flex items-center text-md text-gray-600 font-normal">
+										<Sheet className="h-4 w-4 mr-2" />
+										Schedule Grid
+									</div>
+								</div>
+								<CardContent className="p-2">
+									<ScheduleEditable
+										template={template}
+										shiftTypes={shiftTypes}
+										members={members}
+										assignments={assignments}
+										onAssignmentChange={handleAssignmentChange}
+									/>
+								</CardContent>
+							</Card>
+
+							<Sidebar
+								isOpen={rightSidebarOpen}
+								onToggle={() => setRightSidebarOpen(!rightSidebarOpen)}
+								position="right"
+								icon={<Settings />}
+								title="Settings"
+							>
+								<div className="space-y-2">
+									<div className="h-8 bg-gray-100 rounded animate-pulse" />
+									<div className="h-8 bg-gray-100 rounded animate-pulse" />
+									<div className="h-8 bg-gray-100 rounded animate-pulse" />
+								</div>
+							</Sidebar>
+						</div>
+					) : (
+						<div className="grid grid-cols-12 gap-4">
+							<div className="col-span-12 h-96 flex items-center justify-center text-gray-500">
+								Select a template to start creating your schedule
+							</div>
+						</div>
+					)}
+				</div>
+				: null}
 			<DragOverlay>
 				{draggedMember ? (
 					<DraggableMemberOverlay

@@ -1,29 +1,3 @@
-import { NextFunction, Request, Response } from "express";
-import { IRequest, IResponse } from "../interfaces/http.interface";
-
-export const adaptMiddleware = (
-	callback: (req: IRequest, res: IResponse) => Promise<void>
-) => {
-	return async ({ body, params, query, headers }: Request, res: Response, next: NextFunction): Promise<void> => {
-		const request: IRequest = { body, headers, params, query };
-		const response: IResponse = {
-			json: (data: any) => res.json(data),
-			status: (code: number) => res.status(code),
-			cookie: res.cookie
-		};
-
-
-		try {
-			await callback(request, response);
-			if (!res.headersSent) next();
-		} catch (error) {
-			console.error(error);
-			res.status(500).json({ error: "Internal server error" });
-		}
-	};
-};
-
-
 // Function to convert input data to the Scheduler preferences format
 // export const  AdaptPreferences = (inputData: PreferenceData[]): PreferencesTable => {
 // 	const preferencesTable: PreferencesTable = inputData.map(user => {

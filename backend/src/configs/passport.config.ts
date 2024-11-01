@@ -31,7 +31,6 @@ export const configurePassport = () => {
 						if (email && profile.name?.givenName && profile.name?.familyName) {
 							const newUser = {
 								email,
-								team_id: 1,
 								google_id: profile.id,
 								display_name: profile.displayName,
 								first_name: profile.name?.givenName,

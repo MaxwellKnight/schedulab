@@ -1,9 +1,8 @@
 import Router from "express";
 import { makeSQL } from "../configs/db.config";
 import { shiftSchema } from "../validations/shift.validation";
-import { adaptMiddleware } from "../helpers/adapters";
 import { ShiftService, UserService } from "../services";
-import { access, makeValidator } from "../middlewares/middlewares";
+import { makeValidator } from "../middlewares/middlewares";
 import { AuthController, ShiftController } from '../controllers';
 import { ShiftRepository, UserRepository } from "../repositories";
 
@@ -21,63 +20,54 @@ const router = Router();
 
 router.route("/")
 	.get(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(controller.getMany)
+		authController.authenticate,
+		controller.getMany
 	)
 	.post(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.CHIEF_ACCESS),
-		adaptMiddleware(validator),
-		adaptMiddleware(controller.create)
+		authController.authenticate,
+		validator,
+		controller.create
 	);
 
 router.route("/types/:id")
-	.get(adaptMiddleware(controller.getTypes));
+	.get(controller.getTypes);
 
 router.route("/:id")
 	.put(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.SUPEVISOR_ACCESS),
-		adaptMiddleware(validator),
-		adaptMiddleware(controller.update)
+		authController.authenticate,
+		validator,
+		controller.update
 	)
 	.delete(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.ADMIN_ACCESS),
-		adaptMiddleware(controller.delete)
+		authController.authenticate,
+		controller.delete
 	)
 	.get(
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(controller.getOne)
+		controller.getOne
 	);
 
 router.route("/schedule/:id")
 	.get(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(controller.getByScheduleId)
+		authController.authenticate,
+		controller.getByScheduleId
 	);
 
 router.route("/user/:id")
 	.get(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(controller.getByUserId)
+		authController.authenticate,
+		controller.getByUserId
 	);
 
 router.route("/name/:name")
 	.get(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(controller.getByName)
+		authController.authenticate,
+		controller.getByName
 	);
 
 router.route("/date/:date")
 	.get(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(controller.getByDate)
+		authController.authenticate,
+		controller.getByDate
 	);
 
 export default router

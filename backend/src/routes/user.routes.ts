@@ -2,10 +2,9 @@ import { Router } from "express";
 import { makeSQL } from "../configs/db.config";
 import { UserService } from "../services";
 import { UserRepository } from "../repositories";
-import { adaptMiddleware } from "../helpers/adapters";
 import { userSchema } from "../validations/user.validation";
 import { AuthController, UserController } from "../controllers";
-import { access, makeValidator } from "../middlewares/middlewares";
+import { makeValidator } from "../middlewares/middlewares";
 
 const repository = new UserRepository(makeSQL());
 const service = new UserService(repository);
@@ -17,40 +16,35 @@ const router = Router();
 
 router.route("/")
 	.get(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.SUPEVISOR_ACCESS),
-		adaptMiddleware(controller.getMany)
+		authController.authenticate,
+		controller.getMany
 	)
 
 router.route("/team/:team_id")
 	.get(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.SUPEVISOR_ACCESS),
-		adaptMiddleware(controller.getByTeamId)
+		authController.authenticate,
+		controller.getByTeamId
 	)
 
 router.route("/:id")
 	.put(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(validator),
-		adaptMiddleware(controller.update)
+		authController.authenticate,
+		validator,
+		controller.update
 	)
 	.delete(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(controller.delete)
+		authController.authenticate,
+		controller.delete
 	)
 	.get(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(controller.getOne)
+		authController.authenticate,
+		controller.getOne
 	);
 
 router.route("/shift/:id")
 	.get(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(controller.getByShiftId)
+		authController.authenticate,
+		controller.getByShiftId
 	);
 
 export default router;

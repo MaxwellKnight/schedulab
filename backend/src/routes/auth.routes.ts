@@ -4,7 +4,6 @@ import { UserRepository } from "../repositories";
 import { makeSQL } from "../configs/db.config";
 import { UserService } from "../services";
 import { AuthController } from "../controllers/auth.controller";
-import { adaptMiddleware } from "../helpers/adapters";
 import { makeValidator, verifyToken } from "../middlewares/middlewares";
 import { userSchema } from "../validations/user.validation";
 import { loginSchema, refreshTokenSchema } from "../validations/auth.validation";
@@ -23,26 +22,26 @@ const loginValidator = makeValidator(loginSchema);
 // Basic auth routes
 router.route("/register")
 	.post(
-		adaptMiddleware(userValidator),
-		adaptMiddleware(controller.register)
+		userValidator,
+		controller.register
 	);
 
 router.route("/login")
 	.post(
-		adaptMiddleware(loginValidator),
-		adaptMiddleware(controller.login)
+		loginValidator,
+		controller.login
 	);
 
 router.route("/refresh")
 	.post(
-		adaptMiddleware(refreshTokenValidator),
-		adaptMiddleware(controller.refresh)
+		refreshTokenValidator,
+		controller.refresh
 	);
 
 router.route("/logout")
 	.post(
-		adaptMiddleware(refreshTokenValidator),
-		adaptMiddleware(controller.logout)
+		refreshTokenValidator,
+		controller.logout
 	);
 
 // Google OAuth routes
@@ -86,7 +85,6 @@ router.get('/google/user',
 			}
 
 			const user = await userService.getByEmail(req.user.email);
-			console.log(user);
 			if (!user) {
 				return res.status(404).json({ message: 'User not found' });
 			}

@@ -9,7 +9,6 @@ interface UserRow extends RowDataPacket, Omit<User, 'created_at' | 'recent_shift
 	created_at: string;
 	recent_shifts: string | null;
 	recent_vacations: string | null;
-	team_name?: string;
 }
 
 export class UserRepository {
@@ -33,7 +32,7 @@ export class UserRepository {
 		return result[0].insertId;
 	}
 
-	public async getOne(id: number): Promise<User | null> {
+	public async getOne(id: number, teamId?: number): Promise<User | null> {
 		const [rows] = await this.db.execute<UserRow[]>(`
             SELECT 
                 u.*,
@@ -49,23 +48,20 @@ export class UserRepository {
                         LIMIT 5
                     ) AS limited_shifts
                 ) AS recent_shifts,
-                GROUP_CONCAT(DISTINCT v.id SEPARATOR ',') AS recent_vacations,
-                t.name AS team_name
+                GROUP_CONCAT(DISTINCT v.id SEPARATOR ',') AS recent_vacations
             FROM 
                 users u
-            LEFT JOIN
-                vacations v ON v.user_id = u.id
-            LEFT JOIN
-                teams t ON u.team_id = t.id
+            ${teamId ? 'INNER JOIN team_members tm ON u.id = tm.user_id AND tm.team_id = ?' : ''}
+            LEFT JOIN vacations v ON v.user_id = u.id
             WHERE u.id = ?
             GROUP BY u.id`,
-			[id, id]
+			teamId ? [id, teamId, id] : [id, id]
 		);
 
 		return rows.length ? this.mapToUser(rows[0]) : null;
 	}
 
-	public async getMany(): Promise<User[]> {
+	public async getMany(teamId?: number): Promise<User[]> {
 		const [rows] = await this.db.execute<UserRow[]>(`
             SELECT 
                 u.*,
@@ -81,65 +77,72 @@ export class UserRepository {
                         LIMIT 5
                     ) AS limited_shifts
                 ) AS recent_shifts,
-                GROUP_CONCAT(DISTINCT v.id SEPARATOR ',') AS recent_vacations,
-                t.name AS team_name
+                GROUP_CONCAT(DISTINCT v.id SEPARATOR ',') AS recent_vacations
             FROM 
                 users u
-            LEFT JOIN
-                vacations v ON v.user_id = u.id
-            LEFT JOIN
-                teams t ON u.team_id = t.id
-            GROUP BY u.id`
-		);
-
-		return rows.map(row => this.mapToUser(row));
-	}
-
-	public async getByShiftId(id: number): Promise<User[]> {
-		const [rows] = await this.db.execute<UserRow[]>(`
-            SELECT 
-                u.*, t.name AS team_name
-            FROM 
-                users u
-            JOIN
-                user_shifts us ON u.id = us.user_id
-            LEFT JOIN
-                teams t ON u.team_id = t.id
-            WHERE 
-                us.shift_id = ?`,
-			[id]
-		);
-
-		return rows.map(row => this.mapToUser(row));
-	}
-
-	public async getByEmail(email: string): Promise<User | null> {
-		const [rows] = await this.db.execute<UserRow[]>(`
-            SELECT 
-                u.*,
-                (
-                    SELECT GROUP_CONCAT(DISTINCT limited_shifts.id ORDER BY limited_shifts.start_time SEPARATOR ',')
-                    FROM (
-                        SELECT s.id, tr.start_time
-                        FROM shifts s
-                        JOIN time_ranges tr ON s.id = tr.shift_id
-                        JOIN user_shifts us ON s.id = us.shift_id
-                        WHERE us.user_id = u.id
-                        ORDER BY tr.start_time DESC
-                        LIMIT 5
-                    ) AS limited_shifts
-                ) AS recent_shifts,
-                GROUP_CONCAT(DISTINCT v.id SEPARATOR ',') AS recent_vacations,
-                t.name AS team_name
-            FROM 
-                users u
-            LEFT JOIN
-                vacations v ON v.user_id = u.id
-            LEFT JOIN
-                teams t ON u.team_id = t.id
-            WHERE u.email = ?
+            ${teamId ? 'INNER JOIN team_members tm ON u.id = tm.user_id AND tm.team_id = ?' : ''}
+            LEFT JOIN vacations v ON v.user_id = u.id
             GROUP BY u.id`,
-			[email]
+			teamId ? [teamId] : []
+		);
+
+		return rows.map(row => this.mapToUser(row));
+	}
+
+	public async getByShiftId(id: number, teamId?: number): Promise<User[]> {
+		const [rows] = await this.db.execute<UserRow[]>(`
+            SELECT 
+                u.*,
+                (
+                    SELECT GROUP_CONCAT(DISTINCT limited_shifts.id ORDER BY limited_shifts.start_time SEPARATOR ',')
+                    FROM (
+                        SELECT s.id, tr.start_time
+                        FROM shifts s
+                        JOIN time_ranges tr ON s.id = tr.shift_id
+                        JOIN user_shifts us ON s.id = us.shift_id
+                        WHERE us.user_id = u.id
+                        ORDER BY tr.start_time DESC
+                        LIMIT 5
+                    ) AS limited_shifts
+                ) AS recent_shifts,
+                GROUP_CONCAT(DISTINCT v.id SEPARATOR ',') AS recent_vacations
+            FROM 
+                users u
+            INNER JOIN user_shifts us ON u.id = us.user_id
+            ${teamId ? 'INNER JOIN team_members tm ON u.id = tm.user_id AND tm.team_id = ?' : ''}
+            LEFT JOIN vacations v ON v.user_id = u.id
+            WHERE us.shift_id = ?
+            GROUP BY u.id`,
+			teamId ? [teamId, id] : [id]
+		);
+
+		return rows.map(row => this.mapToUser(row));
+	}
+
+	public async getByEmail(email: string, teamId?: number): Promise<User | null> {
+		const [rows] = await this.db.execute<UserRow[]>(`
+            SELECT 
+                u.*,
+                (
+                    SELECT GROUP_CONCAT(DISTINCT limited_shifts.id ORDER BY limited_shifts.start_time SEPARATOR ',')
+                    FROM (
+                        SELECT s.id, tr.start_time
+                        FROM shifts s
+                        JOIN time_ranges tr ON s.id = tr.shift_id
+                        JOIN user_shifts us ON s.id = us.shift_id
+                        WHERE us.user_id = u.id
+                        ORDER BY tr.start_time DESC
+                        LIMIT 5
+                    ) AS limited_shifts
+                ) AS recent_shifts,
+                GROUP_CONCAT(DISTINCT v.id SEPARATOR ',') AS recent_vacations
+            FROM 
+                users u
+            ${teamId ? 'INNER JOIN team_members tm ON u.id = tm.user_id AND tm.team_id = ?' : ''}
+            LEFT JOIN vacations v ON v.user_id = u.id
+            WHERE u.email = ? 
+            GROUP BY u.id`,
+			teamId ? [teamId, email] : [email]
 		);
 
 		return rows.length ? this.mapToUser(rows[0]) : null;
@@ -161,15 +164,11 @@ export class UserRepository {
                         LIMIT 5
                     ) AS limited_shifts
                 ) AS recent_shifts,
-                GROUP_CONCAT(DISTINCT v.id SEPARATOR ',') AS recent_vacations,
-                t.name AS team_name
+                GROUP_CONCAT(DISTINCT v.id SEPARATOR ',') AS recent_vacations
             FROM 
                 users u
-            LEFT JOIN
-                vacations v ON v.user_id = u.id
-            JOIN
-                teams t ON u.team_id = t.id
-            WHERE u.team_id = ?
+            INNER JOIN team_members tm ON u.id = tm.user_id AND tm.team_id = ?
+            LEFT JOIN vacations v ON v.user_id = u.id
             GROUP BY u.id`,
 			[teamId]
 		);
@@ -177,7 +176,16 @@ export class UserRepository {
 		return rows.map(row => this.mapToUser(row));
 	}
 
-	public async update(user: Partial<User> & { id: number }): Promise<number> {
+	public async update(user: Partial<User> & { id: number }, teamId?: number): Promise<number> {
+		if (teamId) {
+			// Verify user belongs to team before updating
+			const [rows] = await this.db.execute<RowDataPacket[]>(
+				"SELECT 1 FROM team_members WHERE user_id = ? AND team_id = ?",
+				[user.id, teamId]
+			);
+			if (!rows.length) return 0;
+		}
+
 		const result = await this.db.execute<ResultSetHeader>(
 			"UPDATE users SET ? WHERE id = ?",
 			[user, user.id]
@@ -185,7 +193,16 @@ export class UserRepository {
 		return result[0].affectedRows;
 	}
 
-	public async delete(id: number): Promise<number> {
+	public async delete(id: number, teamId?: number): Promise<number> {
+		if (teamId) {
+			// Verify user belongs to team before deleting
+			const [rows] = await this.db.execute<RowDataPacket[]>(
+				"SELECT 1 FROM team_members WHERE user_id = ? AND team_id = ?",
+				[id, teamId]
+			);
+			if (!rows.length) return 0;
+		}
+
 		await this.vacation_repo.deleteByUserId(id);
 		await this.preference_repo.deleteByUserId(id);
 		await this.shift_repo.removeUser(id);

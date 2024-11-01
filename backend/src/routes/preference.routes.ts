@@ -1,7 +1,6 @@
 import Router from "express";
 import { makeSQL } from "../configs/db.config";
-import { access, makeValidator } from "../middlewares/middlewares";
-import { adaptMiddleware } from "../helpers/adapters";
+import { makeValidator } from "../middlewares/middlewares";
 import { PreferenceService, UserService } from "../services";
 import { AuthController, PreferenceController } from "../controllers";
 import { PreferenceRepository, UserRepository } from "../repositories";
@@ -14,54 +13,47 @@ const controller = new PreferenceController(service);
 const validator = makeValidator(preferenceSchema);
 
 const userRepository = new UserRepository(makeSQL());
-const userService		= new UserService(userRepository);
-const authController	= new AuthController(userService);
+const userService = new UserService(userRepository);
+const authController = new AuthController(userService);
 
 const router = Router();
 
 router.route("/")
 	.get(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.SUPEVISOR_ACCESS),
-		adaptMiddleware(controller.getMany)
+		authController.authenticate,
+		controller.getMany
 	)
 	.post(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(validator),
-		adaptMiddleware(controller.create)
+		authController.authenticate,
+		validator,
+		controller.create
 	);
 
 router.route("/user/:id")
 	.get(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(controller.getByUserId)
+		authController.authenticate,
+		controller.getByUserId
 	);
 
 router.route("/:id")
 	.put(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(validator),
-		adaptMiddleware(controller.update)
+		authController.authenticate,
+		validator,
+		controller.update
 	)
 	.delete(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(controller.delete)
+		authController.authenticate,
+		controller.delete
 	)
 	.get(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.USER_ACCESS),
-		adaptMiddleware(controller.getOne)
+		authController.authenticate,
+		controller.getOne
 	);
 
 router.route("/dates/:start_date/:end_date")
 	.get(
-		adaptMiddleware(authController.authenticate),
-		adaptMiddleware(access.SUPEVISOR_ACCESS),
-		adaptMiddleware(controller.getByDates)
+		authController.authenticate,
+		controller.getByDates
 	);
 
 
