@@ -3,17 +3,9 @@ DROP DATABASE IF EXISTS schedula;
 CREATE DATABASE schedula;
 USE schedula;
 
--- Table: teams
-CREATE TABLE teams (
-  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
 -- Table: users
 CREATE TABLE users (
 	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	team_id INT ,
 	google_id VARCHAR(255) UNIQUE,
 	picture VARCHAR(2048),
 	display_name VARCHAR(255),
@@ -23,8 +15,27 @@ CREATE TABLE users (
 	last_name VARCHAR(255) NOT NULL,
 	password VARCHAR(255) NOT NULL,
 	email VARCHAR(255) UNIQUE,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table: teams
+CREATE TABLE teams (
+	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	creator_id 	INT NOT NULL,
+	team_code VARCHAR(255) NOT NULL,
+	name VARCHAR(255) NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	FOREIGN KEY (team_id) REFERENCES teams(id)
+	FOREIGN KEY (creator_id) REFERENCES users(id)
+);
+
+CREATE TABLE team_members (
+	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	team_id INT NOT NULL,
+	user_id INT NOT NULL,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	UNIQUE KEY unique_team_member (team_id, user_id),
+	FOREIGN KEY (team_id) REFERENCES teams(id),
+	FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- Table: shift_types
@@ -294,41 +305,115 @@ CREATE TABLE template_constraints (
   FOREIGN KEY (next_shift_type_id) REFERENCES shift_types(id)
 );
 
--- Insert into teams
-INSERT INTO teams (name) VALUES ("700");
+DELIMITER $$
 
--- Insert multiple users with specified roles
-INSERT INTO users (id, team_id, user_role, first_name, middle_name, last_name, password, email, created_at) VALUES
+CREATE FUNCTION is_code_unique(check_code VARCHAR(255)) 
+RETURNS BOOLEAN
+DETERMINISTIC
+BEGIN
+    DECLARE existing_count INT;
+    SELECT COUNT(*) INTO existing_count FROM teams WHERE team_code = check_code;
+    RETURN existing_count = 0;
+END$$
+
+CREATE TRIGGER before_team_insert 
+BEFORE INSERT ON teams
+FOR EACH ROW
+BEGIN
+    DECLARE generated_code VARCHAR(255);
+    DECLARE is_unique BOOLEAN;
+    DECLARE attempts INT DEFAULT 0;
+    DECLARE max_attempts INT DEFAULT 10;
+    
+    generate_unique_code: REPEAT
+        -- Reset code generation
+        SET @chars := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        SET @code := '';
+        SET @i := 0;
+        
+        -- Generate random part
+        WHILE @i < 6 DO
+            SET @code := CONCAT(
+                @code, 
+                SUBSTRING(@chars, FLOOR(1 + RAND() * 33), 1)
+            );
+            SET @i := @i + 1;
+        END WHILE;
+        
+        -- Combine with prefix
+        SET generated_code = CONCAT(
+            SUBSTRING(NEW.name, 1, 4),
+            '-',
+            @code
+        );
+        
+        -- Check if unique
+        SET is_unique = is_code_unique(generated_code);
+        SET attempts = attempts + 1;
+        
+        -- Exit conditions
+        IF attempts >= max_attempts THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Failed to generate unique team code after maximum attempts';
+        END IF;
+        
+    UNTIL is_unique = TRUE END REPEAT generate_unique_code;
+    
+    SET NEW.team_code = generated_code;
+END$$
+
+DELIMITER ;
+
+INSERT INTO users (id, user_role, first_name, middle_name, last_name, password, email, created_at) VALUES
 -- Admin
-(2, 1, 'admin', 'Sarah', NULL, 'Johnson', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'sarah.j@gmail.com', '2024-10-21 10:00:00'),
+(2, 'admin', 'Sarah', NULL, 'Johnson', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'sarah.j@gmail.com', '2024-10-21 10:00:00'),
 
 -- Chiefs
-(3, 1, 'chief', 'Michael', 'James', 'Smith', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'michael.s@gmail.com',  '2024-10-21 10:15:00'),
-(4, 1, 'chief', 'Emily', NULL, 'Davis', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'emily.d@gmail.com', '2024-10-21 10:30:00'),
+(3, 'chief', 'Michael', 'James', 'Smith', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'michael.s@gmail.com',  '2024-10-21 10:15:00'),
+(4, 'chief', 'Emily', NULL, 'Davis', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'emily.d@gmail.com', '2024-10-21 10:30:00'),
 
 -- Supervisors
-(5, 1, 'supervisor', 'David', NULL, 'Wilson', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'david.w@gmail.com', '2024-10-21 11:00:00'),
-(6, 1, 'supervisor', 'Lisa', 'Marie', 'Brown', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'lisa.b@gmail.com', '2024-10-21 11:30:00'),
-(7, 1, 'supervisor', 'James', NULL, 'Taylor', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'james.t@gmail.com', '2024-10-21 12:00:00'),
+(5, 'supervisor', 'David', NULL, 'Wilson', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'david.w@gmail.com', '2024-10-21 11:00:00'),
+(6, 'supervisor', 'Lisa', 'Marie', 'Brown', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'lisa.b@gmail.com', '2024-10-21 11:30:00'),
+(7, 'supervisor', 'James', NULL, 'Taylor', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'james.t@gmail.com', '2024-10-21 12:00:00'),
 
 -- Managers
-(8, 1, 'manager', 'Jessica', 'Ann', 'Martinez', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'jessica.m@gmail.com',  '2024-10-21 12:30:00'),
-(9, 1, 'manager', 'Robert', NULL, 'Anderson', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'robert.a@gmail.com', '2024-10-21 13:00:00'),
-(10, 1, 'manager', 'Michelle', NULL, 'Thomas', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'michelle.t@gmail.com',  '2024-10-21 13:30:00'),
+(8, 'manager', 'Jessica', 'Ann', 'Martinez', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'jessica.m@gmail.com',  '2024-10-21 12:30:00'),
+(9, 'manager', 'Robert', NULL, 'Anderson', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'robert.a@gmail.com', '2024-10-21 13:00:00'),
+(10, 'manager', 'Michelle', NULL, 'Thomas', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'michelle.t@gmail.com',  '2024-10-21 13:30:00'),
 
 -- Regular Users
-(11, 1, 'user', 'William', 'John', 'Garcia', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'william.g@gmail.com',  '2024-10-21 14:00:00'),
-(12, 1, 'user', 'Jennifer', NULL, 'Miller', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'jennifer.m@gmail.com',  '2024-10-21 14:30:00'),
-(13, 1, 'user', 'Christopher', 'Lee', 'Wong', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'chris.w@gmail.com',  '2024-10-21 15:00:00'),
-(14, 1, 'user', 'Amanda', NULL, 'Lopez', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'amanda.l@gmail.com', '2024-10-21 15:30:00'),
-(15, 1, 'user', 'Daniel', NULL, 'Lee', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'daniel.l@gmail.com',  '2024-10-21 16:00:00'),
-(16, 1, 'user', 'Rachel', 'Anne', 'Kim', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'rachel.k@gmail.com',  '2024-10-21 16:30:00'),
-(17, 1, 'user', 'Kevin', NULL, 'Chen', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'kevin.c@gmail.com', '2024-10-21 17:00:00'),
-(18, 1, 'user', 'Maria', NULL, 'Rodriguez', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'maria.r@gmail.com',  '2024-10-21 17:30:00'),
-(19, 1, 'user', 'Thomas', 'William', 'Wilson', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'thomas.w@gmail.com', '2024-10-21 18:00:00'),
-(20, 1, 'user', 'Sophie', NULL, 'Park', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'sophie.p@gmail.com',  '2024-10-21 18:30:00');
+(11, 'user', 'William', 'John', 'Garcia', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'william.g@gmail.com',  '2024-10-21 14:00:00'),
+(12, 'user', 'Jennifer', NULL, 'Miller', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'jennifer.m@gmail.com',  '2024-10-21 14:30:00'),
+(13, 'user', 'Christopher', 'Lee', 'Wong', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'chris.w@gmail.com',  '2024-10-21 15:00:00'),
+(14, 'user', 'Amanda', NULL, 'Lopez', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'amanda.l@gmail.com', '2024-10-21 15:30:00'),
+(15, 'user', 'Daniel', NULL, 'Lee', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'daniel.l@gmail.com',  '2024-10-21 16:00:00'),
+(16, 'user', 'Rachel', 'Anne', 'Kim', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'rachel.k@gmail.com',  '2024-10-21 16:30:00'),
+(17, 'user', 'Kevin', NULL, 'Chen', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'kevin.c@gmail.com', '2024-10-21 17:00:00'),
+(18, 'user', 'Maria', NULL, 'Rodriguez', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'maria.r@gmail.com',  '2024-10-21 17:30:00'),
+(19, 'user', 'Thomas', 'William', 'Wilson', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'thomas.w@gmail.com', '2024-10-21 18:00:00'),
+(20, 'user', 'Sophie', NULL, 'Park', '$2b$12$5M7tsBOu46jTUKJdl6hp7e.PuWzsOTlmIag5hqcbAetbjq8QtzFFa', 'sophie.p@gmail.com',  '2024-10-21 18:30:00');
 
 
+-- Insert into teams
+INSERT INTO teams (creator_id, team_code, name) 
+VALUES (2, 'HOSP700', '700');  
+
+-- Insert team members
+INSERT INTO team_members (team_id, user_id) 
+SELECT 1, id FROM users WHERE id >= 2 AND id <= 20;
+
+-- Start transaction to ensure data consistency
+START TRANSACTION;
+
+-- Create shift types with team_id
+INSERT INTO shift_types (id, name, team_id) VALUES 
+(1, 'Regular Staff', 1),
+(2, 'Supervisor', 1),
+(3, 'Senior Specialist', 1),
+(4, 'On-Call Staff', 1),
+(5, 'Emergency Response', 1)
+ON DUPLICATE KEY UPDATE name = VALUES(name);
 -- Start transaction to ensure data consistency
 START TRANSACTION;
 
