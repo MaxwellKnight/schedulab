@@ -1,6 +1,9 @@
 export interface UserData {
 	id: number;
 	team_id: number;  // New field to associate user with a team
+	google_id?: string;
+	display_name?: string;
+	picture?: string;
 	user_role: string;
 	first_name: string;
 	middle_name?: string;
@@ -9,7 +12,6 @@ export interface UserData {
 	password: string;  // Made optional as it's not always needed (e.g., when fetching user data)
 	recent_shifts: ParsedRecentShift[];
 	recent_vacations: ParsedRecentVacation[];
-	student: boolean;
 	created_at: Date;
 	team_name?: string;  // Optional field for when joined with teams table
 }

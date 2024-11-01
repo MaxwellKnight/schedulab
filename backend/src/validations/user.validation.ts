@@ -70,10 +70,6 @@ const schema = Joi.object<UserData>({
 			'string.empty': 'Password is required',
 			'string.min': 'Password must be at least 6 characters long',
 		}),
-	student: Joi.boolean().required().messages({
-		'boolean.base': 'Student must be a boolean',
-		'any.required': 'Student field is required',
-	}),
 	team_name: Joi.string().optional(),
 	created_at: Joi.date().optional()
 });

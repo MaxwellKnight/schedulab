@@ -1,13 +1,15 @@
 export interface User {
 	id: number;
 	team_id: number;
+	google_id?: string;
+	picture?: string;
+	display_name?: string;
 	user_role: string;
 	first_name: string;
 	last_name: string;
 	middle_name?: string;
 	password: string;
 	email: string;
-	student: boolean;
 	created_at: Date;
 	recent_shifts?: number[];
 	recent_vacations?: number[];

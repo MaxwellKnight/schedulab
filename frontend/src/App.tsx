@@ -1,9 +1,14 @@
-import { Layout } from './components/layout/Layout.tsx';
+import { Layout } from './components/layout/Layout';
 import { AuthProvider } from "./context/AuthContext";
 import { ReactNode } from 'react';
-import { useAuth } from "./hooks/useAuth/useAuth.ts";
+import { useAuth } from "./hooks/useAuth/useAuth";
 import { createBrowserRouter, RouterProvider, Navigate, useLocation } from "react-router-dom";
 import { ScheduleBuilder, ErrorBoundary, Schedule, Login, Home, Members } from "./pages";
+import AuthCallback from './pages/Login/AuthCallback';
+import { setupAxiosAuth } from './utils/authInterceptor';
+
+// Setup auth headers on app start
+setupAxiosAuth();
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 	const { isAuthenticated } = useAuth();
@@ -12,7 +17,6 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 	if (!isAuthenticated) {
 		return <Navigate to="/login" replace state={{ from: location }} />;
 	}
-
 	return <>{children}</>;
 };
 
@@ -24,6 +28,11 @@ const AppRoutes: React.FC = () => {
 			errorElement: <ErrorBoundary />
 		},
 		{
+			path: "/auth/callback",
+			element: <AuthCallback />,
+			errorElement: <ErrorBoundary />
+		},
+		{
 			path: "/",
 			element: (
 				<ProtectedRoute>
@@ -31,22 +40,21 @@ const AppRoutes: React.FC = () => {
 				</ProtectedRoute>
 			),
 			errorElement: <ErrorBoundary />,
-
 			children: [
 				{
 					index: true,
 					element: <Home />
 				},
 				{
-					path: "/build",
+					path: "build",
 					element: <ScheduleBuilder />
 				},
 				{
-					path: "/members",
+					path: "members",
 					element: <Members />
 				},
 				{
-					path: "/schedule",
+					path: "schedule",
 					element: <Schedule />
 				},
 			]

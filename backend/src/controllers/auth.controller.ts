@@ -8,11 +8,6 @@ import { Database } from '../configs/db.config';
 
 dotenv.config();
 
-interface ITokens {
-	accessToken: string;
-	refreshToken: string;
-}
-
 interface ExpiredToken extends RowDataPacket {
 	id: number;
 	token: string;
@@ -30,11 +25,32 @@ export class AuthController {
 		this.db = Database.instance;
 	}
 
-	private generateTokens(payload: any): ITokens {
-		const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET!, { expiresIn: '15m' });
-		const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET!, { expiresIn: '7d' });
+	generateTokens = (userData: any) => {
+		if (!userData.email) {
+			throw new Error('Missing email in user data');
+		}
+
+		const tokenPayload = {
+			id: userData.id,
+			email: userData.email,
+			googleId: userData.google_id,
+			name: userData.display_name,
+		};
+
+		const accessToken = jwt.sign(
+			tokenPayload,
+			process.env.ACCESS_TOKEN_SECRET!,
+			{ expiresIn: '1h' }
+		);
+
+		const refreshToken = jwt.sign(
+			{ id: userData.id },
+			process.env.ACCESS_TOKEN_SECRET!,
+			{ expiresIn: '7d' }
+		);
+
 		return { accessToken, refreshToken };
-	}
+	};
 
 	private async saveRefreshToken(token: string): Promise<void> {
 		try {
@@ -75,7 +91,6 @@ export class AuthController {
 
 	private async cleanupExpiredTokens(): Promise<void> {
 		try {
-			// Remove tokens older than 7 days
 			await this.db.execute<ResultSetHeader>(
 				'DELETE FROM expired WHERE created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)'
 			);
@@ -106,10 +121,7 @@ export class AuthController {
 			const { password: removed, ...rest } = user;
 			const tokens = this.generateTokens(rest);
 
-			// Save refresh token
 			await this.saveRefreshToken(tokens.refreshToken);
-
-			// Cleanup old tokens periodically
 			await this.cleanupExpiredTokens();
 
 			res.json({
@@ -145,22 +157,14 @@ export class AuthController {
 				return res.status(401).json({ message: 'Refresh token required' });
 			}
 
-			// Check if token is in expired table
 			const isExpired = await this.isTokenExpired(refreshToken);
 			if (isExpired) {
 				return res.status(403).json({ message: 'Refresh token expired' });
 			}
 
-			// Verify refresh token
 			const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!) as any;
-
-			// Generate new tokens
 			const tokens = this.generateTokens({ id: decoded.id, email: decoded.email });
-
-			// Remove old refresh token
 			await this.removeExpiredToken(refreshToken);
-
-			// Save new refresh token
 			await this.saveRefreshToken(tokens.refreshToken);
 
 			res.json({
@@ -181,7 +185,6 @@ export class AuthController {
 				return res.status(400).json({ message: 'Refresh token required' });
 			}
 
-			// Add refresh token to expired table
 			await this.saveRefreshToken(refreshToken);
 			res.json({ message: 'Logged out successfully' });
 		} catch (err) {
@@ -190,7 +193,6 @@ export class AuthController {
 		}
 	}
 
-	// Register method remains unchanged
 	public register = async (req: IRequest, res: IResponse) => {
 		const { email, password, ...rest } = req.body;
 		const user = await this.service.getByEmail(email);
