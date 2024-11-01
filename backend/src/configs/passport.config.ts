@@ -5,17 +5,14 @@ import { makeSQL } from "./db.config";
 import { UserRepository } from "../repositories";
 
 export const configurePassport = () => {
-	// Serialize user for the session
 	passport.serializeUser((user: any, done) => {
 		done(null, user);
 	});
 
-	// Deserialize user from the session
 	passport.deserializeUser((user: any, done) => {
 		done(null, user);
 	});
 
-	// Configure Google Strategy
 	passport.use(
 		'google',
 		new GoogleStrategy(

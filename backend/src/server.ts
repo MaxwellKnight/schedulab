@@ -12,7 +12,6 @@ dotenv.config();
 const app = express();
 const PORT = process.env.NODE_LOCAL_PORT || 5713;
 
-// Configure session first
 app.use(session({
 	secret: process.env.SESSION_SECRET || 'secret',
 	resave: false,
@@ -23,17 +22,14 @@ app.use(session({
 	}
 }));
 
-// Basic middleware
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Initialize and configure passport
 const passport = configurePassport();
 app.use(passport.initialize());
 app.use(passport.session());
 
-// CORS configuration
 app.use(cors({
 	origin: 'http://localhost:5173',
 	credentials: true,
@@ -44,7 +40,6 @@ app.use(cors({
 	optionsSuccessStatus: 204
 }));
 
-// Routes
 app.use('/auth', AuthRouter);
 app.use('/users', UserRouter);
 app.use('/preferences', PreferenceRouter);
