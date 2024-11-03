@@ -26,26 +26,27 @@ export class AuthController {
 		this.db = Database.instance;
 	}
 
-	generateTokens = (userData: any) => {
-		if (!userData.email) {
+	generateTokens = (user: TokenPayload) => {
+		if (!user.email) {
 			throw new Error('Missing email in user data');
 		}
 
-		const tokenPayload = {
-			id: userData.id,
-			email: userData.email,
-			googleId: userData.google_id,
-			name: userData.display_name,
+		const payload = {
+			id: user.id,
+			email: user.email,
+			googleId: user.google_id,
+			name: user.display_name,
+			picture: user.picture
 		};
 
 		const accessToken = jwt.sign(
-			tokenPayload,
+			payload,
 			process.env.ACCESS_TOKEN_SECRET!,
 			{ expiresIn: '1h' }
 		);
 
 		const refreshToken = jwt.sign(
-			{ id: userData.id },
+			{ id: user.id },
 			process.env.ACCESS_TOKEN_SECRET!,
 			{ expiresIn: '7d' }
 		);
@@ -119,14 +120,13 @@ export class AuthController {
 
 			if (!result) return res.status(401).json({ message: 'Incorrect email or password' });
 
-			const { password: removed, ...rest } = user;
-			const tokens = this.generateTokens(rest);
+			const { id, google_id, display_name, picture } = user;
+			const tokens = this.generateTokens({ id, google_id, display_name, picture, email });
 
 			await this.saveRefreshToken(tokens.refreshToken);
 			await this.cleanupExpiredTokens();
 
 			res.json({
-				user: rest,
 				accessToken: tokens.accessToken,
 				refreshToken: tokens.refreshToken
 			});

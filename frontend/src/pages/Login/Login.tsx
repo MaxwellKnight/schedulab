@@ -105,7 +105,6 @@ const Login: React.FC = () => {
 				setEmail('');
 				setPassword('');
 				setUsername('');
-				// Optional: Show success message
 				toast({
 					title: "Account created successfully!",
 					description: "Please log in with your new account.",

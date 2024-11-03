@@ -1,6 +1,5 @@
 import cors from 'cors';
 import express from "express";
-import session from 'express-session';
 import ip from './helpers/ip';
 import * as dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
@@ -12,14 +11,14 @@ dotenv.config();
 const app = express();
 const PORT = process.env.NODE_LOCAL_PORT || 5713;
 
-app.use(session({
-	secret: process.env.SESSION_SECRET || 'secret',
-	resave: false,
-	saveUninitialized: false,
-	cookie: {
-		secure: process.env.NODE_ENV === 'production',
-		maxAge: 24 * 60 * 60 * 1000 // 24 hours
-	}
+app.use(cors({
+	origin: process.env.FRONTEND_URL,
+	credentials: true,
+	methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+	allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Credentials'],
+	exposedHeaders: ['Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
+	preflightContinue: true,
+	optionsSuccessStatus: 204
 }));
 
 app.use(cookieParser());
@@ -28,17 +27,6 @@ app.use(express.urlencoded({ extended: true }));
 
 const passport = configurePassport();
 app.use(passport.initialize());
-app.use(passport.session());
-
-app.use(cors({
-	origin: 'http://localhost:5173',
-	credentials: true,
-	methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-	allowedHeaders: ['Content-Type', 'Authorization', 'Access-Control-Allow-Credentials'],
-	exposedHeaders: ['Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
-	preflightContinue: false,
-	optionsSuccessStatus: 204
-}));
 
 app.use('/auth', AuthRouter);
 app.use('/users', UserRouter);
@@ -48,4 +36,4 @@ app.use('/vacations', VacationRouter);
 app.use('/schedules', ScheduleRouter);
 app.use('/templates', TemplateRouter);
 
-app.listen(PORT, () => console.log(`server running on ${ip() || '127.0.0.1'}:${PORT}`));
+app.listen(PORT, () => console.log(`server running on ${ip() || 'localhost'}:${PORT}`));

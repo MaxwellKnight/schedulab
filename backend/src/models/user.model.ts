@@ -29,3 +29,11 @@ export interface ParsedRecentVacation {
 	start_date: string;
 	end_date: string;
 }
+
+export interface Team {
+	id: number;
+	name: string;
+	creator_id: number;
+	team_code: string;
+	created_at: Date;
+}

@@ -26,6 +26,12 @@ router.route("/team/:team_id")
 		controller.getByTeamId
 	)
 
+router.route("/teams")
+	.get(
+		authController.authenticate,
+		controller.getTeams
+	);
+
 router.route("/:id")
 	.put(
 		authController.authenticate,

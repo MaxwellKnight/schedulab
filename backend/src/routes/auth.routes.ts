@@ -58,7 +58,7 @@ router.get('/google/callback',
 	}),
 	async (req, res) => {
 		try {
-			const tokens = controller.generateTokens(req.user);
+			const tokens = controller.generateTokens(req.user!);
 
 			const redirectUrl = new URL(`${process.env.FRONTEND_URL}/auth/callback`);
 			redirectUrl.searchParams.append('accessToken', tokens.accessToken);

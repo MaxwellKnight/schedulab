@@ -31,9 +31,10 @@ export const makeValidator = (schema: Schema) => {
 
 export interface TokenPayload {
 	id: number;
-	email: string;
-	user_role: string;
-	team_id: number;
+	email?: string;
+	google_id?: string;
+	display_name?: string;
+	picture?: string;
 }
 
 declare global {

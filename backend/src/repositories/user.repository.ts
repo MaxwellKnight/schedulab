@@ -4,12 +4,15 @@ import { VacationRepository } from "./vacation.repository";
 import { PreferenceRepository } from "./preferences.repository";
 import { Database } from "../configs/db.config";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
+import { Team } from "../models/user.model";
 
 interface UserRow extends RowDataPacket, Omit<User, 'created_at' | 'recent_shifts' | 'recent_vacations'> {
 	created_at: string;
 	recent_shifts: string | null;
 	recent_vacations: string | null;
 }
+
+interface TeamRow extends RowDataPacket, Team { }
 
 export class UserRepository {
 	private readonly db: Database;
@@ -117,6 +120,20 @@ export class UserRepository {
 		);
 
 		return rows.map(row => this.mapToUser(row));
+	}
+
+	public async getTeams(teamId: number): Promise<Team[]> {
+		const [rows] = await this.db.execute<TeamRow[]>(`
+			SELECT * FROM teams t WHERE t.creator_id = ?
+		`, [teamId]);
+
+		return rows.length ? rows.map(({ id, creator_id, name, team_code, created_at }) => ({
+			id,
+			name,
+			creator_id,
+			team_code,
+			created_at
+		})) : [];
 	}
 
 	public async getByEmail(email: string, teamId?: number): Promise<User | null> {

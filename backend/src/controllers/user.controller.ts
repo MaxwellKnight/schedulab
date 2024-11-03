@@ -42,6 +42,18 @@ export class UserController {
 		}
 	}
 
+	public getTeams = async (req: Request, res: Response): Promise<void> => {
+		if (!req.user?.id) res.status(400).json({ message: "user is missing from request" });
+
+		const teams = await this.service.getTeams(req.user!.id);
+		if (teams.length > 0) {
+			res.json(teams);
+		} else {
+			res.status(404);
+			res.json({ error: "No teams exist" });
+		}
+	}
+
 	public getByShiftId = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
 		const users = await this.service.getByShiftId(Number(id));

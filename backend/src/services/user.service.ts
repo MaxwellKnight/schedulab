@@ -1,6 +1,6 @@
 import { User } from "../models";
 import { UserData } from "../interfaces";
-import { ParsedRecentShift, ParsedRecentVacation } from "../models/user.model";
+import { ParsedRecentShift, ParsedRecentVacation, Team } from "../models/user.model";
 import { UserRepository } from "../repositories";
 
 type CreateUserData = Omit<UserData, 'id' | 'created_at' | 'recent_shifts' | 'recent_vacations'> & { password: string };
@@ -85,6 +85,10 @@ export class UserService {
 	public async getMany(): Promise<Omit<UserData, "password">[]> {
 		const users = await this.repo.getMany();
 		return users.map(user => this.transform(user));
+	}
+
+	public async getTeams(teamId: number): Promise<Team[]> {
+		return this.repo.getTeams(teamId);
 	}
 
 	public async getByShiftId(id: number): Promise<Omit<UserData, "password">[]> {
