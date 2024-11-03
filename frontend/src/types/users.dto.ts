@@ -14,3 +14,11 @@ export interface UserData {
 	student: boolean;
 	created_at: Date;
 }
+
+export interface TokenPayload {
+	id: number;
+	email?: string;
+	google_id?: string;
+	display_name?: string;
+	picture?: string;
+}

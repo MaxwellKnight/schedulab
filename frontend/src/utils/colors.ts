@@ -9,3 +9,4 @@ export const getColorForShiftType = (shiftTypeId: string, schedule: Schedule): s
 	const index = schedule.types.findIndex(type => type.id === Number(shiftTypeId));
 	return colorPalette[index % colorPalette.length];
 };
+
