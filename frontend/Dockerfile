@@ -1,13 +1,10 @@
-FROM node:18
+FROM node:18-alpine  
 
 WORKDIR /app
+COPY package.json package-lock.json ./ 
 
-COPY package*.json ./
-
-RUN npm ci
+RUN rm -rf node_modules && npm ci 
 
 COPY . .
 
-EXPOSE 5173  
-
-CMD ["npm", "run", "dev" ]
+CMD ["npm", "run", "dev"]
