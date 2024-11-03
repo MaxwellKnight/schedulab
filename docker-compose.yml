@@ -42,7 +42,7 @@ services:
     build:
       context: ./frontend/
       dockerfile: Dockerfile
-    platform: linux/amd64 
+    platform: linux/arm64 
     ports:
       - "5173:5173"
     volumes:
