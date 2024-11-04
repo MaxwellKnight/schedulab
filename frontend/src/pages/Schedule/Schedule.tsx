@@ -116,8 +116,12 @@ const Schedule: React.FC = () => {
 	const [draggedMember, setDraggedMember] = useState<{ member: UserData; isCurrentUser: boolean; } | null>(null);
 	const { selectedTeam } = useTeam();
 
-
-	console.log(selectedTeam);
+	const {
+		data: templates,
+		loading: templatesLoading,
+		error: templatesError,
+		fetchData: fetchTemplates
+	} = useAuthenticatedFetch<TemplateScheduleData[]>(`/templates/team/${selectedTeam?.id}`);
 	const {
 		data: shiftTypes,
 		loading: shiftTypesLoading,
@@ -132,6 +136,11 @@ const Schedule: React.FC = () => {
 		fetchData: fetchMembers
 	} = useAuthenticatedFetch<UserData[]>(`/users/team/${selectedTeam?.id}`);
 
+	useEffect(() => {
+		if (selectedTeam?.id) {
+			fetchTemplates();
+		}
+	}, [selectedTeam?.id, fetchTemplates]);
 
 	const handleDragStart = (event: DragStartEvent) => {
 		const { active } = event;
@@ -241,8 +250,8 @@ const Schedule: React.FC = () => {
 	};
 
 	useEffect(() => {
-		//fetchShiftTypes();
-		//fetchMembers();
+		fetchShiftTypes();
+		fetchMembers();
 	}, [fetchShiftTypes, fetchMembers]);
 
 	if (shiftTypesLoading || membersLoading) {
@@ -253,6 +262,9 @@ const Schedule: React.FC = () => {
 		return <div>Error loading. Please try again.</div>;
 	}
 
+	const isTeamAdmin = selectedTeam?.creator_id === user?.id;
+	console.log(isTeamAdmin, selectedTeam?.creator_id, user?.id);
+
 	return (
 		<DndContext
 			onDragStart={handleDragStart}
@@ -260,7 +272,7 @@ const Schedule: React.FC = () => {
 			onDragCancel={() => setDraggedMember(null)}
 			modifiers={[restrictToWindowEdges]}
 		>
-			{selectedTeam ?
+			{isTeamAdmin ?
 				<div className="mx-auto p-4 space-y-4">
 					<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg shadow-sm">
 						<div className="flex-1 max-w-md">
@@ -268,6 +280,9 @@ const Schedule: React.FC = () => {
 							<Combobox
 								onTemplateSelect={handleTemplateSelect}
 								className="w-full"
+								templates={templates || []}
+								loading={templatesLoading}
+								error={templatesError}
 							/>
 						</div>
 						<div className="flex gap-2 w-full sm:w-auto">

@@ -387,7 +387,7 @@ INSERT INTO users (id, user_role, first_name, middle_name, last_name, password, 
 
 -- Insert into teams
 INSERT INTO teams (creator_id, team_code, name) 
-VALUES (2, 'HOSP700', '700');  
+VALUES (10, 'HOSP700', '700');  
 
 -- Insert team members
 INSERT INTO team_members (team_id, user_id) 
