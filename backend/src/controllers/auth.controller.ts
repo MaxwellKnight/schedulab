@@ -54,7 +54,7 @@ export class AuthController {
 		return { accessToken, refreshToken };
 	};
 
-	private async saveRefreshToken(token: string): Promise<void> {
+	public async saveRefreshToken(token: string): Promise<void> {
 		try {
 			await this.db.execute<ResultSetHeader>(
 				'INSERT INTO expired (token, created_at) VALUES (?, NOW())',
@@ -63,6 +63,29 @@ export class AuthController {
 		} catch (error) {
 			console.error('Error saving refresh token:', error);
 			throw new Error('Failed to save refresh token');
+		}
+	}
+
+	public callback = async (req: Request, res: Response): Promise<void> => {
+		try {
+			if (!req.user || !req.user.email) {
+				throw new Error('No user data from Google authentication');
+			}
+
+			const user = await this.service.getByEmail(req.user?.email);
+			console.log(req.user);
+			const tokens = this.generateTokens(user || req.user);
+			const redirectUrl = new URL(`${process.env.FRONTEND_URL}/auth/callback`);
+
+			redirectUrl.searchParams.append('accessToken', tokens.accessToken);
+			redirectUrl.searchParams.append('refreshToken', tokens.refreshToken);
+
+			await this.saveRefreshToken(tokens.refreshToken);
+
+			res.redirect(redirectUrl.toString());
+		} catch (error) {
+			console.error('Google auth callback error:', error);
+			res.redirect(`${process.env.FRONTEND_URL}/login?error=authentication-failed`);
 		}
 	}
 
@@ -145,6 +168,7 @@ export class AuthController {
 
 			const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
 			req.user = decoded as TokenPayload;
+			console.log(decoded);
 			next();
 		} catch (err) {
 			return res.status(403).json({ message: 'Invalid token' });

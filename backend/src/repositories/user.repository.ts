@@ -122,10 +122,13 @@ export class UserRepository {
 		return rows.map(row => this.mapToUser(row));
 	}
 
-	public async getTeams(teamId: number): Promise<Team[]> {
+	public async getTeams(userId: number): Promise<Team[]> {
 		const [rows] = await this.db.execute<TeamRow[]>(`
-			SELECT * FROM teams t WHERE t.creator_id = ?
-		`, [teamId]);
+		SELECT DISTINCT t.id, t.name, t.creator_id, t.team_code, t.created_at
+        FROM teams t 
+        INNER JOIN team_members tm ON t.id = tm.team_id
+        WHERE tm.user_id = ?
+		`, [userId]);
 
 		return rows.length ? rows.map(({ id, creator_id, name, team_code, created_at }) => ({
 			id,

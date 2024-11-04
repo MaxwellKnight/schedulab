@@ -43,7 +43,10 @@ export class UserController {
 	}
 
 	public getTeams = async (req: Request, res: Response): Promise<void> => {
-		if (!req.user?.id) res.status(400).json({ message: "user is missing from request" });
+		if (!req.user?.id) {
+			res.status(400).json({ message: "user is missing from request" });
+			return;
+		}
 
 		const teams = await this.service.getTeams(req.user!.id);
 		if (teams.length > 0) {

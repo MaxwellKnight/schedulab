@@ -87,8 +87,8 @@ export class UserService {
 		return users.map(user => this.transform(user));
 	}
 
-	public async getTeams(teamId: number): Promise<Team[]> {
-		return this.repo.getTeams(teamId);
+	public async getTeams(userId: number): Promise<Team[]> {
+		return this.repo.getTeams(userId);
 	}
 
 	public async getByShiftId(id: number): Promise<Omit<UserData, "password">[]> {

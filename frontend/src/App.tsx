@@ -1,13 +1,13 @@
-import { Layout } from './components/layout/Layout';
 import { AuthProvider } from "./context/AuthContext";
+import { TeamProvider } from "./context/TeamContext";
 import { ReactNode } from 'react';
 import { useAuth } from "./hooks/useAuth/useAuth";
 import { createBrowserRouter, RouterProvider, Navigate, useLocation } from "react-router-dom";
 import { ScheduleBuilder, ErrorBoundary, Schedule, Login, Home, Members } from "./pages";
 import AuthCallback from './pages/Login/AuthCallback';
 import { setupAxiosAuth } from './utils/authInterceptor';
+import Layout from "./components/layout/Layout";
 
-// Setup auth headers on app start
 setupAxiosAuth();
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
@@ -17,6 +17,7 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 	if (!isAuthenticated) {
 		return <Navigate to="/login" replace state={{ from: location }} />;
 	}
+
 	return <>{children}</>;
 };
 
@@ -36,7 +37,9 @@ const AppRoutes: React.FC = () => {
 			path: "/",
 			element: (
 				<ProtectedRoute>
-					<Layout />
+					<TeamProvider>
+						<Layout />
+					</TeamProvider>
 				</ProtectedRoute>
 			),
 			errorElement: <ErrorBoundary />,

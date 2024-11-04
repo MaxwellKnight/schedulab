@@ -13,6 +13,7 @@ import MembersList, { DraggableMemberOverlay } from './MembersList';
 import { UserData } from '@/types';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
+import { useTeam } from '@/context/TeamContext';
 
 export interface MemberAssignment {
 	memberId: string;
@@ -113,20 +114,23 @@ const Schedule: React.FC = () => {
 	const { user } = useAuth();
 	const [assignments, setAssignments] = useState<MemberAssignment[]>([]);
 	const [draggedMember, setDraggedMember] = useState<{ member: UserData; isCurrentUser: boolean; } | null>(null);
+	const { selectedTeam } = useTeam();
 
+
+	console.log(selectedTeam);
 	const {
 		data: shiftTypes,
 		loading: shiftTypesLoading,
 		error: shiftTypesError,
 		fetchData: fetchShiftTypes
-	} = useAuthenticatedFetch<ShiftType[]>(`/shifts/types/${user?.team_id}`);
+	} = useAuthenticatedFetch<ShiftType[]>(`/shifts/types/${selectedTeam?.id}`);
 
 	const {
 		data: members,
 		loading: membersLoading,
 		error: membersError,
 		fetchData: fetchMembers
-	} = useAuthenticatedFetch<UserData[]>(`/users/team/${user?.team_id}`);
+	} = useAuthenticatedFetch<UserData[]>(`/users/team/${selectedTeam?.id}`);
 
 
 	const handleDragStart = (event: DragStartEvent) => {
@@ -237,8 +241,8 @@ const Schedule: React.FC = () => {
 	};
 
 	useEffect(() => {
-		fetchShiftTypes();
-		fetchMembers();
+		//fetchShiftTypes();
+		//fetchMembers();
 	}, [fetchShiftTypes, fetchMembers]);
 
 	if (shiftTypesLoading || membersLoading) {
@@ -256,7 +260,7 @@ const Schedule: React.FC = () => {
 			onDragCancel={() => setDraggedMember(null)}
 			modifiers={[restrictToWindowEdges]}
 		>
-			{user?.team_id ?
+			{selectedTeam ?
 				<div className="mx-auto p-4 space-y-4">
 					<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg shadow-sm">
 						<div className="flex-1 max-w-md">
