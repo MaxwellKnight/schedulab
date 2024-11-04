@@ -620,3 +620,91 @@ WHERE ts.template_schedule_id = @template_schedule_id
 ORDER BY ts.day_of_week, ts.shift_name, tr.start_time;
 
 COMMIT;
+
+INSERT INTO teams (id, creator_id, name, team_code) VALUES
+(2, 3, 'Surgery Department', 'SURG-XYZ123'),
+(3, 4, 'Emergency Room', 'EMER-ABC456'),
+(4, 5, 'Pediatrics', 'PEDI-DEF789'),
+(5, 8, 'Cardiology', 'CARD-GHI012'),
+(6, 9, 'Neurology', 'NEUR-JKL345'),
+(7, 10, 'Oncology', 'ONCO-MNO678'),
+(8, 11, 'Radiology', 'RADI-PQR901'),
+(9, 12, 'Laboratory', 'LAB-STU234'),
+(10, 13, 'Pharmacy', 'PHAR-VWX567');
+
+-- Associate users with multiple teams
+-- This ensures each user is both an admin in some teams and a regular member in others
+INSERT INTO team_members (team_id, user_id) VALUES
+-- Team 1 (Hospital 700) members already added in previous script
+
+-- Team 2 (Surgery Department) members
+(2, 4), -- Emily Davis
+(2, 5), -- David Wilson
+(2, 8), -- Jessica Martinez
+(2, 11), -- William Garcia
+(2, 14), -- Amanda Lopez
+(2, 17), -- Kevin Chen
+
+-- Team 3 (Emergency Room) members
+(3, 3), -- Michael Smith
+(3, 6), -- Lisa Brown
+(3, 9), -- Robert Anderson
+(3, 12), -- Jennifer Miller
+(3, 15), -- Daniel Lee
+(3, 18), -- Maria Rodriguez
+
+-- Team 4 (Pediatrics) members
+(4, 4), -- Emily Davis
+(4, 7), -- James Taylor
+(4, 10), -- Michelle Thomas
+(4, 13), -- Christopher Wong
+(4, 16), -- Rachel Kim
+(4, 19), -- Thomas Wilson
+
+-- Team 5 (Cardiology) members
+(5, 3), -- Michael Smith
+(5, 6), -- Lisa Brown
+(5, 9), -- Robert Anderson
+(5, 12), -- Jennifer Miller
+(5, 15), -- Daniel Lee
+(5, 20), -- Sophie Park
+
+-- Team 6 (Neurology) members
+(6, 4), -- Emily Davis
+(6, 7), -- James Taylor
+(6, 10), -- Michelle Thomas
+(6, 13), -- Christopher Wong
+(6, 16), -- Rachel Kim
+(6, 19), -- Thomas Wilson
+
+-- Team 7 (Oncology) members
+(7, 5), -- David Wilson
+(7, 8), -- Jessica Martinez
+(7, 11), -- William Garcia
+(7, 14), -- Amanda Lopez
+(7, 17), -- Kevin Chen
+(7, 20), -- Sophie Park
+
+-- Team 8 (Radiology) members
+(8, 3), -- Michael Smith
+(8, 6), -- Lisa Brown
+(8, 9), -- Robert Anderson
+(8, 12), -- Jennifer Miller
+(8, 15), -- Daniel Lee
+(8, 18), -- Maria Rodriguez
+
+-- Team 9 (Laboratory) members
+(9, 4), -- Emily Davis
+(9, 7), -- James Taylor
+(9, 10), -- Michelle Thomas
+(9, 13), -- Christopher Wong
+(9, 16), -- Rachel Kim
+(9, 19), -- Thomas Wilson
+
+-- Team 10 (Pharmacy) members
+(10, 5), -- David Wilson
+(10, 8), -- Jessica Martinez
+(10, 11), -- William Garcia
+(10, 14), -- Amanda Lopez
+(10, 17), -- Kevin Chen
+(10, 20); -- Sophie Park
