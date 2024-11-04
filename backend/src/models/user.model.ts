@@ -1,6 +1,5 @@
 export interface User {
 	id: number;
-	team_id: number;
 	google_id?: string;
 	picture?: string;
 	display_name?: string;
@@ -13,7 +12,6 @@ export interface User {
 	created_at: Date;
 	recent_shifts?: number[];
 	recent_vacations?: number[];
-	team_name?: string;
 }
 
 export interface ParsedRecentShift {
@@ -30,4 +28,12 @@ export interface ParsedRecentVacation {
 	id: number;
 	start_date: string;
 	end_date: string;
+}
+
+export interface Team {
+	id: number;
+	name: string;
+	creator_id: number;
+	team_code: string;
+	created_at: Date;
 }

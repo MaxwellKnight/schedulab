@@ -6,6 +6,8 @@ import axios from 'axios';
 import { useAuth } from '@/hooks/useAuth/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { TokenPayload } from '@/types/users.dto';
+import { decodeJwtToken } from '@/utils/jwt';
 
 interface AuthState {
 	status: 'loading' | 'success' | 'error';
@@ -30,7 +32,6 @@ const AuthCallback: React.FC = () => {
 	const [messageIndex, setMessageIndex] = useState(0);
 
 	useEffect(() => {
-		// Cycle through loading messages
 		if (authState.status === 'loading') {
 			const interval = setInterval(() => {
 				setMessageIndex(prev => (prev + 1) % loadingMessages.length);
@@ -52,31 +53,49 @@ const AuthCallback: React.FC = () => {
 				// Store tokens
 				localStorage.setItem('authToken', accessToken);
 				localStorage.setItem('refreshToken', refreshToken);
+
+				// Decode token to get user information
+				const tokenPayload = decodeJwtToken(accessToken);
+
+				const userPayload: TokenPayload = {
+					id: tokenPayload.id,
+					email: tokenPayload.email,
+					display_name: tokenPayload.display_name,
+					google_id: tokenPayload.google_id,
+					picture: tokenPayload.picture
+				};
+
+				// Store user data
+				localStorage.setItem('user', JSON.stringify(userPayload));
+
+				// Set authorization header
 				axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
-				try {
-					const response = await axios.get('/auth/google/user', {
-						headers: { Authorization: `Bearer ${accessToken}` }
-					});
+				setAuthState({
+					status: 'success',
+					message: 'Authentication successful!'
+				});
 
-					setAuthState({
-						status: 'success',
-						message: 'Authentication successful!'
-					});
+				login(accessToken, userPayload);
 
-					login(accessToken, response.data.user);
-
-					// Delay navigation for animation
-					setTimeout(() => {
-						navigate('/', { replace: true });
-					}, 1500);
-
-				} catch (error) {
-					throw new Error('Failed to fetch user data');
-				}
+				// Delay navigation for animation
+				setTimeout(() => {
+					navigate('/', { replace: true });
+				}, 1500);
 
 			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+				let errorMessage = 'Authentication failed';
+
+				if (axios.isAxiosError(error)) {
+					errorMessage = error.response?.data?.message || error.message;
+
+					if (error.response?.status === 401) {
+						errorMessage = 'Invalid authentication tokens';
+					} else if (error.response?.status === 429) {
+						errorMessage = 'Too many authentication attempts. Please try again later.';
+					}
+				}
+
 				setAuthState({
 					status: 'error',
 					message: errorMessage

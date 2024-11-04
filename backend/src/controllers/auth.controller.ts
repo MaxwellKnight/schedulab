@@ -1,10 +1,11 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import * as dotenv from 'dotenv';
-import { IRequest, IResponse } from "../interfaces";
 import { UserService } from '../services';
 import { RowDataPacket, ResultSetHeader } from 'mysql2';
 import { Database } from '../configs/db.config';
+import { Response, Request, NextFunction } from 'express';
+import { TokenPayload } from '../middlewares/middlewares';
 
 dotenv.config();
 
@@ -25,26 +26,27 @@ export class AuthController {
 		this.db = Database.instance;
 	}
 
-	generateTokens = (userData: any) => {
-		if (!userData.email) {
+	generateTokens = (user: TokenPayload) => {
+		if (!user.email) {
 			throw new Error('Missing email in user data');
 		}
 
-		const tokenPayload = {
-			id: userData.id,
-			email: userData.email,
-			googleId: userData.google_id,
-			name: userData.display_name,
+		const payload = {
+			id: user.id,
+			email: user.email,
+			googleId: user.google_id,
+			name: user.display_name,
+			picture: user.picture
 		};
 
 		const accessToken = jwt.sign(
-			tokenPayload,
+			payload,
 			process.env.ACCESS_TOKEN_SECRET!,
 			{ expiresIn: '1h' }
 		);
 
 		const refreshToken = jwt.sign(
-			{ id: userData.id },
+			{ id: user.id },
 			process.env.ACCESS_TOKEN_SECRET!,
 			{ expiresIn: '7d' }
 		);
@@ -52,7 +54,7 @@ export class AuthController {
 		return { accessToken, refreshToken };
 	};
 
-	private async saveRefreshToken(token: string): Promise<void> {
+	public async saveRefreshToken(token: string): Promise<void> {
 		try {
 			await this.db.execute<ResultSetHeader>(
 				'INSERT INTO expired (token, created_at) VALUES (?, NOW())',
@@ -61,6 +63,29 @@ export class AuthController {
 		} catch (error) {
 			console.error('Error saving refresh token:', error);
 			throw new Error('Failed to save refresh token');
+		}
+	}
+
+	public callback = async (req: Request, res: Response): Promise<void> => {
+		try {
+			if (!req.user || !req.user.email) {
+				throw new Error('No user data from Google authentication');
+			}
+
+			const user = await this.service.getByEmail(req.user?.email);
+			console.log(req.user);
+			const tokens = this.generateTokens(user || req.user);
+			const redirectUrl = new URL(`${process.env.FRONTEND_URL}/auth/callback`);
+
+			redirectUrl.searchParams.append('accessToken', tokens.accessToken);
+			redirectUrl.searchParams.append('refreshToken', tokens.refreshToken);
+
+			await this.saveRefreshToken(tokens.refreshToken);
+
+			res.redirect(redirectUrl.toString());
+		} catch (error) {
+			console.error('Google auth callback error:', error);
+			res.redirect(`${process.env.FRONTEND_URL}/login?error=authentication-failed`);
 		}
 	}
 
@@ -99,7 +124,7 @@ export class AuthController {
 		}
 	}
 
-	public login = async (req: IRequest, res: IResponse) => {
+	public login = async (req: Request, res: Response) => {
 		try {
 			const { email, password } = req.body;
 			if (!email || !password)
@@ -118,14 +143,13 @@ export class AuthController {
 
 			if (!result) return res.status(401).json({ message: 'Incorrect email or password' });
 
-			const { password: removed, ...rest } = user;
-			const tokens = this.generateTokens(rest);
+			const { id, google_id, display_name, picture } = user;
+			const tokens = this.generateTokens({ id, google_id, display_name, picture, email });
 
 			await this.saveRefreshToken(tokens.refreshToken);
 			await this.cleanupExpiredTokens();
 
 			res.json({
-				user: rest,
 				accessToken: tokens.accessToken,
 				refreshToken: tokens.refreshToken
 			});
@@ -135,7 +159,7 @@ export class AuthController {
 		}
 	}
 
-	public authenticate = async (req: IRequest, res: IResponse) => {
+	public authenticate = async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { authorization } = req.headers;
 			const token = authorization && authorization.split(' ')[1];
@@ -143,13 +167,15 @@ export class AuthController {
 			if (!token) return res.status(401).json({ message: 'Unauthorized access' });
 
 			const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
-			req.user = decoded;
+			req.user = decoded as TokenPayload;
+			console.log(decoded);
+			next();
 		} catch (err) {
 			return res.status(403).json({ message: 'Invalid token' });
 		}
 	}
 
-	public refresh = async (req: IRequest, res: IResponse) => {
+	public refresh = async (req: Request, res: Response) => {
 		try {
 			const { refreshToken } = req.body;
 
@@ -177,7 +203,7 @@ export class AuthController {
 		}
 	}
 
-	public logout = async (req: IRequest, res: IResponse) => {
+	public logout = async (req: Request, res: Response) => {
 		try {
 			const { refreshToken } = req.body;
 
@@ -193,7 +219,7 @@ export class AuthController {
 		}
 	}
 
-	public register = async (req: IRequest, res: IResponse) => {
+	public register = async (req: Request, res: Response) => {
 		const { email, password, ...rest } = req.body;
 		const user = await this.service.getByEmail(email);
 

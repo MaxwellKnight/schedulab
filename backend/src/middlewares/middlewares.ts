@@ -1,10 +1,9 @@
 import { Schema } from 'joi';
-import { IRequest, IResponse } from '../interfaces';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
 export const makeValidator = (schema: Schema) => {
-	return async (req: IRequest, res: IResponse): Promise<void> => {
+	return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 		try {
 			const { error } = schema.validate(req.body, {
 				abortEarly: false,
@@ -19,30 +18,23 @@ export const makeValidator = (schema: Schema) => {
 					type: detail.type,
 					context: detail.context
 				}));
+				console.log("validator");
 
-				return res.status(400).json(validationErrors);
+				res.status(400).json(validationErrors);
 			}
+			next();
 		} catch (err) {
-			return res.status(500).json({ message: 'Validation error occurred' });
-		}
-	};
-};
-
-const makeAuthorization = (allowedRoles: string[]) => {
-	return async (req: IRequest, res: IResponse): Promise<void> => {
-		const { user_role } = req.query;
-		if (!user_role || !allowedRoles.includes(user_role)) {
-			console.log('Access forbidden');
-			return res.status(403).json({ error: "Forbidden" });
+			res.status(500).json({ message: 'Validation error occurred' });
 		}
 	};
 };
 
 export interface TokenPayload {
 	id: number;
-	email: string;
-	user_role: string;
-	team_id: number;
+	email?: string;
+	google_id?: string;
+	display_name?: string;
+	picture?: string;
 }
 
 declare global {
@@ -76,9 +68,3 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
 	}
 };
 
-export const access = {
-	USER_ACCESS: makeAuthorization(["user", "manager", "supervisor", "chief", "admin"]),
-	SUPEVISOR_ACCESS: makeAuthorization(["supervisor", "chief", "admin"]),
-	CHIEF_ACCESS: makeAuthorization(["chief", "admin"]),
-	ADMIN_ACCESS: makeAuthorization(["admin"]),
-}

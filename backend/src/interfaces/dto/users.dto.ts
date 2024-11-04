@@ -1,6 +1,5 @@
 export interface UserData {
 	id: number;
-	team_id: number;  // New field to associate user with a team
 	google_id?: string;
 	display_name?: string;
 	picture?: string;
@@ -13,7 +12,6 @@ export interface UserData {
 	recent_shifts: ParsedRecentShift[];
 	recent_vacations: ParsedRecentVacation[];
 	created_at: Date;
-	team_name?: string;  // Optional field for when joined with teams table
 }
 
 export interface ParsedRecentShift {

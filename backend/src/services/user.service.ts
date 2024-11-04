@@ -1,6 +1,6 @@
 import { User } from "../models";
 import { UserData } from "../interfaces";
-import { ParsedRecentShift, ParsedRecentVacation } from "../models/user.model";
+import { ParsedRecentShift, ParsedRecentVacation, Team } from "../models/user.model";
 import { UserRepository } from "../repositories";
 
 type CreateUserData = Omit<UserData, 'id' | 'created_at' | 'recent_shifts' | 'recent_vacations'> & { password: string };
@@ -19,7 +19,6 @@ export class UserService {
 
 		return {
 			id: user.id!,
-			team_id: user.team_id,
 			user_role: user.user_role,
 			first_name: user.first_name,
 			last_name: user.last_name,
@@ -27,7 +26,6 @@ export class UserService {
 			display_name: user.display_name,
 			email: user.email,
 			created_at: user.created_at,
-			team_name: user.team_name,
 			recent_shifts: shifts,
 			recent_vacations: vacs
 		};
@@ -66,7 +64,6 @@ export class UserService {
 	public async create(userData: CreateUserData): Promise<number> {
 		const user: Omit<User, 'id' | 'recent_shifts' | 'recent_vacations' | 'team_name'> = {
 			...userData,
-			team_id: userData.team_id,
 			user_role: userData.user_role,
 			first_name: userData.first_name,
 			last_name: userData.last_name,
@@ -88,6 +85,10 @@ export class UserService {
 	public async getMany(): Promise<Omit<UserData, "password">[]> {
 		const users = await this.repo.getMany();
 		return users.map(user => this.transform(user));
+	}
+
+	public async getTeams(userId: number): Promise<Team[]> {
+		return this.repo.getTeams(userId);
 	}
 
 	public async getByShiftId(id: number): Promise<Omit<UserData, "password">[]> {
@@ -115,7 +116,6 @@ export class UserService {
 	public async update(userData: UpdateUserData): Promise<number> {
 		const user: Partial<User> & { id: number } = {
 			id: userData.id,
-			...(userData.team_id !== undefined && { team_id: userData.team_id }),
 			...(userData.user_role !== undefined && { user_role: userData.user_role }),
 			...(userData.first_name !== undefined && { first_name: userData.first_name }),
 			...(userData.last_name !== undefined && { last_name: userData.last_name }),

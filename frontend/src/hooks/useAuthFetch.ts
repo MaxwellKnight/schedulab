@@ -14,11 +14,6 @@ interface UseAuthenticatedFetchResult<T> extends FetchState<T> {
 	clearData: () => void;
 }
 
-interface RefreshTokenResponse {
-	accessToken: string;
-	refreshToken: string;
-}
-
 interface AuthTokens {
 	accessToken: string;
 	refreshToken: string;
@@ -73,7 +68,7 @@ const refreshToken = async (): Promise<AuthTokens> => {
 			throw new Error('No refresh token available');
 		}
 
-		const response = await axios.post<RefreshTokenResponse>('/auth/refresh', {
+		const response = await axios.post<AuthTokens>('/auth/refresh', {
 			refreshToken
 		});
 

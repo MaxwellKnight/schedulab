@@ -4,8 +4,7 @@ import { UserRepository } from "../repositories";
 import { makeSQL } from "../configs/db.config";
 import { UserService } from "../services";
 import { AuthController } from "../controllers/auth.controller";
-import { adaptMiddleware } from "../helpers/adapters";
-import { makeValidator, verifyToken } from "../middlewares/middlewares";
+import { makeValidator } from "../middlewares/middlewares";
 import { userSchema } from "../validations/user.validation";
 import { loginSchema, refreshTokenSchema } from "../validations/auth.validation";
 
@@ -23,26 +22,26 @@ const loginValidator = makeValidator(loginSchema);
 // Basic auth routes
 router.route("/register")
 	.post(
-		adaptMiddleware(userValidator),
-		adaptMiddleware(controller.register)
+		userValidator,
+		controller.register
 	);
 
 router.route("/login")
 	.post(
-		adaptMiddleware(loginValidator),
-		adaptMiddleware(controller.login)
+		loginValidator,
+		controller.login
 	);
 
 router.route("/refresh")
 	.post(
-		adaptMiddleware(refreshTokenValidator),
-		adaptMiddleware(controller.refresh)
+		refreshTokenValidator,
+		controller.refresh
 	);
 
 router.route("/logout")
 	.post(
-		adaptMiddleware(refreshTokenValidator),
-		adaptMiddleware(controller.logout)
+		refreshTokenValidator,
+		controller.logout
 	);
 
 // Google OAuth routes
@@ -57,46 +56,33 @@ router.get('/google/callback',
 		failureRedirect: '/login',
 		session: false
 	}),
-	async (req, res) => {
-		try {
-			const tokens = controller.generateTokens(req.user);
-
-			const redirectUrl = new URL(`${process.env.FRONTEND_URL}/auth/callback`);
-			redirectUrl.searchParams.append('accessToken', tokens.accessToken);
-			redirectUrl.searchParams.append('refreshToken', tokens.refreshToken);
-
-			res.redirect(redirectUrl.toString());
-		} catch (error) {
-			console.error('Google auth callback error:', error);
-			res.redirect(`${process.env.FRONTEND_URL}/login?error=authentication-failed`);
-		}
-	}
+	controller.callback
 );
 
 router.get('/google/user',
-	verifyToken,
+	controller.authenticate,
 	async (req, res) => {
 		try {
 			if (!req.user?.email) {
-				console.log('No email in token payload');
 				return res.status(401).json({
-					message: 'Invalid token payload - no email found',
-					debug: { tokenPayload: req.user }
+					message: 'Invalid token payload - no email found'
 				});
 			}
 
 			const user = await userService.getByEmail(req.user.email);
-			console.log(user);
 			if (!user) {
 				return res.status(404).json({ message: 'User not found' });
 			}
 
-			const { password, ...userWithoutPassword } = user;
-			res.json({ user: userWithoutPassword });
+			// Remove password from response
+			const { password, ...userData } = user;
+			res.json({ user: userData });
+
 		} catch (error) {
 			console.error('Error fetching user data:', error);
 			res.status(500).json({ message: 'Error fetching user data' });
 		}
 	}
 );
+
 export default router;

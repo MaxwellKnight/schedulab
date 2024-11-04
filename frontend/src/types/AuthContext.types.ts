@@ -1,9 +1,9 @@
-import { UserData } from "./users.dto";
+import { TokenPayload } from "./users.dto";
 
 export interface AuthContextType {
 	token: string | null;
-	user: UserData | null;
+	user: TokenPayload | null;
 	isAuthenticated: boolean;
-	login: (userToken: string, user: UserData) => void;
+	login: (userToken: string, user: TokenPayload) => void;
 	logout: () => void;
 }

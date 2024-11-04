@@ -1,6 +1,6 @@
 import { UserData } from "../interfaces/dto";
-import { IResponse, IRequest } from "../interfaces/http.interface";
 import { UserService } from "../services";
+import { Request, Response } from "express";
 
 export class UserController {
 
@@ -9,7 +9,7 @@ export class UserController {
 		this.service = service;
 	}
 
-	public create = async (req: IRequest, res: IResponse): Promise<void> => {
+	public create = async (req: Request, res: Response): Promise<void> => {
 		const user = req.body.user;
 		try {
 			const id = await this.service.create(user);
@@ -21,7 +21,7 @@ export class UserController {
 		}
 	}
 
-	public getOne = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getOne = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
 		const { password, ...user }: any = await this.service.getOne(Number(id));
 		if (user && user.id !== null) {
@@ -32,7 +32,7 @@ export class UserController {
 		}
 	}
 
-	public getMany = async (_: IRequest, res: IResponse): Promise<void> => {
+	public getMany = async (req: Request, res: Response): Promise<void> => {
 		const users = await this.service.getMany();
 		if (users.length > 0) {
 			res.json(users);
@@ -42,7 +42,22 @@ export class UserController {
 		}
 	}
 
-	public getByShiftId = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getTeams = async (req: Request, res: Response): Promise<void> => {
+		if (!req.user?.id) {
+			res.status(400).json({ message: "user is missing from request" });
+			return;
+		}
+
+		const teams = await this.service.getTeams(req.user!.id);
+		if (teams.length > 0) {
+			res.json(teams);
+		} else {
+			res.status(404);
+			res.json({ error: "No teams exist" });
+		}
+	}
+
+	public getByShiftId = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
 		const users = await this.service.getByShiftId(Number(id));
 		if (users.length > 0) {
@@ -53,7 +68,7 @@ export class UserController {
 		}
 	}
 
-	public getByTeamId = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getByTeamId = async (req: Request, res: Response): Promise<void> => {
 		const team_id = req.params.team_id;
 		const users = await this.service.getByTeamId(Number(team_id));
 		if (users.length > 0) {
@@ -64,7 +79,7 @@ export class UserController {
 		}
 	}
 
-	public update = async (req: IRequest, res: IResponse): Promise<void> => {
+	public update = async (req: Request, res: Response): Promise<void> => {
 		const userData: UserData = req.body;
 		const user = await this.service.getOne(userData.id);
 		if (!user) {
@@ -81,7 +96,7 @@ export class UserController {
 		else res.json({ message: "User updated", id: user.id });
 	}
 
-	public delete = async (req: IRequest, res: IResponse): Promise<void> => {
+	public delete = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
 		const result = await this.service.delete(Number(id));
 		if (result === 0) {

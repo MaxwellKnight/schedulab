@@ -13,6 +13,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserData } from '@/types';
 import { toast } from '@/hooks/use-toast';
+import { TokenPayload } from '@/types/users.dto';
+import { decodeJwtToken } from '@/utils/jwt';
 
 interface RegisterData {
 	username: string;
@@ -57,14 +59,24 @@ const Login: React.FC = () => {
 				password
 			});
 
-			const { accessToken, refreshToken, user } = response.data;
+			const { accessToken, refreshToken } = response.data;
+			const tokenPayload = decodeJwtToken(accessToken);
+
+			const userPayload: TokenPayload = {
+				id: tokenPayload.id,
+				email: tokenPayload.email,
+				display_name: tokenPayload.display_name,
+				google_id: tokenPayload.google_id,
+				picture: tokenPayload.picture
+			};
 
 			localStorage.setItem('authToken', accessToken);
 			localStorage.setItem('refreshToken', refreshToken);
+			localStorage.setItem('user', JSON.stringify(userPayload));
 
 			axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
-			login(accessToken, user);
+			login(accessToken, userPayload);
 			navigate('/');
 		} catch (err) {
 			if (axios.isAxiosError(err)) {
@@ -105,7 +117,6 @@ const Login: React.FC = () => {
 				setEmail('');
 				setPassword('');
 				setUsername('');
-				// Optional: Show success message
 				toast({
 					title: "Account created successfully!",
 					description: "Please log in with your new account.",

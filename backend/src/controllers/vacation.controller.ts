@@ -1,5 +1,5 @@
 import { Vacation } from "../models";
-import { IRequest, IResponse } from "../interfaces/http.interface";
+import { Response, Request } from "express";
 import { VacationService } from "../services";
 
 export class VacationController {
@@ -9,7 +9,7 @@ export class VacationController {
 		this.service = service;
 	}
 
-	public create = async (req: IRequest, res: IResponse): Promise<void> => {
+	public create = async (req: Request, res: Response): Promise<void> => {
 		const vacation = req.body;
 		try {
 			const result = await this.service.create(vacation);
@@ -20,7 +20,7 @@ export class VacationController {
 		}
 	}
 
-	public getOne = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getOne = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
 		const vacations = await this.service.getOne(Number(id));
 		if (vacations) {
@@ -31,7 +31,7 @@ export class VacationController {
 		}
 	}
 
-	public getMany = async (_: IRequest, res: IResponse): Promise<void> => {
+	public getMany = async (_: Request, res: Response): Promise<void> => {
 		const vacations = await this.service.getMany();
 		if (vacations.length > 0) {
 			res.json(vacations);
@@ -41,7 +41,7 @@ export class VacationController {
 		}
 	}
 
-	public getByDates = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getByDates = async (req: Request, res: Response): Promise<void> => {
 		const { start_date, end_date } = req.params;
 		const vacations = await this.service.getByDates(new Date(start_date), new Date(end_date));
 		if (vacations.length > 0) {
@@ -53,7 +53,7 @@ export class VacationController {
 		res.json(vacations);
 	}
 
-	public getByDate = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getByDate = async (req: Request, res: Response): Promise<void> => {
 		const date = req.params.date;
 		const vacations = await this.service.getByDate(new Date(date));
 		if (vacations.length > 0) {
@@ -64,7 +64,7 @@ export class VacationController {
 		}
 	}
 
-	public getByUserId = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getByUserId = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
 		const vacations = await this.service.getByUserId(Number(id));
 		if (vacations.length > 0) {
@@ -76,7 +76,7 @@ export class VacationController {
 	}
 
 
-	public update = async (req: IRequest, res: IResponse): Promise<void> => {
+	public update = async (req: Request, res: Response): Promise<void> => {
 		const vacation: Vacation = req.body;
 		const vac = await this.service.getOne(vacation.id);
 		if (!vac) {
@@ -92,7 +92,7 @@ export class VacationController {
 		else res.json({ message: "vacation updated", id: result });
 	}
 
-	public delete = async (req: IRequest, res: IResponse): Promise<void> => {
+	public delete = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
 		const result = await this.service.delete(Number(id));
 		if (result === 0) {

@@ -3,10 +3,6 @@ import { UserData } from '../interfaces';
 
 const schema = Joi.object<UserData>({
 	id: Joi.number().integer().optional(),
-	team_id: Joi.number().integer().required().messages({
-		'number.base': 'Team ID must be an integer',
-		'any.required': 'Team ID is required',
-	}),
 	user_role: Joi.string()
 		.max(10)
 		.required()
@@ -70,7 +66,6 @@ const schema = Joi.object<UserData>({
 			'string.empty': 'Password is required',
 			'string.min': 'Password must be at least 6 characters long',
 		}),
-	team_name: Joi.string().optional(),
 	created_at: Joi.date().optional()
 });
 

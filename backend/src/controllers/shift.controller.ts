@@ -1,5 +1,5 @@
 import { ShiftData } from "../interfaces/dto";
-import { IRequest, IResponse } from "../interfaces/http.interface";
+import { Request, Response } from "express";
 import { ShiftService } from "../services";
 
 
@@ -10,7 +10,7 @@ export class ShiftController {
 		this.service = service;
 	}
 
-	public create = async (req: IRequest, res: IResponse): Promise<void> => {
+	public create = async (req: Request, res: Response): Promise<void> => {
 		const shift = req.body;
 		try {
 			const id = await this.service.create(shift);
@@ -21,7 +21,7 @@ export class ShiftController {
 		}
 	}
 
-	public getOne = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getOne = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
 		const shift = await this.service.getOne(Number(id));
 		if (shift) {
@@ -32,7 +32,7 @@ export class ShiftController {
 		}
 
 	}
-	public getMany = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getMany = async (req: Request, res: Response): Promise<void> => {
 		const shifts = await this.service.getMany();
 		if (shifts.length > 0) {
 			res.json(shifts);
@@ -42,7 +42,7 @@ export class ShiftController {
 		}
 	}
 
-	public getByDate = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getByDate = async (req: Request, res: Response): Promise<void> => {
 		const date = req.params.date;
 		const shifts = await this.service.getByDate(new Date(date));
 
@@ -54,7 +54,7 @@ export class ShiftController {
 		}
 	}
 
-	public getByName = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getByName = async (req: Request, res: Response): Promise<void> => {
 		const name = req.params.name;
 		const shifts = await this.service.getByName(name);
 
@@ -66,7 +66,7 @@ export class ShiftController {
 		}
 	}
 
-	public getByUserId = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getByUserId = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
 		const shifts = await this.service.getByUserId(Number(id));
 
@@ -78,7 +78,7 @@ export class ShiftController {
 		}
 	}
 
-	public getByScheduleId = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getByScheduleId = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
 		const shifts = await this.service.getByScheduleId(Number(id));
 
@@ -90,7 +90,7 @@ export class ShiftController {
 		}
 	}
 
-	public getTypes = async (req: IRequest, res: IResponse): Promise<void> => {
+	public getTypes = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
 		const shift_types = await this.service.getTypes(Number(id));
 
@@ -103,7 +103,7 @@ export class ShiftController {
 	}
 
 
-	public update = async (req: IRequest, res: IResponse): Promise<void> => {
+	public update = async (req: Request, res: Response): Promise<void> => {
 		const { id, ...rest }: ShiftData = req.body;
 		const shift = this.service.getOne(id);
 		if (!shift) {
@@ -121,7 +121,7 @@ export class ShiftController {
 			res.json({ message: "shift updated", id });
 	}
 
-	public delete = async (req: IRequest, res: IResponse): Promise<void> => {
+	public delete = async (req: Request, res: Response): Promise<void> => {
 		const id = req.params.id;
 		const result = await this.service.delete(Number(id));
 		if (result !== 0) {
