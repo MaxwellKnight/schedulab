@@ -1,12 +1,11 @@
 import { AuthContextType } from "@/types/AuthContext.types";
 import { TokenPayload } from "@/types/users.dto";
-import React, { createContext, useState, ReactNode, useEffect, useCallback } from "react";
+import React, { createContext, useState, ReactNode, useEffect, useCallback, useRef } from "react";
 import axios from 'axios';
 import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { decodeJwtToken } from '@/utils/jwt';
 
-// Enhanced types
 interface AuthState {
 	token: string | null;
 	refreshToken: string | null;
@@ -29,27 +28,28 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 	const [authState, setAuthState] = useState<AuthState>(initialState);
+	const tokenExpiryTimeout = useRef<NodeJS.Timeout>();
+	const initializationTimeout = useRef<NodeJS.Timeout>();
 
-	// Enhanced logout handler
 	const handleLogout = useCallback(async () => {
 		try {
-			// Attempt to notify backend about logout
+			if (tokenExpiryTimeout.current) {
+				clearTimeout(tokenExpiryTimeout.current);
+			}
+			if (initializationTimeout.current) {
+				clearTimeout(initializationTimeout.current);
+			}
+
 			if (authState.token) {
 				await axios.post('/auth/logout').catch(() => {
-					// Ignore error, proceed with local logout
 					console.warn('Backend logout failed, proceeding with local logout');
 				});
 			}
 		} finally {
-			// Clear axios header
 			delete axios.defaults.headers.common['Authorization'];
-
-			// Clear local storage
 			localStorage.removeItem('authToken');
 			localStorage.removeItem('refreshToken');
 			localStorage.removeItem('user');
-
-			// Reset auth state
 			setAuthState({
 				...initialState,
 				isLoading: false
@@ -57,39 +57,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 		}
 	}, [authState.token]);
 
-	const handleLogin = useCallback(async (userToken: string, user: TokenPayload, refreshToken: string) => {
-		try {
-			// Validate token before storing
-			const tokenPayload = decodeJwtToken(userToken);
-			if (!tokenPayload) {
-				throw new Error('Invalid token format');
-			}
-
-			// Setup axios default header
-			axios.defaults.headers.common['Authorization'] = `Bearer ${userToken}`;
-
-			// Update auth state
-			setAuthState({
-				token: userToken,
-				refreshToken,
-				user,
-				isAuthenticated: true,
-				isLoading: false,
-				error: null
-			});
-
-			// Store auth data
-			localStorage.setItem('authToken', userToken);
-			localStorage.setItem('refreshToken', refreshToken);
-			localStorage.setItem('user', JSON.stringify(user));
-		} catch (error) {
-			console.error('Login failed:', error);
-			handleLogout();
-			throw error;
-		}
-	}, [handleLogout]);
-
-	// Token refresh logic
 	const refreshAccessToken = useCallback(async (refreshToken: string) => {
 		try {
 			const response = await axios.post('/auth/refresh', { refreshToken });
@@ -99,6 +66,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 			localStorage.setItem('authToken', newToken);
 			setAuthState(prev => ({ ...prev, token: newToken }));
+			axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
 
 			return newToken;
 		} catch (error) {
@@ -107,6 +75,69 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 			throw error;
 		}
 	}, [handleLogout]);
+
+	const scheduleTokenCheck = useCallback((token: string) => {
+		if (tokenExpiryTimeout.current) {
+			clearTimeout(tokenExpiryTimeout.current);
+		}
+
+		const tokenPayload = decodeJwtToken(token);
+		if (!tokenPayload) {
+			handleLogout();
+			return;
+		}
+
+		const tokenExp = tokenPayload.exp * 1000;
+		const currentTime = Date.now();
+		const timeUntilExpiry = tokenExp - currentTime;
+
+		const refreshBuffer = 60000; // 1 minute
+		const timeUntilRefresh = Math.max(0, timeUntilExpiry - refreshBuffer);
+
+		tokenExpiryTimeout.current = setTimeout(async () => {
+			const refreshToken = localStorage.getItem('refreshToken');
+			if (refreshToken) {
+				try {
+					const newToken = await refreshAccessToken(refreshToken);
+					scheduleTokenCheck(newToken);
+				} catch {
+					handleLogout();
+				}
+			} else {
+				handleLogout();
+			}
+		}, timeUntilRefresh);
+	}, [handleLogout, refreshAccessToken]);
+
+	const handleLogin = useCallback(async (userToken: string, user: TokenPayload, refreshToken: string) => {
+		try {
+			const tokenPayload = decodeJwtToken(userToken);
+			if (!tokenPayload) {
+				throw new Error('Invalid token format');
+			}
+
+			axios.defaults.headers.common['Authorization'] = `Bearer ${userToken}`;
+			setAuthState({
+				token: userToken,
+				refreshToken,
+				user,
+				isAuthenticated: true,
+				isLoading: false,
+				error: null
+			});
+
+			localStorage.setItem('authToken', userToken);
+			localStorage.setItem('refreshToken', refreshToken);
+			localStorage.setItem('user', JSON.stringify(user));
+
+			// Schedule token refresh
+			scheduleTokenCheck(userToken);
+		} catch (error) {
+			console.error('Login failed:', error);
+			handleLogout();
+			throw error;
+		}
+	}, [handleLogout, scheduleTokenCheck]);
 
 	// Setup axios interceptors for token refresh
 	useEffect(() => {
@@ -136,31 +167,56 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 		};
 	}, [refreshAccessToken, authState.refreshToken]);
 
-	// Initialize auth state
+	// Cleanup timeout on unmount
+	useEffect(() => {
+		return () => {
+			if (tokenExpiryTimeout.current) {
+				clearTimeout(tokenExpiryTimeout.current);
+			}
+			if (initializationTimeout.current) {
+				clearTimeout(initializationTimeout.current);
+			}
+		};
+	}, []);
+
 	useEffect(() => {
 		const initializeAuth = async () => {
+			// Set a timeout for initialization
+			const initTimeout = setTimeout(() => {
+				console.warn('Auth initialization timed out');
+				handleLogout();
+			}, 10000);
+
+			initializationTimeout.current = initTimeout;
+
 			try {
 				const storedToken = localStorage.getItem('authToken');
 				const storedRefreshToken = localStorage.getItem('refreshToken');
 				const storedUser = localStorage.getItem('user');
 
+				// If no stored auth data, just set loading to false and return
 				if (!storedToken || !storedRefreshToken || !storedUser) {
-					throw new Error('Missing auth data');
+					setAuthState({
+						...initialState,
+						isLoading: false
+					});
+					return;
 				}
 
-				// Validate token
 				const tokenPayload = decodeJwtToken(storedToken);
 				if (!tokenPayload) {
-					throw new Error('Invalid token');
+					// Invalid token, clear everything and return
+					console.warn('Invalid token found in storage');
+					handleLogout();
+					return;
 				}
 
-				// Check token expiration
-				const tokenExp = tokenPayload.exp * 1000; // Convert to milliseconds
-				if (Date.now() >= tokenExp) {
-					// Token expired, try to refresh
+				const tokenExp = tokenPayload.exp * 1000;
+				if (Date.now() >= tokenExp - 60000) {
+					// Token expired or about to expire, try to refresh
 					await refreshAccessToken(storedRefreshToken);
 				} else {
-					// Token valid, setup auth state
+					// Valid token, set up auth state
 					setAuthState({
 						token: storedToken,
 						refreshToken: storedRefreshToken,
@@ -170,19 +226,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 						error: null
 					});
 
-					// Setup axios default header
 					axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+					scheduleTokenCheck(storedToken);
 				}
 			} catch (error) {
 				console.error('Auth initialization failed:', error);
 				handleLogout();
 			} finally {
+				clearTimeout(initializationTimeout.current);
 				setAuthState(prev => ({ ...prev, isLoading: false }));
 			}
 		};
 
 		initializeAuth();
-	}, [refreshAccessToken, handleLogout]);
+	}, [refreshAccessToken, handleLogout, scheduleTokenCheck]);
 
 	// Loading screen
 	if (authState.isLoading) {
@@ -196,7 +253,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 						className="text-center"
 					>
 						<Loader2 className="h-8 w-8 animate-spin text-indigo-600 mx-auto mb-4" />
-						<p className="text-gray-600">Initializing...</p>
+						<p className="text-gray-600">Loading...</p>
 					</motion.div>
 				</AnimatePresence>
 			</div>

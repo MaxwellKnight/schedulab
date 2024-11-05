@@ -28,7 +28,6 @@ import {
 import axios from 'axios';
 import { useTeam } from "@/context/TeamContext";
 import { useAuth } from "@/hooks/useAuth/useAuth";
-import api from "@/lib/axios";
 
 const Layout = () => {
 	const [activeTab, setActiveTab] = useState('create');
