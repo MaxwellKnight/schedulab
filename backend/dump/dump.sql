@@ -40,14 +40,27 @@ CREATE TABLE team_members (
 	FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+-- Table: team_roles
+CREATE TABLE team_roles (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    team_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (team_id) REFERENCES teams(id),
+    UNIQUE KEY unique_team_role (team_id, name)
+);
+
+-- Table: member_roles 
 CREATE TABLE member_roles (
-	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	team_id INT NOT NULL,
-	user_id INT NOT NULL,
-	role VARCHAR(255) NOT NULL,
-	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	FOREIGN KEY (team_id) REFERENCES teams(id),
-	FOREIGN KEY (user_id) REFERENCES users(id)
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    team_id INT NOT NULL,
+    user_id INT NOT NULL,
+    role_id INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (team_id) REFERENCES teams(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (role_id) REFERENCES team_roles(id),
+    UNIQUE KEY unique_member_role (team_id, user_id)
 );
 
 -- Table: shift_types

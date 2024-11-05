@@ -73,7 +73,6 @@ export class AuthController {
 			}
 
 			const user = await this.service.getByEmail(req.user?.email);
-			console.log(req.user);
 			const tokens = this.generateTokens(user || req.user);
 			const redirectUrl = new URL(`${process.env.FRONTEND_URL}/auth/callback`);
 
@@ -168,7 +167,6 @@ export class AuthController {
 
 			const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
 			req.user = decoded as TokenPayload;
-			console.log(decoded);
 			next();
 		} catch (err) {
 			return res.status(403).json({ message: 'Invalid token' });

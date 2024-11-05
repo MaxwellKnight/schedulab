@@ -18,9 +18,8 @@ export const makeValidator = (schema: Schema) => {
 					type: detail.type,
 					context: detail.context
 				}));
-				console.log("validator");
-
 				res.status(400).json(validationErrors);
+				return;
 			}
 			next();
 		} catch (err) {

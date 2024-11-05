@@ -10,24 +10,24 @@ export class TeamController {
 	}
 
 	public create = async (req: Request, res: Response): Promise<void> => {
-		if (!req.user?.id) {
-			res.status(400).json({ message: "User is missing from request" });
-			return;
-		}
-
-		const teamData = {
-			...req.body,
-			creator_id: req.user.id
-		};
-
 		try {
+			if (!req.user?.id) {
+				res.status(400).json({ message: "User is missing from request" });
+				return;
+			}
+
+			const teamData = {
+				...req.body,
+				creator_id: req.user.id
+			};
+
 			const id = await this.service.create(teamData);
-			res.json({ message: "Team created", id });
+			res.status(201).json({ message: "Team created", id });
 		} catch (error) {
-			console.log(error);
+			console.error(error);
 			res.status(400).json({ message: "Failed to create team" });
 		}
-	}
+	};
 
 	public getOne = async (req: Request, res: Response): Promise<void> => {
 		if (!req.user?.id) {
@@ -118,14 +118,14 @@ export class TeamController {
 	}
 
 	public joinTeam = async (req: Request, res: Response): Promise<void> => {
-		if (!req.user?.id) {
-			res.status(400).json({ message: "User is missing from request" });
-			return;
-		}
-
-		const { teamCode } = req.body;
-
 		try {
+			if (!req.user?.id) {
+				res.status(400).json({ message: "User is missing from request" });
+				return;
+			}
+
+			const { teamCode } = req.body;
+
 			// First get the team by code
 			const team = await this.service.getByTeamCode(teamCode);
 
@@ -150,21 +150,24 @@ export class TeamController {
 			}
 		} catch (error) {
 			console.error(error);
-			res.status(400).json({ message: "Failed to join team" });
+			// Only send response if one hasn't been sent yet
+			if (!res.headersSent) {
+				res.status(400).json({ message: "Failed to join team" });
+			}
 		}
-	}
+	};
 
 	// Modify addMember to require admin rights
 	public addMember = async (req: Request, res: Response): Promise<void> => {
-		if (!req.user?.id) {
-			res.status(400).json({ message: "User is missing from request" });
-			return;
-		}
-
-		const teamId = Number(req.params.id);
-		const { userId } = req.body;
-
 		try {
+			if (!req.user?.id) {
+				res.status(400).json({ message: "User is missing from request" });
+				return;
+			}
+
+			const teamId = Number(req.params.id);
+			const { userId } = req.body;
+
 			// Check if user is admin
 			const userRole = await this.service.getMemberRole(teamId, req.user.id);
 			if (userRole !== 'admin') {
@@ -179,9 +182,12 @@ export class TeamController {
 				res.status(400).json({ message: "Failed to add member" });
 			}
 		} catch (error) {
-			res.status(400).json({ message: "Failed to add member" });
+			// Only send response if one hasn't been sent yet
+			if (!res.headersSent) {
+				res.status(400).json({ message: "Failed to add member" });
+			}
 		}
-	}
+	};
 
 	public removeMember = async (req: Request, res: Response): Promise<void> => {
 		if (!req.user?.id) {

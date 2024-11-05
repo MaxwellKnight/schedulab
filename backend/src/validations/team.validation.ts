@@ -91,11 +91,12 @@ const updateRoleSchema = Joi.object({
 
 const joinTeamSchema = Joi.object({
 	teamCode: Joi.string()
-		.pattern(/^[a-zA-Z0-9-]{6,}$/)
+		.pattern(/^([A-Za-z]{4}|[0-9]{3})-[A-Z0-9]{5,6}$/)
 		.required()
 		.messages({
 			'string.empty': 'Team code is required',
-			'string.pattern.base': 'Invalid team code format',
+			'string.pattern.base': 'Team code must be in format XXXX-YYYYY or NNN-YYYYY (e.g., Card-NBFX2Z or 700-SUL5K)',
+			'string.base': 'Team code must be a string',
 		})
 });
 
