@@ -228,7 +228,6 @@ const Layout = () => {
 															<SelectValue placeholder="Select role" />
 														</SelectTrigger>
 														<SelectContent>
-															<SelectItem value="owner">Team Owner</SelectItem>
 															<SelectItem value="admin">Admin</SelectItem>
 															<SelectItem value="member">Team Member</SelectItem>
 														</SelectContent>
@@ -274,21 +273,6 @@ const Layout = () => {
 														className="pl-10 h-10 border-gray-200 focus:ring-2 focus:ring-slate-600 focus:border-slate-600 uppercase"
 													/>
 												</div>
-											</div>
-
-											<div className="space-y-2">
-												<Label htmlFor="role" className="text-sm font-medium text-gray-700">
-													Requested Role
-												</Label>
-												<Select value={role} onValueChange={setRole} disabled={loading}>
-													<SelectTrigger className="h-10">
-														<SelectValue placeholder="Select role" />
-													</SelectTrigger>
-													<SelectContent>
-														<SelectItem value="member">Team Member</SelectItem>
-														<SelectItem value="admin">Admin</SelectItem>
-													</SelectContent>
-												</Select>
 											</div>
 
 											<Button
