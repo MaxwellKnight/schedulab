@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth/useAuth';
 import { useTeam } from '@/context/TeamContext';
 import {
@@ -578,6 +578,7 @@ const Members = () => {
 									)}
 								</TableHead>
 								<TableHead className='w-48 mx-auto flex items-center gap-2'>Next Shift</TableHead>
+								<TableHead>Last Active</TableHead>
 								<TableHead className="text-right">Actions</TableHead>
 							</TableRow>
 						</TableHeader>
