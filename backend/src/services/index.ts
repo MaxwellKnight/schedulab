@@ -4,6 +4,7 @@ import { ShiftService } from "./shift.service";
 import { ScheduleService } from "./schedule.service";
 import { VacationService } from "./vacation.service";
 import { TemplateService } from "./template.service";
+import { TeamService } from "./team.service";
 
 export {
 	UserService,
@@ -11,5 +12,6 @@ export {
 	ShiftService,
 	ScheduleService,
 	TemplateService,
-	VacationService
+	VacationService,
+	TeamService
 }

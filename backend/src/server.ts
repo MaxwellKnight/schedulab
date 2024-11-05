@@ -3,7 +3,17 @@ import express from "express";
 import ip from './helpers/ip';
 import * as dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
-import { UserRouter, PreferenceRouter, ShiftRouter, VacationRouter, ScheduleRouter, AuthRouter, TemplateRouter } from "./routes";
+import {
+	UserRouter,
+	PreferenceRouter,
+	ShiftRouter,
+	VacationRouter,
+	ScheduleRouter,
+	AuthRouter,
+	TemplateRouter,
+	TeamRouter
+} from "./routes";
+
 import { configurePassport } from './configs/passport.config';
 
 dotenv.config();
@@ -35,5 +45,6 @@ app.use('/shifts', ShiftRouter);
 app.use('/vacations', VacationRouter);
 app.use('/schedules', ScheduleRouter);
 app.use('/templates', TemplateRouter);
+app.use('/teams', TeamRouter);
 
 app.listen(PORT, () => console.log(`server running on ${ip() || 'localhost'}:${PORT}`));

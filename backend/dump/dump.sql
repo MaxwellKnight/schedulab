@@ -15,6 +15,7 @@ CREATE TABLE users (
 	last_name VARCHAR(255) NOT NULL,
 	password VARCHAR(255) NOT NULL,
 	email VARCHAR(255) UNIQUE,
+	last_active TIMESTAMP NULL DEFAULT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -24,6 +25,7 @@ CREATE TABLE teams (
 	creator_id 	INT NOT NULL,
 	team_code VARCHAR(255) NOT NULL,
 	name VARCHAR(255) NOT NULL,
+  	notes VARCHAR(1024),
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY (creator_id) REFERENCES users(id)
 );
@@ -34,6 +36,16 @@ CREATE TABLE team_members (
 	user_id INT NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	UNIQUE KEY unique_team_member (team_id, user_id),
+	FOREIGN KEY (team_id) REFERENCES teams(id),
+	FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE member_roles (
+	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	team_id INT NOT NULL,
+	user_id INT NOT NULL,
+	role VARCHAR(255) NOT NULL,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY (team_id) REFERENCES teams(id),
 	FOREIGN KEY (user_id) REFERENCES users(id)
 );
@@ -237,17 +249,6 @@ CREATE TABLE remarks (
   content VARCHAR(1024) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (schedule_id) REFERENCES schedules(id)
-);
-
--- Table: feedback
-CREATE TABLE feedback (
-  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NOT NULL,
-  title VARCHAR(255) NOT NULL,
-  content VARCHAR(1024) NOT NULL,
-  sentiment VARCHAR(50),
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE expired (

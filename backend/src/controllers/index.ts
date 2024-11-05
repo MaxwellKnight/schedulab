@@ -5,6 +5,7 @@ import { ScheduleController } from "./schedule.controller";
 import { VacationController } from "./vacation.controller";
 import { AuthController } from "./auth.controller";
 import { TemplateController } from "./template.controller";
+import { TeamController } from "./team.controller";
 
 export {
 	UserController,
@@ -13,5 +14,6 @@ export {
 	VacationController,
 	ScheduleController,
 	AuthController,
-	TemplateController
+	TemplateController,
+	TeamController
 }
