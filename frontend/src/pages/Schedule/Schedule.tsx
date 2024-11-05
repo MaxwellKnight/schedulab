@@ -263,7 +263,6 @@ const Schedule: React.FC = () => {
 	}
 
 	const isTeamAdmin = selectedTeam?.creator_id === user?.id;
-	console.log(isTeamAdmin, selectedTeam?.creator_id, user?.id);
 
 	return (
 		<DndContext

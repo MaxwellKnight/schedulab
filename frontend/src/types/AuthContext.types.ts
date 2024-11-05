@@ -2,8 +2,10 @@ import { TokenPayload } from "./users.dto";
 
 export interface AuthContextType {
 	token: string | null;
-	user: TokenPayload | null;
 	isAuthenticated: boolean;
-	login: (userToken: string, user: TokenPayload) => void;
-	logout: () => void;
+	user: TokenPayload | null;
+	error: string | null;
+	login: (token: string, user: TokenPayload, refreshToken: string) => Promise<void>;
+	logout: () => Promise<void>;
+	refreshToken: (refreshToken: string) => Promise<string>;
 }

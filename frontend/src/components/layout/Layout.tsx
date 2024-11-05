@@ -28,6 +28,7 @@ import {
 import axios from 'axios';
 import { useTeam } from "@/context/TeamContext";
 import { useAuth } from "@/hooks/useAuth/useAuth";
+import api from "@/lib/axios";
 
 const Layout = () => {
 	const [activeTab, setActiveTab] = useState('create');
@@ -56,7 +57,10 @@ const Layout = () => {
 		setLoading(true);
 
 		try {
-			await createTeam('');
+			await createTeam({
+				name: teamName,
+				notes: teamDescription
+			});
 			setSuccess('Team created successfully!');
 			setTeamName('');
 			setTeamDescription('');
@@ -77,7 +81,7 @@ const Layout = () => {
 		setLoading(true);
 
 		try {
-			await joinTeam('');
+			await joinTeam(teamCode);
 			setSuccess('Successfully joined team!');
 			setTeamCode('');
 		} catch (err) {
