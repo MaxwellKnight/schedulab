@@ -50,6 +50,8 @@ export const TeamProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 		if (selectedTeam) {
 			localStorage.setItem('selectedTeam', JSON.stringify(selectedTeam));
 		}
+
+		return () => localStorage.removeItem('selectedTeam');
 	}, [selectedTeam]);
 
 	useEffect(() => {
@@ -63,8 +65,6 @@ export const TeamProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 				localStorage.removeItem('selectedTeam');
 			}
 		}
-
-		return () => localStorage.removeItem('selectedTeam');
 	}, []);
 
 	const createTeam = useCallback(async (teamData: { name: string; notes?: string }) => {
