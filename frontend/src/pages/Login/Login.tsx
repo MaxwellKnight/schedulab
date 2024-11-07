@@ -202,7 +202,7 @@ const Login: React.FC = () => {
 					>
 						<h2 className="text-5xl font-bold text-white mb-6">
 							Welcome to<br />
-							<span className="text-indigo-200">Magshimim Boyz</span>
+							<span className="text-indigo-200">Schedulab</span>
 						</h2>
 						<p className="text-xl text-indigo-100">
 							Streamlined scheduling that puts your priorities first

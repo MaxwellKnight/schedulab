@@ -76,7 +76,7 @@ const Logo = () => (
 
 		<g transform="translate(90,53)">
 			<text fontFamily="Arial, sans-serif" fontSize="38" fontWeight="600" fill="#1F2937" letterSpacing="0">
-				schedula
+				schedulab
 			</text>
 		</g>
 	</svg>
