@@ -4,6 +4,7 @@ import { Shift, TimeRange, UserShifts } from "./shift.model";
 import { Schedule } from "./schedule.model";
 import { Vacation } from "./vacations.model";
 import { TemplateSchedule, TemplateShift, TemplateTimeRange, TemplateConstraint } from "./template.model";
+import { Team, TeamRole } from "./user.model";
 
 export {
 	User,
@@ -17,5 +18,7 @@ export {
 	TemplateSchedule,
 	TemplateShift,
 	TemplateTimeRange,
-	TemplateConstraint
+	TemplateConstraint,
+	TeamRole,
+	Team
 };

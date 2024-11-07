@@ -67,7 +67,9 @@ const Login: React.FC = () => {
 				email: tokenPayload.email,
 				display_name: tokenPayload.display_name,
 				google_id: tokenPayload.google_id,
-				picture: tokenPayload.picture
+				picture: tokenPayload.picture,
+				exp: tokenPayload.exp,
+				iat: tokenPayload.iat,
 			};
 
 			localStorage.setItem('authToken', accessToken);
@@ -76,7 +78,7 @@ const Login: React.FC = () => {
 
 			axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
-			login(accessToken, userPayload);
+			login(accessToken, userPayload, refreshToken);
 			navigate('/');
 		} catch (err) {
 			if (axios.isAxiosError(err)) {
@@ -152,17 +154,17 @@ const Login: React.FC = () => {
 
 	const features = [
 		{
-			icon: <Clock className="h-6 w-6 mb-2" />,
+			icon: <Clock className="text-gray-200 h-6 w-6 mb-2" />,
 			title: "Priority",
 			subtitle: "Smart Handling"
 		},
 		{
-			icon: <Zap className="h-6 w-6 mb-2" />,
+			icon: <Zap className="text-gray-200 h-6 w-6 mb-2" />,
 			title: "Instant",
 			subtitle: "Coordination"
 		},
 		{
-			icon: <Calendar className="h-6 w-6 mb-2" />,
+			icon: <Calendar className="text-gray-200 h-6 w-6 mb-2" />,
 			title: "Effortless",
 			subtitle: "Planning"
 		}

@@ -21,6 +21,8 @@ export interface TokenPayload {
 	google_id?: string;
 	display_name?: string;
 	picture?: string;
+	exp: number;
+	iat: number;
 }
 
 export interface Team {

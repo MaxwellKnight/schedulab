@@ -37,3 +37,10 @@ export interface Team {
 	team_code: string;
 	created_at: Date;
 }
+
+export interface TeamRole {
+	id?: number;
+	team_id: number;
+	name: string;
+	created_at: Date;
+}

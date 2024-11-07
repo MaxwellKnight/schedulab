@@ -56,7 +56,10 @@ const Layout = () => {
 		setLoading(true);
 
 		try {
-			await createTeam('');
+			await createTeam({
+				name: teamName,
+				notes: teamDescription
+			});
 			setSuccess('Team created successfully!');
 			setTeamName('');
 			setTeamDescription('');
@@ -77,7 +80,7 @@ const Layout = () => {
 		setLoading(true);
 
 		try {
-			await joinTeam('');
+			await joinTeam(teamCode);
 			setSuccess('Successfully joined team!');
 			setTeamCode('');
 		} catch (err) {

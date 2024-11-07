@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2, AlertCircle, CheckCircle2, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -30,85 +30,104 @@ const AuthCallback: React.FC = () => {
 		message: loadingMessages[0]
 	});
 	const [messageIndex, setMessageIndex] = useState(0);
+	const [isProcessing, setIsProcessing] = useState(false);
 
+	// Separate loading messages effect
 	useEffect(() => {
+		let interval: NodeJS.Timeout;
+
 		if (authState.status === 'loading') {
-			const interval = setInterval(() => {
+			interval = setInterval(() => {
 				setMessageIndex(prev => (prev + 1) % loadingMessages.length);
 			}, 2000);
-			return () => clearInterval(interval);
 		}
+
+		return () => {
+			if (interval) clearInterval(interval);
+		};
 	}, [authState.status]);
 
-	useEffect(() => {
-		const handleCallback = async () => {
-			try {
-				const accessToken = searchParams.get('accessToken');
-				const refreshToken = searchParams.get('refreshToken');
+	// Separate authentication logic into a callback
+	const processAuthentication = useCallback(async () => {
+		if (isProcessing) return;
 
-				if (!accessToken || !refreshToken) {
-					throw new Error('Missing authentication tokens');
-				}
+		try {
+			setIsProcessing(true);
+			const accessToken = searchParams.get('accessToken');
+			const refreshToken = searchParams.get('refreshToken');
 
-				// Store tokens
-				localStorage.setItem('authToken', accessToken);
-				localStorage.setItem('refreshToken', refreshToken);
-
-				// Decode token to get user information
-				const tokenPayload = decodeJwtToken(accessToken);
-
-				const userPayload: TokenPayload = {
-					id: tokenPayload.id,
-					email: tokenPayload.email,
-					display_name: tokenPayload.display_name,
-					google_id: tokenPayload.google_id,
-					picture: tokenPayload.picture
-				};
-
-				// Store user data
-				localStorage.setItem('user', JSON.stringify(userPayload));
-
-				// Set authorization header
-				axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-
-				setAuthState({
-					status: 'success',
-					message: 'Authentication successful!'
-				});
-
-				login(accessToken, userPayload);
-
-				// Delay navigation for animation
-				setTimeout(() => {
-					navigate('/', { replace: true });
-				}, 1500);
-
-			} catch (error) {
-				let errorMessage = 'Authentication failed';
-
-				if (axios.isAxiosError(error)) {
-					errorMessage = error.response?.data?.message || error.message;
-
-					if (error.response?.status === 401) {
-						errorMessage = 'Invalid authentication tokens';
-					} else if (error.response?.status === 429) {
-						errorMessage = 'Too many authentication attempts. Please try again later.';
-					}
-				}
-
-				setAuthState({
-					status: 'error',
-					message: errorMessage
-				});
-
-				setTimeout(() => {
-					navigate('/login');
-				}, 2000);
+			if (!accessToken || !refreshToken) {
+				throw new Error('Missing authentication tokens');
 			}
-		};
 
-		handleCallback();
-	}, [searchParams, navigate, login]);
+			// Decode token first to validate it
+			const tokenPayload = decodeJwtToken(accessToken);
+			if (!tokenPayload) {
+				throw new Error('Invalid token format');
+			}
+
+			const userPayload: TokenPayload = {
+				id: tokenPayload.id,
+				email: tokenPayload.email,
+				display_name: tokenPayload.display_name,
+				google_id: tokenPayload.google_id,
+				picture: tokenPayload.picture
+			};
+
+			// Store tokens and user data only after validation
+			localStorage.setItem('authToken', accessToken);
+			localStorage.setItem('refreshToken', refreshToken);
+			localStorage.setItem('user', JSON.stringify(userPayload));
+
+			// Update axios defaults after successful validation
+			axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+
+			// Call login only once after all validations pass
+			login(accessToken, userPayload);
+
+			setAuthState({
+				status: 'success',
+				message: 'Authentication successful!'
+			});
+
+			// Use a promise with setTimeout for better cleanup
+			await new Promise(resolve => setTimeout(resolve, 1500));
+			navigate('/', { replace: true });
+
+		} catch (error) {
+			let errorMessage = 'Authentication failed';
+
+			if (axios.isAxiosError(error)) {
+				errorMessage = error.response?.data?.message || error.message;
+
+				if (error.response?.status === 401) {
+					errorMessage = 'Invalid authentication tokens';
+				} else if (error.response?.status === 429) {
+					errorMessage = 'Too many authentication attempts. Please try again later.';
+				}
+			}
+
+			setAuthState({
+				status: 'error',
+				message: errorMessage
+			});
+
+			// Clean up any stored data on error
+			localStorage.removeItem('authToken');
+			localStorage.removeItem('refreshToken');
+			localStorage.removeItem('user');
+
+			await new Promise(resolve => setTimeout(resolve, 2000));
+			navigate('/login', { replace: true });
+		} finally {
+			setIsProcessing(false);
+		}
+	}, [isProcessing, searchParams, navigate, login]);
+
+	// Single effect for authentication
+	useEffect(() => {
+		processAuthentication();
+	}, [processAuthentication]);
 
 	return (
 		<div className="min-h-screen w-full flex flex-col lg:flex-row bg-gradient-to-br from-indigo-700 via-purple-700 to-purple-800 items-center justify-center">

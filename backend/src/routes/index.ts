@@ -5,6 +5,7 @@ import VacationRouter from './vacation.routes';
 import ScheduleRouter from './schedule.routes';
 import AuthRouter from './auth.routes';
 import TemplateRouter from './template.routes';
+import TeamRouter from './team.routes';
 
 export {
 	UserRouter,
@@ -13,5 +14,6 @@ export {
 	VacationRouter,
 	ScheduleRouter,
 	AuthRouter,
-	TemplateRouter
+	TemplateRouter,
+	TeamRouter
 }
