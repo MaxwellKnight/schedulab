@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -135,7 +135,6 @@ interface ScheduleEditableProps {
 	shiftTypes: ShiftType[] | null;
 	members: UserData[] | null;
 	assignments: MemberAssignment[];
-	onAssignmentChange: (newAssignments: MemberAssignment[]) => void;
 }
 
 const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
@@ -149,7 +148,46 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 	const [visibleHoursEnd, setVisibleHoursEnd] = useState(24);
 	const [isFullScreen, setIsFullScreen] = useState(false);
 
-	const renderShiftGroup = (shifts: TemplateShiftData[], date: Date, timeSlot: string) => {
+	const getAssignedSlots = useCallback((shift: TemplateShiftData, date: Date, timeSlot: string) => {
+		return assignments
+			.filter(a => {
+				const normalizedAssignmentTimeSlot = a.timeSlot.split(':').slice(0, 2).join(':');
+				const normalizedTimeSlot = timeSlot.split(':').slice(0, 2).join(':');
+
+				return (
+					a.shiftTypeId === shift.shift_type_id &&
+					a.date === date.toISOString() &&
+					normalizedAssignmentTimeSlot === normalizedTimeSlot
+				);
+			})
+			.map(a => ({
+				position: a.position,
+				member: members?.find(m => m.id.toString() === a.memberId),
+				assignment: a
+			}))
+			.filter((slot): slot is { position: number; member: UserData; assignment: MemberAssignment } =>
+				slot.member != null
+			)
+			.sort((a, b) => a.position - b.position);
+	}, [assignments, members]);
+
+	const shiftColors = useMemo(() => {
+		const colors = {
+			morning: 'bg-blue-100 border-blue-300 text-blue-800',
+			afternoon: 'bg-green-100 border-green-300 text-green-800',
+			night: 'bg-purple-100 border-purple-300 text-purple-800',
+			oncall: 'bg-yellow-100 border-yellow-300 text-yellow-800',
+			backup: 'bg-pink-100 border-pink-300 text-pink-800',
+			default: 'bg-red-100 border-red-300 text-red-800'
+		};
+
+		return shiftTypes?.reduce((acc, type, index) => {
+			acc[type.id] = Object.values(colors)[index % Object.values(colors).length];
+			return acc;
+		}, {} as Record<number, string>) ?? {};
+	}, [shiftTypes]);
+
+	const renderShiftGroup = useCallback((shifts: TemplateShiftData[], date: Date, timeSlot: string) => {
 		return shifts.map(shift => {
 			const shiftType = shiftTypes?.find(type => type.id === shift.shift_type_id);
 			if (!shiftType) return null;
@@ -159,27 +197,17 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 			const scaledBaseHeight = baseHeight * zoomLevel;
 			const scaledSpacing = spacing * zoomLevel;
 
-			// Show all available positions up to required_count
+			const assignedSlots = getAssignedSlots(shift, date, timeSlot);
 			const positions = Array.from({ length: shift.required_count });
-			const assignedSlots = assignments
-				.filter(a =>
-					a.shiftTypeId === shift.shift_type_id &&
-					a.date === date.toISOString() &&
-					a.timeSlot === timeSlot
-				)
-				.map(a => ({
-					position: a.position,
-					member: members?.find(m => m.id.toString() === a.memberId)
-				}))
-				.filter((slot): slot is { position: number; member: UserData } => slot.member != null);
 
-			// Calculate total height for all required positions
 			const totalHeight = (scaledBaseHeight * shift.required_count) +
 				(scaledSpacing * (shift.required_count - 1));
 
+			const groupKey = `${shift.id}-${date.toISOString()}-${timeSlot}-${assignments.length}`;
+
 			return (
 				<div
-					key={shift.id}
+					key={groupKey}
 					className="p-1 first:pt-2 last:pb-2 relative group"
 					style={{
 						height: `${totalHeight + 32}px`,
@@ -196,9 +224,11 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 					<div className="relative">
 						{positions.map((_, i) => {
 							const assignment = assignedSlots.find(s => s.position === i);
+							const uniqueKey = `${shiftType.id}-${date.toISOString()}-${timeSlot}-${i}-${assignment?.member?.id || 'empty'}-${assignments.length}`;
+
 							return (
 								<DroppableShiftSlot
-									key={`${shiftType.id}-${i}`}
+									key={uniqueKey}
 									shiftTypeId={shift.shift_type_id}
 									date={date}
 									timeSlot={timeSlot}
@@ -221,11 +251,10 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 							);
 						})}
 					</div>
-					<div className="absolute bottom-0 left-2 right-2 border-b border-gray-200 last:border-0" />
 				</div>
 			);
 		});
-	};
+	}, [shiftTypes, zoomLevel, getAssignedSlots, shiftColors, assignments.length]);
 
 	const timeSlots = useMemo(() => {
 		if (!template) return [];
@@ -238,22 +267,6 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 		});
 		return Array.from(uniqueHours).sort();
 	}, [template]);
-
-	const shiftColors = useMemo(() => {
-		const colors = {
-			morning: 'bg-blue-100 border-blue-300 text-blue-800',
-			afternoon: 'bg-green-100 border-green-300 text-green-800',
-			night: 'bg-purple-100 border-purple-300 text-purple-800',
-			oncall: 'bg-yellow-100 border-yellow-300 text-yellow-800',
-			backup: 'bg-pink-100 border-pink-300 text-pink-800',
-			default: 'bg-red-100 border-red-300 text-red-800'
-		};
-
-		return shiftTypes?.reduce((acc, type, index) => {
-			acc[type.id] = Object.values(colors)[index % Object.values(colors).length];
-			return acc;
-		}, {} as Record<number, string>) ?? {};
-	}, [shiftTypes]);
 
 	const dates = useMemo(() => {
 		if (!template) return [];

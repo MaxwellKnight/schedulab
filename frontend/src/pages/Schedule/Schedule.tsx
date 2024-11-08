@@ -14,6 +14,8 @@ import { UserData } from '@/types';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { useTeam } from '@/context/TeamContext';
+import ScheduleSettings, { AutoAssignPreferences } from './ScheduleSettings';
+import { createOptimalSchedule } from '@/algorithms/scheduler';
 
 export interface MemberAssignment {
 	memberId: string;
@@ -106,6 +108,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 	</Card>
 );
 
+
+
 const Schedule: React.FC = () => {
 	const [template, setTemplate] = useState<TemplateScheduleData | null>(null);
 	const [isDirty, setIsDirty] = useState(false);
@@ -114,6 +118,12 @@ const Schedule: React.FC = () => {
 	const { user } = useAuth();
 	const [assignments, setAssignments] = useState<MemberAssignment[]>([]);
 	const [draggedMember, setDraggedMember] = useState<{ member: UserData; isCurrentUser: boolean; } | null>(null);
+	const [isProcessingAutoAssign, setIsProcessingAutoAssign] = useState(false);
+	const [autoAssignPreferences, setAutoAssignPreferences] = useState<AutoAssignPreferences>({
+		respectExisting: true,
+		balanceLoad: true,
+		considerStudentStatus: true
+	});
 	const { selectedTeam } = useTeam();
 
 	const {
@@ -142,6 +152,20 @@ const Schedule: React.FC = () => {
 		}
 	}, [selectedTeam?.id, fetchTemplates]);
 
+	useEffect(() => {
+		fetchShiftTypes();
+		fetchMembers();
+	}, [fetchShiftTypes, fetchMembers]);
+
+
+	if (shiftTypesLoading || membersLoading) {
+		return <div>Loading data...</div>;
+	}
+
+	if (shiftTypesError || membersError) {
+		return <div>Error loading. Please try again.</div>;
+	}
+
 	const handleDragStart = (event: DragStartEvent) => {
 		const { active } = event;
 		if (active.data.current?.type === 'new-member') {
@@ -167,14 +191,15 @@ const Schedule: React.FC = () => {
 			// Handle dropping outside any droppable area
 			if (active.data.current?.type === 'member') {
 				const dragData = active.data.current;
-				const newAssignments = assignments.filter(a =>
-					!(a.memberId === dragData.memberId &&
-						a.shiftTypeId === dragData.shiftTypeId &&
-						a.date === dragData.date &&
-						a.timeSlot === dragData.timeSlot &&
-						a.position === dragData.position)
+				setAssignments(prev =>
+					prev.filter(a =>
+						!(a.memberId === dragData.memberId &&
+							a.shiftTypeId === dragData.shiftTypeId &&
+							a.date === dragData.date &&
+							a.timeSlot === dragData.timeSlot &&
+							a.position === dragData.position)
+					)
 				);
-				setAssignments(newAssignments);
 				setIsDirty(true);
 			}
 			return;
@@ -183,53 +208,57 @@ const Schedule: React.FC = () => {
 		const dropData = over.data.current;
 		if (!dropData?.type || dropData.type !== 'slot') return;
 
-		// Check if the slot is already occupied
-		const isSlotOccupied = assignments.some(a =>
-			a.shiftTypeId === dropData.shiftTypeId &&
-			a.date === dropData.date.toISOString() &&
-			a.timeSlot === dropData.timeSlot &&
-			a.position === dropData.position
-		);
-
-		if (isSlotOccupied) return;
-
-		if (active.data.current?.type === 'new-member') {
-			// Dragging from MembersList
-			const memberData = active.data.current.member;
-			const newAssignment: MemberAssignment = {
-				memberId: memberData.id.toString(),
-				shiftTypeId: dropData.shiftTypeId,
-				date: dropData.date.toISOString(),
-				timeSlot: dropData.timeSlot,
-				position: dropData.position
-			};
-			setAssignments(prev => [...prev, newAssignment]);
-			setIsDirty(true);
-		} else if (active.data.current?.type === 'member') {
-			// Dragging from one slot to another
-			const dragData = active.data.current;
-			const newAssignments = assignments.filter(a =>
-				!(a.memberId === dragData.memberId &&
-					a.shiftTypeId === dragData.shiftTypeId &&
-					a.date === dragData.date &&
-					a.timeSlot === dragData.timeSlot &&
-					a.position === dragData.position)
+		setAssignments(prev => {
+			// Check if slot is already occupied
+			const isSlotOccupied = prev.some(a =>
+				a.shiftTypeId === dropData.shiftTypeId &&
+				a.date === dropData.date.toISOString() &&
+				a.timeSlot === dropData.timeSlot &&
+				a.position === dropData.position
 			);
 
-			newAssignments.push({
-				memberId: dragData.memberId,
-				shiftTypeId: dropData.shiftTypeId,
-				date: dropData.date.toISOString(),
-				timeSlot: dropData.timeSlot,
-				position: dropData.position
-			});
+			if (isSlotOccupied) return prev;
 
-			setAssignments(newAssignments);
-			setIsDirty(true);
-		}
+			let newAssignments = [...prev];
+
+			if (active.data.current?.type === 'new-member') {
+				const memberData = active.data.current.member;
+				newAssignments.push({
+					memberId: memberData.id.toString(),
+					shiftTypeId: dropData.shiftTypeId,
+					date: dropData.date.toISOString(),
+					timeSlot: dropData.timeSlot,
+					position: dropData.position
+				});
+			} else if (active.data.current?.type === 'member') {
+				const dragData = active.data.current;
+				// Remove old assignment
+				newAssignments = newAssignments.filter(a =>
+					!(a.memberId === dragData.memberId &&
+						a.shiftTypeId === dragData.shiftTypeId &&
+						a.date === dragData.date &&
+						a.timeSlot === dragData.timeSlot &&
+						a.position === dragData.position)
+				);
+
+				// Add new assignment
+				newAssignments.push({
+					memberId: dragData.memberId,
+					shiftTypeId: dropData.shiftTypeId,
+					date: dropData.date.toISOString(),
+					timeSlot: dropData.timeSlot,
+					position: dropData.position
+				});
+			}
+
+			return newAssignments;
+		});
+
+		setIsDirty(true);
 	};
 
 	const handleAssignmentChange = (newAssignments: MemberAssignment[]) => {
+		console.log('Assignments updated:', newAssignments);
 		setAssignments(newAssignments);
 		setIsDirty(true);
 	};
@@ -249,20 +278,46 @@ const Schedule: React.FC = () => {
 		console.log('Publishing schedule:', template, assignments);
 	};
 
-	useEffect(() => {
-		fetchShiftTypes();
-		fetchMembers();
-	}, [fetchShiftTypes, fetchMembers]);
-
-	if (shiftTypesLoading || membersLoading) {
-		return <div>Loading data...</div>;
-	}
-
-	if (shiftTypesError || membersError) {
-		return <div>Error loading. Please try again.</div>;
-	}
-
 	const isTeamAdmin = selectedTeam?.creator_id === user?.id;
+
+	const handleAutoAssign = async () => {
+		if (!template || !members || isProcessingAutoAssign) return;
+		setIsProcessingAutoAssign(true);
+		try {
+			let availableMembers = [...members];
+			if (autoAssignPreferences.considerStudentStatus) {
+				availableMembers = availableMembers.sort((a, b) =>
+					(a.student === b.student) ? 0 : a.student ? 1 : -1
+				);
+			}
+
+			const existingAssignmentsToKeep = autoAssignPreferences.respectExisting
+				? assignments
+				: [];
+
+			const newAssignments = await createOptimalSchedule(
+				template,
+				availableMembers,
+				existingAssignmentsToKeep
+			);
+
+			setAssignments([...newAssignments]);
+
+			console.log('Auto-assignment completed');
+			setIsDirty(true);
+		} catch (error) {
+			console.error('Failed to create schedule:', error);
+		} finally {
+			setIsProcessingAutoAssign(false);
+		}
+	};
+
+	const handleClearAssignments = () => {
+		if (window.confirm('Are you sure you want to clear all assignments?')) {
+			setAssignments([]);
+			setIsDirty(true);
+		}
+	};
 
 	return (
 		<DndContext
@@ -334,7 +389,6 @@ const Schedule: React.FC = () => {
 										shiftTypes={shiftTypes}
 										members={members}
 										assignments={assignments}
-										onAssignmentChange={handleAssignmentChange}
 									/>
 								</CardContent>
 							</Card>
@@ -346,11 +400,14 @@ const Schedule: React.FC = () => {
 								icon={<Settings />}
 								title="Settings"
 							>
-								<div className="space-y-2">
-									<div className="h-8 bg-gray-100 rounded animate-pulse" />
-									<div className="h-8 bg-gray-100 rounded animate-pulse" />
-									<div className="h-8 bg-gray-100 rounded animate-pulse" />
-								</div>
+								<ScheduleSettings
+									onAutoAssign={handleAutoAssign}
+									isProcessing={isProcessingAutoAssign}
+									hasAssignments={assignments.length > 0}
+									onClearAssignments={handleClearAssignments}
+									preferences={autoAssignPreferences}
+									onPreferencesChange={setAutoAssignPreferences}
+								/>
 							</Sidebar>
 						</div>
 					) : (
