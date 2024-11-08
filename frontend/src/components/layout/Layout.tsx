@@ -350,11 +350,11 @@ const Layout = () => {
 	const renderMainContent = () => (
 		<div className="min-h-screen flex flex-col bg-gray-50">
 			<header className="bg-white shadow-sm">
-				<div className="max-w-[2000px] w-full mx-auto">
+				<div className="fixed z-50 max-w-[2000px] w-full mx-auto">
 					<Navigation />
 				</div>
 			</header>
-			<main className="flex-grow w-full">
+			<main className="mt-8 flex-grow w-full">
 				<div className="max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-8 xl:py-12 bg-slate-50 bg-grid-small-slate-100/60 bg-fixed backdrop-blur-[0.2px]">
 					<Outlet />
 				</div>

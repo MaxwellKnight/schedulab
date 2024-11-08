@@ -161,24 +161,25 @@ const MembersList: React.FC<MembersListProps> = ({ members }) => {
 	);
 
 	return (
-		<Card className="border-0 shadow-none">
-			<CardContent className="p-4">
-				<div className="mb-4">
+		<Card className="h-full flex flex-col border-0 shadow-none">
+			<CardContent className="flex-1 flex flex-col p-4 h-full">
+				<div className="mb-4 flex-shrink-0">
 					<div className="relative">
-						<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
 						<Input
 							placeholder="Search members..."
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
-							className="pl-9 bg-gray-50 border-gray-200 focus:bg-white transition-colors duration-200"
+							className="w-full pl-9 bg-gray-50 border-gray-200 focus:bg-white transition-colors duration-200"
 						/>
 					</div>
 				</div>
-				<ScrollArea className="xl:h-[calc(100vh-25rem)]">
+
+				<ScrollArea className="flex-1 h-full min-h-0">
 					{!filteredMembers || filteredMembers.length === 0 ? (
 						<EmptyState searchActive={searchQuery.length > 0} />
 					) : (
-						<div className="flex flex-row xl:flex-col gap-2 xl:gap-2 overflow-x-auto xl:overflow-x-visible pr-4">
+						<div className="flex flex-row xl:flex-col gap-2 pr-4 xl:pr-0 overflow-x-auto xl:overflow-x-visible">
 							{filteredMembers.map((member) => (
 								<DraggableMemberCard
 									key={member.id}

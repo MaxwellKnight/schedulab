@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
@@ -311,7 +311,7 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 
 	return (
 		<Card className={`transition-all duration-300 ${isFullScreen ? 'fixed inset-0 z-50 m-0 rounded-none' : ''}`}>
-			<CardHeader className="border-b sticky top-0 z-20">
+			<CardHeader className="bg-white border-b sticky top-0 z-20">
 				<div className="flex justify-between items-center">
 					<CardTitle className="text-lg font-medium">
 						Playground

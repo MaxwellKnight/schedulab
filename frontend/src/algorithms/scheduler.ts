@@ -24,7 +24,7 @@ export class ShiftAssignmentSolver {
 		private users: UserData[],
 		private existingAssignments: MemberAssignment[] = [],
 		private options = {
-			maxShiftsPerDay: 2,
+			maxShiftsPerDay: 1,
 			minRestHoursBetweenShifts: 8,
 			maxHoursPerWeek: 40,
 			considerStudentStatus: true
