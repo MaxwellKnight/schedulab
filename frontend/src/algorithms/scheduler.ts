@@ -109,7 +109,7 @@ export class ShiftAssignmentSolver {
 		return (weeklyAssignments.length + 1) * 8;
 	}
 
-	private async validateAssignment(assignment: MemberAssignment): Promise<boolean> {
+	private validateAssignment(assignment: MemberAssignment): boolean {
 		const userId = assignment.memberId;
 		const newWindow = this.getTimeWindow(assignment.date, assignment.timeSlot);
 
@@ -180,12 +180,12 @@ export class ShiftAssignmentSolver {
 		return score;
 	}
 
-	private async backtrack(
+	private backtrack(
 		date: Date,
 		shift: TemplateShiftData,
 		timeSlot: string,
 		position: number
-	): Promise<boolean> {
+	): boolean {
 		if (position >= shift.required_count) {
 			return true;
 		}
@@ -204,14 +204,14 @@ export class ShiftAssignmentSolver {
 				position
 			};
 
-			if (await this.validateAssignment(assignment)) {
+			if (this.validateAssignment(assignment)) {
 				// Make the assignment
 				this.assignments.push(assignment);
 				const currentCount = this.userAssignmentCounts.get(user.id.toString()) || 0;
 				this.userAssignmentCounts.set(user.id.toString(), currentCount + 1);
 
 				// Try to assign the next position
-				const success = await this.backtrack(date, shift, timeSlot, position + 1);
+				const success = this.backtrack(date, shift, timeSlot, position + 1);
 				if (success) {
 					return true;
 				}
@@ -225,7 +225,7 @@ export class ShiftAssignmentSolver {
 		return false;
 	}
 
-	public async solve(): Promise<MemberAssignment[]> {
+	public solve(): MemberAssignment[] {
 		try {
 			const startDate = new Date(this.template.start_date);
 			const endDate = new Date(this.template.end_date);
@@ -240,7 +240,7 @@ export class ShiftAssignmentSolver {
 
 				for (const shift of shifts) {
 					for (const range of shift.ranges) {
-						const success = await this.backtrack(
+						const success = this.backtrack(
 							new Date(currentDate),
 							shift,
 							range.start_time,
@@ -266,16 +266,16 @@ export class ShiftAssignmentSolver {
 	}
 }
 
-export const createOptimalSchedule = async (
+export const createOptimalSchedule = (
 	template: TemplateScheduleData,
 	users: UserData[],
 	existingAssignments: MemberAssignment[] = []
-): Promise<MemberAssignment[]> => {
+): MemberAssignment[] => {
 	try {
 		const solver = new ShiftAssignmentSolver(template, users, existingAssignments);
-		return await solver.solve();
+		return solver.solve();
 	} catch (error) {
 		console.error('Failed to create schedule:', error);
-		throw error;
+		return [];
 	}
 };
