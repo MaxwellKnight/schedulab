@@ -96,6 +96,8 @@ const DroppableShiftSlot: React.FC<{
 				ref={setNodeRef}
 				className={`
         ${className}
+${isValidDrop && active?.data?.current?.memberId == assignedMember?.id.toString()
+						? 'bg-indigo-900 shadow-md border-2 border-blue-400 scale-[1.02]' : ''}
         ${isOver && isValidDrop ? 'ring-2 ring-blue-400 opacity-100 !bg-opacity-75' : ''}
         ${!assignedMember ? 'min-h-[24px]' : ''}
       `}

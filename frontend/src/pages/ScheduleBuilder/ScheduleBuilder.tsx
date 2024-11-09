@@ -1,17 +1,17 @@
-import { useEffect, useReducer, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { useForm } from 'react-hook-form';
-import { useAuth } from '@/hooks/useAuth/useAuth';
-import { ScheduleData, ShiftData, Constraints } from '@/types';
-import { TemplateScheduleData, TemplateShiftData, TemplateConstraintData } from '@/types/template.dto';
-import ScheduleForm from './ScheduleForm';
 import ShiftForm from './ShiftForm';
 import ShiftList from './ShiftList';
-import ProgressSteps from './ProgressSteps';
-import ConstraintBuilder from './ConstraintBuilder';
+import ScheduleForm from './ScheduleForm';
+import { useForm } from 'react-hook-form';
 import ScheduleTable from './ScheduleTable';
+import ProgressSteps from './ProgressSteps';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth/useAuth';
+import ConstraintBuilder from './ConstraintBuilder';
+import { useEffect, useReducer, useState } from 'react';
+import { ScheduleData, ShiftData, Constraints } from '@/types';
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { TemplateScheduleData, TemplateShiftData, TemplateConstraintData } from '@/types/template.dto';
 
 export type ShiftType = { id: number; name: string };
 export type Schedule = ScheduleData & { types: ShiftType[] } & { step: number; constraints: Constraints[][] };

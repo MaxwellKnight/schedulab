@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Save, Users, Settings, Sheet, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Save, Users, Settings, Sheet } from 'lucide-react';
 import Combobox from "@/components/combobox/Combobox";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,8 +14,10 @@ import { UserData } from '@/types';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { useTeam } from '@/context/TeamContext';
-import ScheduleSettings, { AutoAssignPreferences } from './ScheduleSettings';
-import { createOptimalSchedule } from '@/algorithms/scheduler';
+import ScheduleSettings from './ScheduleSettings';
+import { DragData, DropData } from './reducer';
+import { useSchedule } from '@/context';
+import { Sidebar } from './ScheduleSidebar';
 
 export interface MemberAssignment {
 	memberId: string;
@@ -25,136 +27,14 @@ export interface MemberAssignment {
 	position: number;
 }
 
-interface SidebarToggleButtonProps {
-	isOpen: boolean;
-	onClick: () => void;
-	position: 'left' | 'right';
-}
-
-interface SidebarProps {
-	isOpen: boolean;
-	onToggle: () => void;
-	position: 'left' | 'right';
-	icon: React.ReactNode;
-	title: string;
-	children: React.ReactNode;
-	className?: string;
-}
-
-const SidebarToggleButton: React.FC<SidebarToggleButtonProps> = ({ isOpen, onClick, position }) => (
-	<Button
-		variant="ghost"
-		size="sm"
-		className={cn(
-			'absolute top-1/2 -translate-y-1/2 z-10',
-			'h-6 w-6 p-0.5 rounded-full',
-			'bg-white border shadow-sm hover:bg-gray-50',
-			'transition-transform duration-300',
-			position === 'left' ? '-right-3' : '-left-3',
-			!isOpen && position === 'left' && 'rotate-180',
-			!isOpen && position === 'right' && '-rotate-180'
-		)}
-		onClick={onClick}
-		aria-label={`${isOpen ? 'Collapse' : 'Expand'} sidebar`}
-	>
-		{position === 'left' ?
-			<ChevronLeft className="h-4 w-4" /> :
-			<ChevronRight className="h-4 w-4" />
-		}
-	</Button>
-);
-
-const Sidebar: React.FC<SidebarProps> = ({
-	isOpen,
-	onToggle,
-	position,
-	icon,
-	title,
-	children,
-	className
-}) => (
-	<Card
-		className={cn(
-			'relative transition-all duration-300',
-			'col-span-12',
-			isOpen ? (
-				'sm:col-span-2 max-h-[800px]'
-			) : (
-				'sm:col-span-1 h-12'
-			),
-			'flex flex-col',
-			className
-		)}
-	>
-		<SidebarToggleButton
-			isOpen={isOpen}
-			onClick={onToggle}
-			position={position}
-		/>
-
-		<div
-			className={cn(
-				'flex-shrink-0',
-				'p-3 border-b',
-				'transition-all duration-300',
-				!isOpen && 'px-2'
-			)}
-		>
-			<div
-				className={cn(
-					'flex items-center',
-					'text-md text-gray-600 font-normal',
-					!isOpen && 'justify-center'
-				)}
-			>
-				{React.cloneElement(icon, {
-					className: cn('h-4 w-4', isOpen && 'mr-2')
-				})}
-				<span
-					className={cn(
-						'transition-all duration-300',
-						'origin-left',
-						!isOpen && 'w-0 scale-0 opacity-0'
-					)}
-				>
-					{title}
-				</span>
-			</div>
-		</div>
-
-		<CardContent
-			className={cn(
-				'p-2 transition-all duration-300',
-				'flex-1 min-h-0',
-				isOpen ? (
-					'opacity-100 overflow-y-auto'
-				) : (
-					'opacity-0 h-0 overflow-hidden'
-				)
-			)}
-		>
-			{children}
-		</CardContent>
-	</Card>
-);
-
-
+export interface DraggedMember { member: UserData; isCurrentUser: boolean; }
 
 const Schedule: React.FC = () => {
-	const [template, setTemplate] = useState<TemplateScheduleData | null>(null);
-	const [isDirty, setIsDirty] = useState(false);
-	const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
-	const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
-	const { user } = useAuth();
-	const [assignments, setAssignments] = useState<MemberAssignment[]>([]);
-	const [draggedMember, setDraggedMember] = useState<{ member: UserData; isCurrentUser: boolean; } | null>(null);
-	const [isProcessingAutoAssign, setIsProcessingAutoAssign] = useState(false);
-	const [autoAssignPreferences, setAutoAssignPreferences] = useState<AutoAssignPreferences>({
-		respectExisting: true,
-		balanceLoad: true,
-		considerStudentStatus: true
-	});
+	const { state, handleTemplateSelect, handleSaveDraft, handlePublish, handleAutoAssign,
+		handleClearAssignments, toggleLeftSidebar, toggleRightSidebar, handleDraggedMember,
+		updateAutoAssignPreferences, handleAssignmentChanges } = useSchedule();
 	const { selectedTeam } = useTeam();
+	const { user } = useAuth();
 
 	const {
 		data: templates,
@@ -198,156 +78,81 @@ const Schedule: React.FC = () => {
 
 	const handleDragStart = (event: DragStartEvent) => {
 		const { active } = event;
-		if (active.data.current?.type === 'new-member') {
-			const memberData = active.data.current.member;
-			setDraggedMember({
-				member: memberData,
-				isCurrentUser: memberData.id === user?.id
-			});
-		} else if (active.data.current?.type === 'member') {
-			const memberData = active.data.current.member;
-			setDraggedMember({
-				member: memberData,
-				isCurrentUser: memberData.id === user?.id
+		const data = active.data.current as DragData;
+		if (data?.type === 'new-member' || data?.type === 'member') {
+			handleDraggedMember({
+				member: data.member,
+				isCurrentUser: data.member.id === user?.id
 			});
 		}
 	};
 
 	const handleDragEnd = (event: DragEndEvent) => {
 		const { active, over } = event;
-		setDraggedMember(null);
+		handleDraggedMember(null);
 
 		if (!over) {
-			// Handle dropping outside any droppable area
-			if (active.data.current?.type === 'member') {
-				const dragData = active.data.current;
-				setAssignments(prev =>
-					prev.filter(a =>
-						!(a.memberId === dragData.memberId &&
-							a.shiftTypeId === dragData.shiftTypeId &&
-							a.date === dragData.date &&
-							a.timeSlot === dragData.timeSlot &&
-							a.position === dragData.position)
-					)
-				);
-				setIsDirty(true);
+			const data = active.data.current as DragData;
+			if (data?.type === 'member' && data.memberId && data.shiftTypeId && data.date && data.timeSlot && data.position) {
+				handleAssignmentChanges.removeAssignment({
+					memberId: data.memberId,
+					shiftTypeId: data.shiftTypeId,
+					date: data.date,
+					timeSlot: data.timeSlot,
+					position: data.position
+				});
 			}
 			return;
 		}
 
-		const dropData = over.data.current;
+		const dropData = over.data.current as DropData;
 		if (!dropData?.type || dropData.type !== 'slot') return;
 
-		setAssignments(prev => {
-			// Check if slot is already occupied
-			const isSlotOccupied = prev.some(a =>
-				a.shiftTypeId === dropData.shiftTypeId &&
-				a.date === dropData.date.toISOString() &&
-				a.timeSlot === dropData.timeSlot &&
-				a.position === dropData.position
-			);
+		const isSlotOccupied = state.assignments.some(a =>
+			a.shiftTypeId === dropData.shiftTypeId &&
+			a.date === dropData.date.toISOString() &&
+			a.timeSlot === dropData.timeSlot &&
+			a.position === dropData.position
+		);
 
-			if (isSlotOccupied) return prev;
+		if (isSlotOccupied) return;
 
-			let newAssignments = [...prev];
-
-			if (active.data.current?.type === 'new-member') {
-				const memberData = active.data.current.member;
-				newAssignments.push({
-					memberId: memberData.id.toString(),
-					shiftTypeId: dropData.shiftTypeId,
-					date: dropData.date.toISOString(),
-					timeSlot: dropData.timeSlot,
-					position: dropData.position
-				});
-			} else if (active.data.current?.type === 'member') {
-				const dragData = active.data.current;
-				// Remove old assignment
-				newAssignments = newAssignments.filter(a =>
-					!(a.memberId === dragData.memberId &&
-						a.shiftTypeId === dragData.shiftTypeId &&
-						a.date === dragData.date &&
-						a.timeSlot === dragData.timeSlot &&
-						a.position === dragData.position)
-				);
-
-				// Add new assignment
-				newAssignments.push({
+		const dragData = active.data.current as DragData;
+		if (dragData?.type === 'new-member') {
+			handleAssignmentChanges.addAssignment({
+				memberId: dragData.member.id.toString(),
+				shiftTypeId: dropData.shiftTypeId,
+				date: dropData.date.toISOString(),
+				timeSlot: dropData.timeSlot,
+				position: dropData.position
+			});
+		} else if (dragData?.type === 'member' && dragData.memberId && dragData.shiftTypeId && dragData.date && dragData.timeSlot && dragData.position) {
+			handleAssignmentChanges.updateAssignment(
+				{
+					memberId: dragData.memberId,
+					shiftTypeId: dragData.shiftTypeId,
+					date: dragData.date,
+					timeSlot: dragData.timeSlot,
+					position: dragData.position
+				},
+				{
 					memberId: dragData.memberId,
 					shiftTypeId: dropData.shiftTypeId,
 					date: dropData.date.toISOString(),
 					timeSlot: dropData.timeSlot,
 					position: dropData.position
-				});
-			}
-
-			return newAssignments;
-		});
-
-		setIsDirty(true);
-	};
-
-	const handleTemplateSelect = (selected: TemplateScheduleData | null) => {
-		setTemplate(selected);
-		setIsDirty(false);
-		setAssignments([]);
-	};
-
-	const handleSaveDraft = () => {
-		console.log('Saving draft:', template, assignments);
-		setIsDirty(false);
-	};
-
-	const handlePublish = () => {
-		console.log('Publishing schedule:', template, assignments);
+				}
+			);
+		}
 	};
 
 	const isTeamAdmin = selectedTeam?.creator_id === user?.id;
-
-	const handleAutoAssign = async () => {
-		if (!template || !members || isProcessingAutoAssign) return;
-		setIsProcessingAutoAssign(true);
-		try {
-			let availableMembers = [...members];
-			if (autoAssignPreferences.considerStudentStatus) {
-				availableMembers = availableMembers.sort((a, b) =>
-					(a.student === b.student) ? 0 : a.student ? 1 : -1
-				);
-			}
-
-			const existingAssignmentsToKeep = autoAssignPreferences.respectExisting
-				? assignments
-				: [];
-
-			const newAssignments = await createOptimalSchedule(
-				template,
-				availableMembers,
-				existingAssignmentsToKeep
-			);
-
-			setAssignments([...newAssignments]);
-
-			console.log('Auto-assignment completed');
-			setIsDirty(true);
-		} catch (error) {
-			console.error('Failed to create schedule:', error);
-		} finally {
-			setIsProcessingAutoAssign(false);
-		}
-	};
-
-	const handleClearAssignments = () => {
-		if (window.confirm('Are you sure you want to clear all assignments?')) {
-			setAssignments([]);
-			setIsDirty(true);
-		}
-	};
 
 	return (
 		<DndContext
 			onDragStart={handleDragStart}
 			onDragEnd={handleDragEnd}
-			onDragCancel={() => setDraggedMember(null)}
+			onDragCancel={() => handleDraggedMember(null)}
 			modifiers={[restrictToWindowEdges]}
 		>
 			{isTeamAdmin ?
@@ -367,7 +172,7 @@ const Schedule: React.FC = () => {
 							<Button
 								variant="outline"
 								onClick={handleSaveDraft}
-								disabled={!template || !isDirty}
+								disabled={!state.template || !state.isDirty}
 								className="flex-1 sm:flex-none"
 							>
 								<Save className="h-4 w-4 mr-2" />
@@ -375,7 +180,7 @@ const Schedule: React.FC = () => {
 							</Button>
 							<Button
 								onClick={handlePublish}
-								disabled={!template}
+								disabled={!state.template}
 								className="flex-1 sm:flex-none"
 							>
 								Publish Schedule
@@ -383,11 +188,11 @@ const Schedule: React.FC = () => {
 						</div>
 					</div>
 
-					{template ? (
+					{state.template ? (
 						<div className="xl:grid xl:grid-cols-12 gap-4 flex flex-col xl:flex-none">
 							<Sidebar
-								isOpen={leftSidebarOpen}
-								onToggle={() => setLeftSidebarOpen(!leftSidebarOpen)}
+								isOpen={state.leftSidebarOpen}
+								onToggle={toggleLeftSidebar}
 								position="left"
 								icon={<Users />}
 								title="Members"
@@ -398,8 +203,8 @@ const Schedule: React.FC = () => {
 
 							<Card className={cn(
 								'col-span-12 transition-all duration-300',
-								leftSidebarOpen && rightSidebarOpen ? 'sm:col-span-8' :
-									(!leftSidebarOpen && !rightSidebarOpen) ? 'sm:col-span-10' :
+								state.leftSidebarOpen && state.rightSidebarOpen ? 'sm:col-span-8' :
+									(!state.leftSidebarOpen && !state.rightSidebarOpen) ? 'sm:col-span-10' :
 										'sm:col-span-9'
 							)}>
 								<div className="p-3 border-b">
@@ -410,28 +215,29 @@ const Schedule: React.FC = () => {
 								</div>
 								<CardContent className="p-2">
 									<ScheduleEditable
-										template={template}
+										template={state.template}
 										shiftTypes={shiftTypes}
 										members={members}
-										assignments={assignments}
+										assignments={state.assignments}
 									/>
 								</CardContent>
 							</Card>
 
 							<Sidebar
-								isOpen={rightSidebarOpen}
-								onToggle={() => setRightSidebarOpen(!rightSidebarOpen)}
+								isOpen={state.rightSidebarOpen}
+								onToggle={toggleRightSidebar}
 								position="right"
 								icon={<Settings />}
 								title="Settings"
 							>
 								<ScheduleSettings
+									members={members || []}
 									onAutoAssign={handleAutoAssign}
-									isProcessing={isProcessingAutoAssign}
-									hasAssignments={assignments.length > 0}
+									isProcessing={state.isProcessingAutoAssign}
+									hasAssignments={state.assignments.length > 0}
 									onClearAssignments={handleClearAssignments}
-									preferences={autoAssignPreferences}
-									onPreferencesChange={setAutoAssignPreferences}
+									preferences={state.autoAssignPreferences}
+									onPreferencesChange={updateAutoAssignPreferences}
 								/>
 							</Sidebar>
 						</div>
@@ -445,10 +251,10 @@ const Schedule: React.FC = () => {
 				</div>
 				: null}
 			<DragOverlay>
-				{draggedMember ? (
+				{state.draggedMember ? (
 					<DraggableMemberOverlay
-						member={draggedMember.member}
-						isCurrentUser={draggedMember.isCurrentUser}
+						member={state.draggedMember.member}
+						isCurrentUser={state.draggedMember.isCurrentUser}
 					/>
 				) : null}
 			</DragOverlay>

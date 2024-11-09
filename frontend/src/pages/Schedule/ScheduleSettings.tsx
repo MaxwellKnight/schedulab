@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Wand2, Settings2, AlertCircle, Loader2, Trash2 } from 'lucide-react';
+import { UserData } from '@/types';
+import { useSchedule } from '@/context';
 
 export interface AutoAssignPreferences {
 	respectExisting: boolean;
@@ -11,7 +13,8 @@ export interface AutoAssignPreferences {
 }
 
 interface ScheduleSettingsProps {
-	onAutoAssign: () => Promise<void>;
+	members: UserData[];
+	onAutoAssign: (members: UserData[]) => Promise<void>;
 	isProcessing: boolean;
 	hasAssignments: boolean;
 	onClearAssignments: () => void;
@@ -26,13 +29,14 @@ const ScheduleSettings: React.FC<ScheduleSettingsProps> = ({
 	onClearAssignments,
 	preferences,
 	onPreferencesChange,
+	members
 }) => {
 	const [error, setError] = useState<string | null>(null);
 
 	const handleAutoAssign = async () => {
 		try {
 			setError(null);
-			await onAutoAssign();
+			await onAutoAssign(members);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Failed to create schedule');
 		}

@@ -7,6 +7,7 @@ import { ScheduleBuilder, ErrorBoundary, Schedule, Login, Home, Members } from "
 import AuthCallback from './pages/Login/AuthCallback';
 import { setupAxiosAuth } from './utils/authInterceptor';
 import Layout from "./components/layout/Layout";
+import { ScheduleProvider } from "./context";
 
 setupAxiosAuth();
 
@@ -58,7 +59,10 @@ const AppRoutes: React.FC = () => {
 				},
 				{
 					path: "schedule",
-					element: <Schedule />
+					element:
+						<ScheduleProvider>
+							<Schedule />
+						</ScheduleProvider>
 				},
 			]
 		},
