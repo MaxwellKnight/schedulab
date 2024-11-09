@@ -7,41 +7,89 @@ interface TimeWindow {
 	end: Date;
 }
 
-class AssignmentError extends Error {
-	constructor(message: string) {
-		super(message);
-		this.name = 'AssignmentError';
-	}
+interface ShiftSlot {
+	date: Date;
+	shift: TemplateShiftData;
+	timeSlot: string;
 }
 
-export class ShiftAssignmentSolver {
+export class Solver {
 	private assignments: MemberAssignment[] = [];
+	private bestAssignments: MemberAssignment[] = [];
+	private bestCoverage: number = 0;
+	private totalRequiredPositions: number = 0;
 	private constraints: Map<number, Set<number>> = new Map();
 	private userAssignmentCounts: Map<string, number> = new Map();
+	private allShiftSlots: ShiftSlot[] = [];
+	private remainingPositionsPerSlot: Map<string, number> = new Map();
 
 	constructor(
 		private template: TemplateScheduleData,
 		private users: UserData[],
 		private existingAssignments: MemberAssignment[] = [],
 		private options = {
-			maxShiftsPerDay: 1,
-			minRestHoursBetweenShifts: 8,
-			maxHoursPerWeek: 40,
-			considerStudentStatus: true
+			maxShiftsPerDay: 2,
+			minRestHoursBetweenShifts: 0,
+			maxHoursPerWeek: 80,
+			considerStudentStatus: true,
+			useExistingAssignments: true
 		}
 	) {
-		this.validateTemplate();
+		if (!template.shifts?.length || !template.start_date || !template.end_date) {
+			throw new Error('Invalid template data');
+		}
 		this.buildConstraintsGraph();
-		this.assignments = [...existingAssignments];
+
+		if (this.options.useExistingAssignments) {
+			this.assignments = [...existingAssignments];
+		}
+
 		this.initializeAssignmentCounts();
+		this.buildShiftSlots();
+		this.initializeRemainingPositions();
 	}
 
-	private validateTemplate() {
-		if (!this.template.shifts || !Array.isArray(this.template.shifts)) {
-			throw new AssignmentError('Template must contain shifts array');
+	// New method to initialize remaining positions
+	private initializeRemainingPositions() {
+		this.remainingPositionsPerSlot.clear();
+
+		// First, set initial required counts
+		for (const slot of this.allShiftSlots) {
+			const key = this.getSlotKey(slot);
+			this.remainingPositionsPerSlot.set(key, slot.shift.required_count);
 		}
-		if (!this.template.start_date || !this.template.end_date) {
-			throw new AssignmentError('Template must have start and end dates');
+
+		// Then subtract existing assignments
+		if (this.options.useExistingAssignments) {
+			for (const assignment of this.existingAssignments) {
+				const key = `${assignment.date}_${assignment.timeSlot}_${assignment.shiftTypeId}`;
+				const current = this.remainingPositionsPerSlot.get(key) || 0;
+				if (current > 0) {
+					this.remainingPositionsPerSlot.set(key, current - 1);
+				}
+			}
+		}
+
+		// Calculate total required positions based on remaining positions
+		this.totalRequiredPositions = Array.from(this.remainingPositionsPerSlot.values())
+			.reduce((sum, count) => sum + count, 0);
+	}
+
+	private getSlotKey(slot: ShiftSlot): string {
+		return `${slot.date.toISOString()}_${slot.timeSlot}_${slot.shift.shift_type_id}`;
+	}
+
+	private buildConstraintsGraph() {
+		if (!this.template.constraints) return;
+		for (const group of this.template.constraints) {
+			for (let i = 0; i < group.length - 1; i++) {
+				const current = group[i].shift_type_id;
+				const next = group[i + 1].shift_type_id;
+				if (!this.constraints.has(current)) {
+					this.constraints.set(current, new Set());
+				}
+				this.constraints.get(current)?.add(next);
+			}
 		}
 	}
 
@@ -49,28 +97,35 @@ export class ShiftAssignmentSolver {
 		this.users.forEach(user => {
 			this.userAssignmentCounts.set(user.id.toString(), 0);
 		});
+
 		this.existingAssignments.forEach(assignment => {
 			const count = this.userAssignmentCounts.get(assignment.memberId) || 0;
 			this.userAssignmentCounts.set(assignment.memberId, count + 1);
 		});
 	}
 
-	private buildConstraintsGraph() {
-		if (!this.template.constraints) return;
+	private buildShiftSlots() {
+		const startDate = new Date(this.template.start_date);
+		const endDate = new Date(this.template.end_date);
 
-		for (const constraintGroup of this.template.constraints) {
-			for (let i = 0; i < constraintGroup.length - 1; i++) {
-				const currentShift = constraintGroup[i].shift_type_id;
-				const nextShift = constraintGroup[i + 1].shift_type_id;
-
-				if (!this.constraints.has(currentShift)) {
-					this.constraints.set(currentShift, new Set());
+		for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
+			const shifts = this.template.shifts.filter(s => s.day_of_week === date.getDay());
+			for (const shift of shifts) {
+				for (const range of shift.ranges) {
+					this.allShiftSlots.push({
+						date: new Date(date),
+						shift,
+						timeSlot: range.start_time.slice(0, 5)
+					});
 				}
-				this.constraints.get(currentShift)?.add(nextShift);
 			}
 		}
-	}
 
+		this.allShiftSlots.sort((a, b) => {
+			const dateCompare = a.date.getTime() - b.date.getTime();
+			return dateCompare || a.timeSlot.localeCompare(b.timeSlot);
+		});
+	}
 
 	private getTimeWindow(date: string | Date, timeSlot: string): TimeWindow {
 		const baseDate = new Date(date);
@@ -79,41 +134,43 @@ export class ShiftAssignmentSolver {
 		const start = new Date(baseDate);
 		start.setHours(startHour, startMinute, 0, 0);
 
-		// Assuming each shift is 8 hours by default
 		const end = new Date(start);
 		end.setHours(start.getHours() + 8);
 
 		return { start, end };
 	}
 
-	private isTimeOverlapping(window1: TimeWindow, window2: TimeWindow): boolean {
-		return window1.start < window2.end && window2.start < window1.end;
+	private isTimeOverlapping(w1: TimeWindow, w2: TimeWindow): boolean {
+		return w1.start < w2.end && w2.start < w1.end;
 	}
 
 	private getWeeklyHours(userId: string, newAssignment: MemberAssignment): number {
-		const newWindow = this.getTimeWindow(newAssignment.date, newAssignment.timeSlot);
-		const weekStart = new Date(newWindow.start);
+		const window = this.getTimeWindow(newAssignment.date, newAssignment.timeSlot);
+		const weekStart = new Date(window.start);
 		weekStart.setDate(weekStart.getDate() - weekStart.getDay());
 		weekStart.setHours(0, 0, 0, 0);
 
 		const weekEnd = new Date(weekStart);
 		weekEnd.setDate(weekEnd.getDate() + 7);
 
-		const weeklyAssignments = this.assignments.filter(a => {
+		const weeklyCount = this.assignments.filter(a => {
 			if (a.memberId !== userId) return false;
-			const window = this.getTimeWindow(a.date, a.timeSlot);
-			return window.start >= weekStart && window.start < weekEnd;
-		});
+			const w = this.getTimeWindow(a.date, a.timeSlot);
+			return w.start >= weekStart && w.start < weekEnd;
+		}).length;
 
-		// Assume 8 hours per shift for this calculation
-		return (weeklyAssignments.length + 1) * 8;
+		return (weeklyCount + 1) * 8;
 	}
 
 	private validateAssignment(assignment: MemberAssignment): boolean {
 		const userId = assignment.memberId;
 		const newWindow = this.getTimeWindow(assignment.date, assignment.timeSlot);
 
-		// Check if position is already taken for this shift
+		// Check if the slot has remaining positions
+		const slotKey = `${assignment.date}_${assignment.timeSlot}_${assignment.shiftTypeId}`;
+		const remainingPositions = this.remainingPositionsPerSlot.get(slotKey) || 0;
+		if (remainingPositions <= 0) return false;
+
 		const positionTaken = this.assignments.some(a =>
 			a.shiftTypeId === assignment.shiftTypeId &&
 			a.date === assignment.date &&
@@ -122,43 +179,27 @@ export class ShiftAssignmentSolver {
 		);
 		if (positionTaken) return false;
 
-		// Check daily shift limit
-		const dayAssignments = this.assignments.filter(a => {
+		const dayCount = this.assignments.filter(a => {
 			if (a.memberId !== userId) return false;
-			const assignmentDate = new Date(a.date);
+			const aDate = new Date(a.date);
 			const newDate = new Date(assignment.date);
-			return assignmentDate.toDateString() === newDate.toDateString();
-		});
-		if (dayAssignments.length >= this.options.maxShiftsPerDay) return false;
+			return aDate.toDateString() === newDate.toDateString();
+		}).length;
+		if (dayCount >= this.options.maxShiftsPerDay) return false;
 
-		// Check weekly hours limit
-		const weeklyHours = this.getWeeklyHours(userId, assignment);
-		if (weeklyHours > this.options.maxHoursPerWeek) return false;
+		if (this.getWeeklyHours(userId, assignment) > this.options.maxHoursPerWeek) return false;
 
-		// Check minimum rest period and constraints
 		for (const existing of this.assignments) {
 			if (existing.memberId !== userId) continue;
-
 			const existingWindow = this.getTimeWindow(existing.date, existing.timeSlot);
+			if (this.isTimeOverlapping(newWindow, existingWindow)) return false;
 
-			// Check for direct overlap
-			if (this.isTimeOverlapping(newWindow, existingWindow)) {
-				return false;
-			}
+			const hoursBetween = Math.abs(newWindow.start.getTime() - existingWindow.start.getTime()) / (1000 * 60 * 60);
+			if (hoursBetween < this.options.minRestHoursBetweenShifts) return false;
 
-			// Check minimum rest period
-			const timeBetween = Math.abs(newWindow.start.getTime() - existingWindow.end.getTime());
-			const hoursBetween = timeBetween / (1000 * 60 * 60);
-			if (hoursBetween < this.options.minRestHoursBetweenShifts) {
-				return false;
-			}
-
-			// Check shift sequence constraints
 			if (hoursBetween <= 24) {
 				const constrainedShifts = this.constraints.get(existing.shiftTypeId);
-				if (constrainedShifts?.has(assignment.shiftTypeId)) {
-					return false;
-				}
+				if (constrainedShifts?.has(assignment.shiftTypeId)) return false;
 			}
 		}
 
@@ -166,59 +207,55 @@ export class ShiftAssignmentSolver {
 	}
 
 	private getUserScore(user: UserData): number {
-		let score = 0;
-
-		// Prefer users with fewer assignments
-		const assignmentCount = this.userAssignmentCounts.get(user.id.toString()) || 0;
-		score -= assignmentCount;
-
-		// Consider student status if enabled
-		if (this.options.considerStudentStatus && user.student) {
-			score -= 5; // Lower priority for students
-		}
-
+		let score = -(this.userAssignmentCounts.get(user.id.toString()) || 0);
+		if (this.options.considerStudentStatus && user.student) score -= 5;
 		return score;
 	}
 
-	private backtrack(
-		date: Date,
-		shift: TemplateShiftData,
-		timeSlot: string,
-		position: number
-	): boolean {
-		if (position >= shift.required_count) {
-			return true;
+	private updateBestSolution() {
+		const coverage = (this.assignments.length / this.totalRequiredPositions) * 100;
+		if (coverage > this.bestCoverage) {
+			this.bestCoverage = coverage;
+			this.bestAssignments = [...this.assignments];
+		}
+	}
+
+	private backtrack(shiftIndex: number = 0): boolean {
+		this.updateBestSolution();
+		if (shiftIndex >= this.allShiftSlots.length) return true;
+
+		const slot = this.allShiftSlots[shiftIndex];
+		const slotKey = this.getSlotKey(slot);
+		const remainingPositions = this.remainingPositionsPerSlot.get(slotKey) || 0;
+
+		if (remainingPositions <= 0) {
+			return this.backtrack(shiftIndex + 1);
 		}
 
-		// Sort users by score for better assignment distribution
-		const sortedUsers = [...this.users].sort((a, b) =>
-			this.getUserScore(b) - this.getUserScore(a)
-		);
+		const sortedUsers = [...this.users].sort((a, b) => this.getUserScore(b) - this.getUserScore(a));
 
 		for (const user of sortedUsers) {
 			const assignment: MemberAssignment = {
 				memberId: user.id.toString(),
-				shiftTypeId: shift.shift_type_id,
-				date: date.toISOString(),
-				timeSlot,
-				position
+				shiftTypeId: slot.shift.shift_type_id,
+				date: slot.date.toISOString(),
+				timeSlot: slot.timeSlot,
+				position: slot.shift.required_count - remainingPositions
 			};
 
 			if (this.validateAssignment(assignment)) {
-				// Make the assignment
 				this.assignments.push(assignment);
 				const currentCount = this.userAssignmentCounts.get(user.id.toString()) || 0;
 				this.userAssignmentCounts.set(user.id.toString(), currentCount + 1);
+				this.remainingPositionsPerSlot.set(slotKey, remainingPositions - 1);
 
-				// Try to assign the next position
-				const success = this.backtrack(date, shift, timeSlot, position + 1);
-				if (success) {
+				if (this.backtrack(remainingPositions - 1 <= 0 ? shiftIndex + 1 : shiftIndex)) {
 					return true;
 				}
 
-				// If unsuccessful, backtrack
 				this.assignments.pop();
 				this.userAssignmentCounts.set(user.id.toString(), currentCount);
+				this.remainingPositionsPerSlot.set(slotKey, remainingPositions);
 			}
 		}
 
@@ -226,56 +263,16 @@ export class ShiftAssignmentSolver {
 	}
 
 	public solve(): MemberAssignment[] {
-		try {
-			const startDate = new Date(this.template.start_date);
-			const endDate = new Date(this.template.end_date);
-
-			for (
-				let currentDate = new Date(startDate);
-				currentDate <= endDate;
-				currentDate.setDate(currentDate.getDate() + 1)
-			) {
-				const dayOfWeek = currentDate.getDay();
-				const shifts = this.template.shifts.filter(s => s.day_of_week === dayOfWeek);
-
-				for (const shift of shifts) {
-					for (const range of shift.ranges) {
-						const success = this.backtrack(
-							new Date(currentDate),
-							shift,
-							range.start_time,
-							0
-						);
-
-						if (!success) {
-							throw new AssignmentError(
-								`Unable to find valid assignment for shift ${shift.shift_name} on ${currentDate.toDateString()}`
-							);
-						}
-					}
-				}
-			}
-
-			return this.assignments;
-		} catch (error) {
-			if (error instanceof AssignmentError) {
-				throw error;
-			}
-			throw new AssignmentError('An unexpected error occurred while creating the schedule');
-		}
+		this.backtrack();
+		return this.bestAssignments.length > 0 ? this.bestAssignments : this.assignments;
 	}
 }
 
-export const createOptimalSchedule = (
+export const BuildSchedule = (
 	template: TemplateScheduleData,
 	users: UserData[],
 	existingAssignments: MemberAssignment[] = []
 ): MemberAssignment[] => {
-	try {
-		const solver = new ShiftAssignmentSolver(template, users, existingAssignments);
-		return solver.solve();
-	} catch (error) {
-		console.error('Failed to create schedule:', error);
-		return [];
-	}
+	const solver = new Solver(template, users, existingAssignments);
+	return solver.solve();
 };

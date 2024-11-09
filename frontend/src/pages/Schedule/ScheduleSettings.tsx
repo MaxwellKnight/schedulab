@@ -4,7 +4,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Wand2, Settings2, AlertCircle, Loader2, Trash2 } from 'lucide-react';
 import { UserData } from '@/types';
-import { useSchedule } from '@/context';
 
 export interface AutoAssignPreferences {
 	respectExisting: boolean;

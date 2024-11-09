@@ -9,6 +9,7 @@ import { ShiftType } from '@/types/shifts.dto';
 import { UserData } from '@/types';
 import { useDroppable, useDraggable } from '@dnd-kit/core';
 import { MemberAssignment } from './Schedule';
+import { cn } from '@/lib/utils';
 
 const getShiftAbbreviation = (name: string): string => {
 	const words = name.split(' ');
@@ -26,39 +27,78 @@ const DraggableMember: React.FC<{
 	position: number;
 	member: UserData;
 	className?: string;
-}> = ({ memberId, shiftTypeId, date, timeSlot, position, member, className }) => {
-	const { attributes, listeners, setNodeRef, transform } = useDraggable({
-		id: `member-${memberId}-${shiftTypeId}-${date}-${timeSlot}-${position}`,
-		data: {
-			type: 'member',
-			memberId,
-			shiftTypeId,
-			date,
-			timeSlot,
-			position,
-			member
-		}
-	});
+}> = ({
+	memberId,
+	shiftTypeId,
+	date,
+	timeSlot,
+	position,
+	member,
+	className
+}) => {
+		const {
+			attributes,
+			listeners,
+			setNodeRef,
+			transform,
+			isDragging
+		} = useDraggable({
+			id: `member-${memberId}-${shiftTypeId}-${date}-${timeSlot}-${position}`,
+			data: {
+				type: 'member',
+				memberId,
+				shiftTypeId,
+				date,
+				timeSlot,
+				position,
+				member
+			}
+		});
 
-	const style = transform ? {
-		transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-		zIndex: 50
-	} : undefined;
+		const style = transform ? {
+			transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+			zIndex: 50
+		} : undefined;
 
-	return (
-		<div
-			ref={setNodeRef}
-			{...listeners}
-			{...attributes}
-			className={`${className} cursor-move`}
-			style={style}
-		>
-			<span className="truncate">
-				{member.first_name} {member.last_name}
-			</span>
-		</div>
-	);
-};
+		return (
+			<div
+				ref={setNodeRef}
+				{...listeners}
+				{...attributes}
+				style={style}
+				className={cn(
+					// Base styles
+					"cursor-move truncate transition-all duration-200",
+					// Animation and transform styles
+					"hover:scale-[1.02] active:scale-[0.98]",
+					// Dragging state styles
+					isDragging && [
+						"scale-105 shadow-lg backdrop-blur-sm",
+						"bg-white/95 dark:bg-gray-800/95",
+						"ring-2 ring-primary/30",
+						"rounded-md border-none",
+						// Glow effect
+						"before:absolute before:inset-0 before:-z-10",
+						"before:bg-primary/5 before:rounded-md",
+						"before:transform before:scale-110 before:blur-sm",
+						"after:absolute after:inset-0 after:-z-20",
+						"after:bg-primary/10 after:rounded-lg",
+						"after:transform after:scale-125 after:blur-md"
+					],
+					className
+				)}
+			>
+				<span
+					className={cn(
+						"truncate block",
+						isDragging && "font-medium text-primary"
+					)}
+				>
+					{member.first_name} {member.last_name}
+				</span>
+			</div>
+		);
+	};
 
 const DroppableShiftSlot: React.FC<{
 	shiftTypeId: number;
@@ -97,8 +137,8 @@ const DroppableShiftSlot: React.FC<{
 				className={`
         ${className}
 ${isValidDrop && active?.data?.current?.memberId == assignedMember?.id.toString()
-						? 'bg-indigo-900 shadow-md border-2 border-blue-400 scale-[1.02]' : ''}
-        ${isOver && isValidDrop ? 'ring-2 ring-blue-400 opacity-100 !bg-opacity-75' : ''}
+						? 'shadow-md border-4 border-blue-400 scale-[1.02]' : ''}Edit
+        ${isOver && isValidDrop ? 'ring-2 ring-blue-400 opacity-100 bg-opacity-75' : ''}
         ${!assignedMember ? 'min-h-[24px]' : ''}
       `}
 				style={style}
@@ -145,7 +185,7 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 	members,
 	assignments,
 }) => {
-	const [zoomLevel, setZoomLevel] = useState(1.75);
+	const [zoomLevel, setZoomLevel] = useState(1.25);
 	const [visibleHoursStart, setVisibleHoursStart] = useState(0);
 	const [visibleHoursEnd, setVisibleHoursEnd] = useState(24);
 	const [isFullScreen, setIsFullScreen] = useState(false);
@@ -312,8 +352,28 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 	}
 
 	return (
-		<Card className={`transition-all duration-300 ${isFullScreen ? 'fixed inset-0 z-50 m-0 rounded-none' : ''}`}>
-			<CardHeader className="bg-white border-b sticky top-0 z-20">
+		<Card
+			className={cn(
+				"transition-all duration-300",
+				isFullScreen ? [
+					"fixed inset-0 w-full h-full",
+					"z-[9999]",
+					"m-0 rounded-none",
+					"bg-white",
+					"backdrop-blur-lg",
+					"animate-in fade-in zoom-in-95",
+					"duration-200"
+				] : ""
+			)}>
+			<CardHeader className={cn(
+				"bg-white border-b",
+				"sticky top-0",
+				isFullScreen ? [
+					"z-[9999]",
+					"px-6 py-4",
+					"shadow-sm"
+				] : "z-20"
+			)}>
 				<div className="flex justify-between items-center">
 					<CardTitle className="text-lg font-medium">
 						Playground
@@ -387,10 +447,32 @@ const ScheduleEditable: React.FC<ScheduleEditableProps> = ({
 					</div>
 				</div>
 			</CardHeader>
-			<CardContent className={`p-0 ${isFullScreen ? 'h-[calc(100vh-9rem)]' : ''}`}>
-				<ScrollArea className={`${isFullScreen ? 'h-full' : 'max-h-[calc(100vh-16rem)] overflow-y-scroll'}`}>
-					<div className="p-2 max-h-[600px]">
-						<Table className='rounded'>
+			<CardContent className={cn(
+				"p-0",
+				isFullScreen ? [
+					"h-[calc(100vh-4rem)]",
+					"p-0",
+					"relative"
+				] : ""
+			)}>
+				<ScrollArea className={cn(
+					isFullScreen ? [
+						"h-full",
+						"absolute inset-0",
+						"shadow-inner"
+					] : "h-full overflow-y-scroll"
+				)}>
+					<div className={cn(
+						"p-2",
+						isFullScreen && "p-4" // Larger padding when fullscreen
+					)}>
+						<Table className={cn(
+							'rounded',
+							isFullScreen && [
+								"bg-white",
+								"shadow-sm"
+							]
+						)}>
 							<TableHeader className="sticky top-0 bg-white z-10">
 								<TableRow>
 									<TableHead className="w-16 px-2">Time</TableHead>

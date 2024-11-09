@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Search, UserCircle } from "lucide-react";
 import { UserData } from "@/types";
 import { useAuth } from '@/hooks/useAuth/useAuth';
@@ -129,27 +128,6 @@ const EmptyState: React.FC<{ searchActive?: boolean }> = ({ searchActive }) => (
 	</div>
 );
 
-export const DraggableMemberOverlay: React.FC<{
-	member: UserData;
-	isCurrentUser: boolean;
-}> = ({ member, isCurrentUser }) => (
-	<div
-		className="
-      w-[250px] shadow-xl cursor-grabbing
-      animate-in zoom-in-95 duration-200
-      rounded-lg overflow-hidden
-      bg-white/90 backdrop-blur-sm
-      pointer-events-none 
-    "
-	>
-		<MemberCard
-			member={member}
-			isCurrentUser={isCurrentUser}
-			className="cursor-grabbing"
-		/>
-	</div>
-);
-
 const MembersList: React.FC<MembersListProps> = ({ members }) => {
 	const { user } = useAuth();
 	const [searchQuery, setSearchQuery] = useState("");
@@ -175,21 +153,19 @@ const MembersList: React.FC<MembersListProps> = ({ members }) => {
 					</div>
 				</div>
 
-				<ScrollArea className="flex-1 h-full min-h-0">
-					{!filteredMembers || filteredMembers.length === 0 ? (
-						<EmptyState searchActive={searchQuery.length > 0} />
-					) : (
-						<div className="flex flex-row xl:flex-col gap-2 pr-4 xl:pr-0 overflow-x-auto xl:overflow-x-visible">
-							{filteredMembers.map((member) => (
-								<DraggableMemberCard
-									key={member.id}
-									member={member}
-									isCurrentUser={member.id === user?.id}
-								/>
-							))}
-						</div>
-					)}
-				</ScrollArea>
+				{!filteredMembers || filteredMembers.length === 0 ? (
+					<EmptyState searchActive={searchQuery.length > 0} />
+				) : (
+					<div className="flex flex-row xl:flex-col gap-2 pr-4 xl:pr-0 overflow-x-auto xl:overflow-x-visible">
+						{filteredMembers.map((member) => (
+							<DraggableMemberCard
+								key={member.id}
+								member={member}
+								isCurrentUser={member.id === user?.id}
+							/>
+						))}
+					</div>
+				)}
 			</CardContent>
 		</Card>
 	);

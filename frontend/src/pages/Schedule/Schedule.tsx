@@ -9,15 +9,18 @@ import ScheduleEditable from './ScheduleEditable';
 import { useAuthenticatedFetch } from '@/hooks/useAuthFetch';
 import { ShiftType } from '@/types/shifts.dto';
 import { useAuth } from '@/hooks/useAuth/useAuth';
-import MembersList, { DraggableMemberOverlay } from './MembersList';
+import MembersList from './MembersList';
 import { UserData } from '@/types';
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragStartEvent, Modifier } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { useTeam } from '@/context/TeamContext';
 import ScheduleSettings from './ScheduleSettings';
 import { DragData, DropData } from './reducer';
 import { useSchedule } from '@/context';
 import { Sidebar } from './ScheduleSidebar';
+import type { Transform } from '@dnd-kit/utilities';
+import ScheduleLoadingSkeleton from './ScheduleLoadingSkeleton';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export interface MemberAssignment {
 	memberId: string;
@@ -28,6 +31,26 @@ export interface MemberAssignment {
 }
 
 export interface DraggedMember { member: UserData; isCurrentUser: boolean; }
+
+const centerModifier: Modifier = ({
+	transform,
+}): Transform => {
+	if (!transform) {
+		return {
+			x: 0,
+			y: 0,
+			scaleX: 1,
+			scaleY: 1,
+		};
+	}
+
+	return {
+		x: transform.x - 20,
+		y: transform.y - 20,
+		scaleX: transform.scaleX,
+		scaleY: transform.scaleY,
+	};
+};
 
 const Schedule: React.FC = () => {
 	const { state, handleTemplateSelect, handleSaveDraft, handlePublish, handleAutoAssign,
@@ -67,13 +90,22 @@ const Schedule: React.FC = () => {
 		fetchMembers();
 	}, [fetchShiftTypes, fetchMembers]);
 
+	if (selectedTeam?.creator_id !== user?.id) return null;
 
 	if (shiftTypesLoading || membersLoading) {
-		return <div>Loading data...</div>;
+		return <ScheduleLoadingSkeleton />;
 	}
 
 	if (shiftTypesError || membersError) {
-		return <div>Error loading. Please try again.</div>;
+		return (
+			<motion.div
+				initial={{ opacity: 0, y: 20 }}
+				animate={{ opacity: 1, y: 0 }}
+				className="flex items-center justify-center h-96 text-red-500"
+			>
+				Error loading. Please try again.
+			</motion.div>
+		);
 	}
 
 	const handleDragStart = (event: DragStartEvent) => {
@@ -146,57 +178,69 @@ const Schedule: React.FC = () => {
 		}
 	};
 
-	const isTeamAdmin = selectedTeam?.creator_id === user?.id;
 
 	return (
 		<DndContext
 			onDragStart={handleDragStart}
 			onDragEnd={handleDragEnd}
 			onDragCancel={() => handleDraggedMember(null)}
-			modifiers={[restrictToWindowEdges]}
+			modifiers={[restrictToWindowEdges, centerModifier]}
 		>
-			{isTeamAdmin ?
-				<div className="mx-auto p-4 space-y-4">
-					<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg shadow-sm">
-						<div className="flex-1 max-w-md">
-							<h1 className="text-sm text-gray-500 mb-2">Template</h1>
-							<Combobox
-								onTemplateSelect={handleTemplateSelect}
-								className="w-full"
-								templates={templates || []}
-								loading={templatesLoading}
-								error={templatesError}
-							/>
-						</div>
-						<div className="flex gap-2 w-full sm:w-auto">
-							<Button
-								variant="outline"
-								onClick={handleSaveDraft}
-								disabled={!state.template || !state.isDirty}
-								className="flex-1 sm:flex-none"
-							>
-								<Save className="h-4 w-4 mr-2" />
-								Save Draft
-							</Button>
-							<Button
-								onClick={handlePublish}
-								disabled={!state.template}
-								className="flex-1 sm:flex-none"
-							>
-								Publish Schedule
-							</Button>
-						</div>
+			<motion.div
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				className="mx-auto p-4 space-y-4"
+			>
+				<motion.div
+					initial={{ opacity: 0, y: -10 }}
+					animate={{ opacity: 1, y: 0 }}
+					className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg shadow-sm"
+				>
+					<div className="flex-1 max-w-md">
+						<h1 className="text-sm text-gray-500 mb-2">Template</h1>
+						<Combobox
+							onTemplateSelect={handleTemplateSelect}
+							className="w-full"
+							templates={templates || []}
+							loading={templatesLoading}
+							error={templatesError}
+						/>
 					</div>
+					<div className="flex gap-2 w-full sm:w-auto">
+						<Button
+							variant="outline"
+							onClick={handleSaveDraft}
+							disabled={!state.template || !state.isDirty}
+							className="flex-1 sm:flex-none"
+						>
+							<Save className="h-4 w-4 mr-2" />
+							Save Draft
+						</Button>
+						<Button
+							onClick={handlePublish}
+							disabled={!state.template}
+							className="flex-1 sm:flex-none"
+						>
+							Publish Schedule
+						</Button>
+					</div>
+				</motion.div>
 
+				<AnimatePresence mode="wait">
 					{state.template ? (
-						<div className="xl:grid xl:grid-cols-12 gap-4 flex flex-col xl:flex-none">
+						<motion.div
+							key="template-content"
+							initial={{ opacity: 0, y: 10 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: -10 }}
+							className="xl:grid xl:grid-cols-12 gap-4 flex flex-col xl:flex-none"
+						>
 							<Sidebar
 								isOpen={state.leftSidebarOpen}
 								onToggle={toggleLeftSidebar}
 								position="left"
 								icon={<Users />}
 								title="Members"
-								className='h-full'
 							>
 								<MembersList members={members} />
 							</Sidebar>
@@ -240,24 +284,22 @@ const Schedule: React.FC = () => {
 									onPreferencesChange={updateAutoAssignPreferences}
 								/>
 							</Sidebar>
-						</div>
+						</motion.div>
 					) : (
-						<div className="grid grid-cols-12 gap-4">
+						<motion.div
+							key="empty-state"
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							exit={{ opacity: 0 }}
+							className="grid grid-cols-12 gap-4"
+						>
 							<div className="col-span-12 h-96 flex items-center justify-center text-gray-500">
 								Select a template to start creating your schedule
 							</div>
-						</div>
+						</motion.div>
 					)}
-				</div>
-				: null}
-			<DragOverlay>
-				{state.draggedMember ? (
-					<DraggableMemberOverlay
-						member={state.draggedMember.member}
-						isCurrentUser={state.draggedMember.isCurrentUser}
-					/>
-				) : null}
-			</DragOverlay>
+				</AnimatePresence>
+			</motion.div>
 		</DndContext>
 	);
 };

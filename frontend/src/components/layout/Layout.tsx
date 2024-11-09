@@ -350,7 +350,7 @@ const Layout = () => {
 	const renderMainContent = () => (
 		<div className="min-h-screen flex flex-col bg-gray-50">
 			<header className="bg-white shadow-sm">
-				<div className="fixed z-50 max-w-[2000px] w-full mx-auto">
+				<div className="fixed z-10 max-w-[2000px] w-full mx-auto">
 					<Navigation />
 				</div>
 			</header>

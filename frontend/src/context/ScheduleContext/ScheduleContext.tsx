@@ -4,7 +4,8 @@ import { TemplateScheduleData } from '@/types/template.dto';
 import { UserData } from '@/types';
 import { DraggedMember, MemberAssignment } from '@/pages/Schedule/Schedule';
 import { AutoAssignPreferences } from '@/pages/Schedule/ScheduleSettings';
-import { createOptimalSchedule } from '@/algorithms/scheduler';
+import { BuildSchedule } from '@/algorithms/scheduler';
+import { log } from 'console';
 
 interface ScheduleContextType {
 	state: ScheduleState;
@@ -63,7 +64,7 @@ export const ScheduleProvider: React.FC<ScheduleProviderProps> = ({ children }) 
 				? state.assignments
 				: [];
 
-			const newAssignments = createOptimalSchedule(
+			const newAssignments = BuildSchedule(
 				state.template,
 				availableMembers,
 				existingAssignmentsToKeep

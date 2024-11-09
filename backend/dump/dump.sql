@@ -635,6 +635,273 @@ ORDER BY ts.day_of_week, ts.shift_name, tr.start_time;
 
 COMMIT;
 
+-- Start transaction to ensure data consistency
+START TRANSACTION;
+
+-- Create new template schedule
+INSERT INTO template_schedules (team_id, name, start_date, end_date, notes) 
+VALUES (
+    1, 
+    'Hospital Complex Weekly Template', 
+    '2024-11-11', 
+    '2024-11-17', 
+    'Comprehensive weekly template with varied shift patterns, specialized rotations, and floating staff coverage'
+);
+
+SET @template_schedule_id = LAST_INSERT_ID();
+
+-- 1. Day Shift Patterns (Multiple start times for better coverage)
+-- Early Morning Team
+INSERT INTO template_shifts (template_schedule_id, shift_type_id, shift_name, required_count, day_of_week)
+SELECT 
+    @template_schedule_id,
+    1, -- Regular Staff
+    'Early Morning',
+    CASE 
+        WHEN day BETWEEN 1 AND 5 THEN 3  -- Mon-Fri
+        ELSE 2                           -- Weekends
+    END,
+    day
+FROM (SELECT 0 UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6) numbers(day);
+
+-- Core Day Team
+INSERT INTO template_shifts (template_schedule_id, shift_type_id, shift_name, required_count, day_of_week)
+SELECT 
+    @template_schedule_id,
+    1, -- Regular Staff
+    'Core Day',
+    CASE 
+        WHEN day BETWEEN 1 AND 5 THEN 4  -- Mon-Fri
+        WHEN day = 6 THEN 3              -- Saturday
+        ELSE 2                           -- Sunday
+    END,
+    day
+FROM (SELECT 0 UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6) numbers(day);
+
+-- 2. Specialized Coverage
+-- Senior Specialists (split shifts for better coverage)
+INSERT INTO template_shifts (template_schedule_id, shift_type_id, shift_name, required_count, day_of_week)
+SELECT 
+    @template_schedule_id,
+    3, -- Senior Specialist
+    'Morning Specialist',
+    CASE 
+        WHEN day BETWEEN 1 AND 5 THEN 2  -- Mon-Fri
+        ELSE 1                           -- Weekends
+    END,
+    day
+FROM (SELECT 0 UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6) numbers(day);
+
+INSERT INTO template_shifts (template_schedule_id, shift_type_id, shift_name, required_count, day_of_week)
+SELECT 
+    @template_schedule_id,
+    3, -- Senior Specialist
+    'Evening Specialist',
+    CASE 
+        WHEN day BETWEEN 1 AND 5 THEN 2  -- Mon-Fri
+        WHEN day = 5 THEN 3              -- Extra coverage Friday evening
+        ELSE 1                           -- Weekends
+    END,
+    day
+FROM (SELECT 0 UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6) numbers(day);
+
+-- 3. Emergency Response Teams
+-- Primary Emergency Team
+INSERT INTO template_shifts (template_schedule_id, shift_type_id, shift_name, required_count, day_of_week)
+SELECT 
+    @template_schedule_id,
+    5, -- Emergency Response
+    'Primary Emergency',
+    CASE 
+        WHEN day IN (5, 6) THEN 3        -- Fri-Sat (higher coverage)
+        ELSE 2                           -- Other days
+    END,
+    day
+FROM (SELECT 0 UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6) numbers(day);
+
+-- Backup Emergency Team
+INSERT INTO template_shifts (template_schedule_id, shift_type_id, shift_name, required_count, day_of_week)
+SELECT 
+    @template_schedule_id,
+    5, -- Emergency Response
+    'Backup Emergency',
+    CASE 
+        WHEN day IN (5, 6) THEN 2        -- Fri-Sat
+        ELSE 1                           -- Other days
+    END,
+    day
+FROM (SELECT 0 UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6) numbers(day);
+
+-- 4. Night Coverage
+-- Primary Night Team
+INSERT INTO template_shifts (template_schedule_id, shift_type_id, shift_name, required_count, day_of_week)
+SELECT 
+    @template_schedule_id,
+    4, -- On-Call Staff
+    'Primary Night',
+    CASE 
+        WHEN day IN (5, 6) THEN 3        -- Fri-Sat
+        ELSE 2                           -- Other days
+    END,
+    day
+FROM (SELECT 0 UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6) numbers(day);
+
+-- Night Float Team
+INSERT INTO template_shifts (template_schedule_id, shift_type_id, shift_name, required_count, day_of_week)
+SELECT 
+    @template_schedule_id,
+    4, -- On-Call Staff
+    'Night Float',
+    1,  -- Consistent single coverage
+    day
+FROM (SELECT 0 UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6) numbers(day);
+
+-- 5. Supervisor Coverage
+INSERT INTO template_shifts (template_schedule_id, shift_type_id, shift_name, required_count, day_of_week)
+SELECT 
+    @template_schedule_id,
+    2, -- Supervisor
+    'Shift Supervisor',
+    CASE 
+        WHEN day BETWEEN 1 AND 5 THEN 2  -- Mon-Fri
+        ELSE 1                           -- Weekends
+    END,
+    day
+FROM (SELECT 0 UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6) numbers(day);
+
+-- Add time ranges for each shift type
+-- Early Morning Team (6:00 AM start)
+INSERT INTO template_time_ranges (template_shift_id, start_time, end_time)
+SELECT 
+    id,
+    '06:00',
+    '14:30'
+FROM template_shifts 
+WHERE template_schedule_id = @template_schedule_id 
+AND shift_name = 'Early Morning';
+
+-- Core Day Team (8:00 AM start)
+INSERT INTO template_time_ranges (template_shift_id, start_time, end_time)
+SELECT 
+    id,
+    '08:00',
+    '16:30'
+FROM template_shifts 
+WHERE template_schedule_id = @template_schedule_id 
+AND shift_name = 'Core Day';
+
+-- Morning Specialist (Split shift morning)
+INSERT INTO template_time_ranges (template_shift_id, start_time, end_time)
+SELECT 
+    id,
+    '07:00',
+    '12:00'
+FROM template_shifts 
+WHERE template_schedule_id = @template_schedule_id 
+AND shift_name = 'Morning Specialist';
+
+-- Evening Specialist (Split shift evening)
+INSERT INTO template_time_ranges (template_shift_id, start_time, end_time)
+SELECT 
+    id,
+    '13:00',
+    '21:00'
+FROM template_shifts 
+WHERE template_schedule_id = @template_schedule_id 
+AND shift_name = 'Evening Specialist';
+
+-- Primary Emergency Team (12-hour shifts)
+INSERT INTO template_time_ranges (template_shift_id, start_time, end_time)
+SELECT 
+    id,
+    '07:00',
+    '19:00'
+FROM template_shifts 
+WHERE template_schedule_id = @template_schedule_id 
+AND shift_name = 'Primary Emergency';
+
+-- Backup Emergency Team (10-hour peak coverage)
+INSERT INTO template_time_ranges (template_shift_id, start_time, end_time)
+SELECT 
+    id,
+    '10:00',
+    '20:00'
+FROM template_shifts 
+WHERE template_schedule_id = @template_schedule_id 
+AND shift_name = 'Backup Emergency';
+
+-- Primary Night Team
+INSERT INTO template_time_ranges (template_shift_id, start_time, end_time)
+SELECT 
+    id,
+    '19:00',
+    '07:00'
+FROM template_shifts 
+WHERE template_schedule_id = @template_schedule_id 
+AND shift_name = 'Primary Night';
+
+-- Night Float Team (shorter overlap shift)
+INSERT INTO template_time_ranges (template_shift_id, start_time, end_time)
+SELECT 
+    id,
+    '23:00',
+    '07:00'
+FROM template_shifts 
+WHERE template_schedule_id = @template_schedule_id 
+AND shift_name = 'Night Float';
+
+-- Shift Supervisor (extended hours)
+INSERT INTO template_time_ranges (template_shift_id, start_time, end_time)
+SELECT 
+    id,
+    '07:00',
+    '19:00'
+FROM template_shifts 
+WHERE template_schedule_id = @template_schedule_id 
+AND shift_name = 'Shift Supervisor';
+
+-- Add complex scheduling constraints
+-- 1. No back-to-back night shifts followed by day shifts
+INSERT INTO template_constraints (template_schedule_id, shift_type_id, next_shift_type_id)
+SELECT DISTINCT
+    @template_schedule_id,
+    ts1.shift_type_id,
+    ts2.shift_type_id
+FROM template_shifts ts1
+CROSS JOIN template_shifts ts2
+WHERE ts1.template_schedule_id = @template_schedule_id 
+AND ts2.template_schedule_id = @template_schedule_id
+AND ts1.shift_name IN ('Primary Night', 'Night Float')
+AND ts2.shift_name IN ('Early Morning', 'Core Day', 'Morning Specialist');
+
+-- 2. Emergency Response constraints (maximum one 12-hour shift per 24 hours)
+INSERT INTO template_constraints (template_schedule_id, shift_type_id, next_shift_type_id)
+SELECT DISTINCT
+    @template_schedule_id,
+    ts1.shift_type_id,
+    ts2.shift_type_id
+FROM template_shifts ts1
+CROSS JOIN template_shifts ts2
+WHERE ts1.template_schedule_id = @template_schedule_id 
+AND ts2.template_schedule_id = @template_schedule_id
+AND ts1.shift_name IN ('Primary Emergency', 'Backup Emergency')
+AND ts2.shift_name IN ('Primary Emergency', 'Backup Emergency');
+
+-- 3. Specialist rotation constraints (minimum 8 hours between split shifts)
+INSERT INTO template_constraints (template_schedule_id, shift_type_id, next_shift_type_id)
+SELECT DISTINCT
+    @template_schedule_id,
+    ts1.shift_type_id,
+    ts2.shift_type_id
+FROM template_shifts ts1
+CROSS JOIN template_shifts ts2
+WHERE ts1.template_schedule_id = @template_schedule_id 
+AND ts2.template_schedule_id = @template_schedule_id
+AND ts1.shift_name = 'Evening Specialist'
+AND ts2.shift_name = 'Morning Specialist';
+
+COMMIT;
+
 INSERT INTO teams (id, creator_id, name, team_code) VALUES
 (2, 3, 'Surgery Department', 'SURG-XYZ123'),
 (3, 4, 'Emergency Room', 'EMER-ABC456'),

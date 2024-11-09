@@ -240,7 +240,7 @@ const Login: React.FC = () => {
 				<Card className="w-full max-w-md bg-white/95 backdrop-blur-sm border-indigo-100">
 					<CardHeader className="space-y-2">
 						<CardTitle className="text-2xl lg:text-3xl font-bold tracking-tight text-center text-indigo-900">
-							{activeTab === 'login' ? 'Welcome back!' : 'Join Schedula'}
+							{activeTab === 'login' ? 'Welcome back!' : 'Join Schedulab'}
 						</CardTitle>
 						<CardDescription className="text-center text-base lg:text-lg text-indigo-600">
 							{activeTab === 'login' ? "Ready to plan smarter" : "Start organizing efficiently"}
