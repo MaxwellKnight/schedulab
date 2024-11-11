@@ -57,12 +57,17 @@ git clone https://github.com/maxwellknight/schedula.git
 cd schedula
 ```
 
-2. **Start with Docker**
+3. **Create enviroment**
+```bash
+mv .env.example .env
+```
+
+4. **Start with Docker**
 ```bash
 docker-compose up
 ```
 
-3. **Or start services individually**
+5. **Or start services individually**
 ```bash
 # Terminal 1 - Backend
 cd backend
