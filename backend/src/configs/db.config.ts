@@ -82,7 +82,7 @@ export class Database {
 
 	public async close(): Promise<void> {
 		try {
-			await this._connection.end();
+			this._connection.end();
 			console.log('Database connection closed');
 		} catch (error) {
 			console.error('Error closing database connection:', error);
