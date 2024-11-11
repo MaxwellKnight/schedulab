@@ -206,7 +206,7 @@ const Schedule: React.FC = () => {
 							error={templatesError}
 						/>
 					</div>
-					<div className="flex gap-2 w-full sm:w-auto">
+					<div className="flex gap-2 self-end w-full sm:w-auto">
 						<Button
 							variant="outline"
 							onClick={handleSaveDraft}
@@ -219,8 +219,9 @@ const Schedule: React.FC = () => {
 						<Button
 							onClick={handlePublish}
 							disabled={!state.template}
-							className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-500 shadow-lg hover:shadow-blue-100
-    transition-all duration-300 ease-in-out relative group overflow-hidden"
+							className="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 
+  hover:to-indigo-500 shadow-lg hover:shadow-indigo-100/50 
+  transition-all duration-300 ease-in-out relative group overflow-hidden"
 						>
 							<div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-500 opacity-0 
     group-hover:opacity-100 transition-opacity duration-300 ease-in-out" />
@@ -261,21 +262,15 @@ const Schedule: React.FC = () => {
 								</motion.div>
 								<motion.span
 									initial={false}
-									animate={{
-										y: 0,
-										scale: 1
-									}}
 									whileHover={{
-										y: -4,
-										scale: 1.05,
 										transition: {
 											duration: 0.3,
 											ease: "easeOut"
 										}
 									}}
-									className="font-medium"
+									className="font-medium uppercase text-md tracking-wider"
 								>
-									Publish Schedule
+									Publish
 								</motion.span>
 							</div>
 						</Button>

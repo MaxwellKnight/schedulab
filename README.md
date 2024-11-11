@@ -41,7 +41,7 @@ Intelligent shift scheduling system that combines automated scheduling with pref
 
 - **Backend**
   - Node.js + TypeScript
-  - PostgreSQL
+  - MySQL
   - Express.js
   
 - **Frontend**

@@ -81,7 +81,7 @@ const ScheduleSettings: React.FC<ScheduleSettingsProps> = ({
 	const solverOptions = [
 		{
 			id: 'maxShiftsPerMember',
-			label: 'Shifts Per Member',
+			label: 'Max Assignments',
 			description: 'Limit how many shifts each member can be assigned in the schedule period',
 			type: 'number',
 			value: preferences.maxShiftsPerMember || 5,
