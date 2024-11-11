@@ -47,7 +47,7 @@ export class AuthController {
 
 		const refreshToken = jwt.sign(
 			{ id: user.id },
-			process.env.ACCESS_TOKEN_SECRET!,
+			process.env.REFRESH_TOKEN_SECRET!,
 			{ expiresIn: '7d' }
 		);
 
@@ -89,28 +89,11 @@ export class AuthController {
 	}
 
 	private async isTokenExpired(token: string): Promise<boolean> {
-		try {
-			const [result] = await this.db.execute<ExpiredToken[]>(
-				'SELECT * FROM expired WHERE token = ?',
-				[token]
-			);
-			return result.length > 0;
-		} catch (error) {
-			console.error('Error checking token expiration:', error);
-			throw new Error('Failed to check token expiration');
-		}
-	}
-
-	private async removeExpiredToken(token: string): Promise<void> {
-		try {
-			await this.db.execute<ResultSetHeader>(
-				'DELETE FROM expired WHERE token = ?',
-				[token]
-			);
-		} catch (error) {
-			console.error('Error removing expired token:', error);
-			throw new Error('Failed to remove expired token');
-		}
+		const [result] = await this.db.execute<ExpiredToken[]>(
+			'SELECT * FROM expired WHERE token = ?',
+			[token]
+		);
+		return result.length > 0;
 	}
 
 	private async cleanupExpiredTokens(): Promise<void> {
@@ -181,23 +164,31 @@ export class AuthController {
 				return res.status(401).json({ message: 'Refresh token required' });
 			}
 
-			const isExpired = await this.isTokenExpired(refreshToken);
-			if (isExpired) {
-				return res.status(403).json({ message: 'Refresh token expired' });
+			const isInExpiredList = await this.isTokenExpired(refreshToken);
+			if (isInExpiredList) {
+				return res.status(403).json({ message: 'Refresh token has been revoked' });
 			}
 
-			const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!) as any;
-			const tokens = this.generateTokens({ id: decoded.id, email: decoded.email });
-			await this.removeExpiredToken(refreshToken);
-			await this.saveRefreshToken(tokens.refreshToken);
+			try {
+				const decoded = jwt.verify(
+					refreshToken,
+					process.env.REFRESH_TOKEN_SECRET!
+				) as TokenPayload;
 
-			res.json({
-				accessToken: tokens.accessToken,
-				refreshToken: tokens.refreshToken
-			});
+				const tokens = this.generateTokens(decoded);
+				await this.saveRefreshToken(refreshToken);
+				await this.saveRefreshToken(tokens.refreshToken);
+
+				res.json({
+					accessToken: tokens.accessToken,
+					refreshToken: tokens.refreshToken
+				});
+			} catch (jwtError) {
+				return res.status(403).json({ message: 'Invalid or expired refresh token' });
+			}
 		} catch (err) {
 			console.error('Refresh token error:', err);
-			return res.status(403).json({ message: 'Invalid refresh token' });
+			return res.status(500).json({ message: 'Internal server error' });
 		}
 	}
 
