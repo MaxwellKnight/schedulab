@@ -26,8 +26,8 @@ Create `.env` file with these exact values:
 ```bash
 # Database Configuration
 DATABASE_HOST=
-DATABASE_USER=
-DATABASE_PASSWORD=
+DATABASE_USER=root
+DATABASE_PASSWORD=''
 DATABASE_NAME=schedula
 DATABASE_LOCAL_PORT=3306
 DATABASE_DOCKER_PORT=3306
@@ -35,12 +35,14 @@ DATABASE_DOCKER_PORT=3306
 # Server Configuration
 NODE_LOCAL_PORT=5713
 NODE_DOCKER_PORT=5713
-EXPRESS_ORIGIN_HOST=http://localhost
-EXPRESS_ORIGIN_PORT=3000
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_CALLBACK_URL=http://localhost:5713/auth/google/callback
+FRONTEND_URL=http://localhost:5173
 
 # JWT Secrets
-ACCESS_TOKEN_SECRET=
-REFRESH_TOKEN_SECRET=
+ACCESS_TOKEN_SECRET=your-access-secret
+REFRESH_TOKEN_SECRET=your-refresh-secret
 ```
 
 ## Project Structure 📁
@@ -70,14 +72,7 @@ src/
 
 1. Create MySQL database
 ```bash
-mysql -u root
-CREATE DATABASE shifty;
-```
-
-2. Run migration scripts
-```bash
-cd src/seeders
-./seed.sh
+mysql -u root -p < dump/dump.sql
 ```
 
 ## Available Scripts 📜
@@ -86,11 +81,7 @@ cd src/seeders
 # Development
 npm run dev           # Start development server on port 5713
 npm run build        # Build for production
-npm run start        # Start production server
-
-# Database
-npm run db:migrate   # Run migrations
-npm run db:seed      # Run seeders
+npm run dev        # Start production server
 ```
 
 ## API Endpoints 🛣️
@@ -163,12 +154,6 @@ sudo service mysql status
 
 # Verify connection (no password)
 mysql -u root
-
-# Test database
-mysql -u root
-USE shifty;
-SHOW TABLES;
-```
 
 2. Server Issues
 ```bash
