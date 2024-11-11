@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Save, Users, Settings, Sheet } from 'lucide-react';
+import { Save, Users, Settings, Sheet, Send } from 'lucide-react';
 import Combobox from "@/components/combobox/Combobox";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -211,7 +211,7 @@ const Schedule: React.FC = () => {
 							variant="outline"
 							onClick={handleSaveDraft}
 							disabled={!state.template || !state.isDirty}
-							className="flex-1 sm:flex-none"
+							className="flex-1 sm:flex-none text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-700 transition-all"
 						>
 							<Save className="h-4 w-4 mr-2" />
 							Save Draft
@@ -219,9 +219,65 @@ const Schedule: React.FC = () => {
 						<Button
 							onClick={handlePublish}
 							disabled={!state.template}
-							className="flex-1 sm:flex-none"
+							className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-500 shadow-lg hover:shadow-blue-100
+    transition-all duration-300 ease-in-out relative group overflow-hidden"
 						>
-							Publish Schedule
+							<div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-500 opacity-0 
+    group-hover:opacity-100 transition-opacity duration-300 ease-in-out" />
+							<div className="relative flex gap-2 items-center justify-center">
+								<motion.div
+									initial={false}
+									animate={{
+										scale: 1,
+										y: 0,
+										x: 0,
+									}}
+									whileHover={{
+										scale: 1.1,
+										transition: {
+											duration: 2,
+											repeat: Infinity,
+											ease: "linear"
+										}
+									}}
+									className="relative"
+								>
+									<motion.div
+										initial={false}
+										animate={{
+											rotate: 0
+										}}
+										whileHover={{
+											rotate: 360,
+											transition: {
+												duration: 2,
+												repeat: Infinity,
+												ease: "linear"
+											}
+										}}
+									>
+										<Send className="h-4 w-4 mr-2" />
+									</motion.div>
+								</motion.div>
+								<motion.span
+									initial={false}
+									animate={{
+										y: 0,
+										scale: 1
+									}}
+									whileHover={{
+										y: -4,
+										scale: 1.05,
+										transition: {
+											duration: 0.3,
+											ease: "easeOut"
+										}
+									}}
+									className="font-medium"
+								>
+									Publish Schedule
+								</motion.span>
+							</div>
 						</Button>
 					</div>
 				</motion.div>

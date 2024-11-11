@@ -1,7 +1,8 @@
 import { TemplateScheduleData } from '@/types/template.dto';
-import { DraggedMember, MemberAssignment } from './Schedule';
-import { AutoAssignPreferences } from './ScheduleSettings';
 import { UserData } from '@/types';
+import { DraggedMember, MemberAssignment } from '@/pages/Schedule/Schedule';
+import { AutoAssignPreferences } from '@/pages/Schedule/ScheduleSettings';
+import { defaultSolverOptions, SolverOptions } from '@/algorithms/scheduler';
 
 export interface DragData {
 	type: 'new-member' | 'member';
@@ -30,6 +31,7 @@ export interface ScheduleState {
 	draggedMember: DraggedMember | null;
 	isProcessingAutoAssign: boolean;
 	autoAssignPreferences: AutoAssignPreferences;
+	solverOptions: SolverOptions;
 }
 
 export type ScheduleAction =
@@ -44,7 +46,8 @@ export type ScheduleAction =
 	| { type: 'CLEAR_ASSIGNMENTS' }
 	| { type: 'SET_DRAGGED_MEMBER'; payload: DraggedMember | null }
 	| { type: 'SET_PROCESSING_AUTO_ASSIGN'; payload: boolean }
-	| { type: 'SET_AUTO_ASSIGN_PREFERENCES'; payload: AutoAssignPreferences };
+	| { type: 'SET_AUTO_ASSIGN_PREFERENCES'; payload: AutoAssignPreferences }
+	| { type: 'SET_SOLVER_OPTIONS'; payload: SolverOptions };
 
 export const initialState: ScheduleState = {
 	template: null,
@@ -58,7 +61,8 @@ export const initialState: ScheduleState = {
 		respectExisting: true,
 		balanceLoad: true,
 		considerStudentStatus: true
-	}
+	},
+	solverOptions: defaultSolverOptions
 };
 
 export function scheduleReducer(state: ScheduleState, action: ScheduleAction): ScheduleState {
@@ -154,6 +158,12 @@ export function scheduleReducer(state: ScheduleState, action: ScheduleAction): S
 			return {
 				...state,
 				autoAssignPreferences: action.payload
+			};
+
+		case 'SET_SOLVER_OPTIONS':
+			return {
+				...state,
+				solverOptions: { ...state.solverOptions, ...action.payload }
 			};
 
 		default:

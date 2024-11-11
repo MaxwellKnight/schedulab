@@ -177,6 +177,22 @@ class CSPSolver {
 	}
 }
 
+export interface SolverOptions {
+	maxShiftsPerDay: number;
+	minRestHoursBetweenShifts: number;
+	maxHoursPerWeek: number;
+	considerStudentStatus: boolean;
+	useExistingAssignments: boolean;
+}
+
+export const defaultSolverOptions: SolverOptions = {
+	maxShiftsPerDay: 1,
+	minRestHoursBetweenShifts: 8,
+	maxHoursPerWeek: 80,
+	considerStudentStatus: true,
+	useExistingAssignments: true
+}
+
 export class Solver {
 	private allShiftSlots: ShiftSlot[] = [];
 	private constraints: Map<number, Set<number>> = new Map();
@@ -185,13 +201,7 @@ export class Solver {
 		private template: TemplateScheduleData,
 		private users: UserData[],
 		private existingAssignments: MemberAssignment[] = [],
-		private options = {
-			maxShiftsPerDay: 1,
-			minRestHoursBetweenShifts: 0,
-			maxHoursPerWeek: 80,
-			considerStudentStatus: true,
-			useExistingAssignments: true
-		}
+		private options: SolverOptions = defaultSolverOptions
 	) {
 		if (!template.shifts?.length || !template.start_date || !template.end_date) {
 			throw new Error('Invalid template data');
@@ -256,8 +266,9 @@ export class Solver {
 export const BuildSchedule = (
 	template: TemplateScheduleData,
 	users: UserData[],
-	existingAssignments: MemberAssignment[] = []
+	existingAssignments: MemberAssignment[] = [],
+	defaultOptions?: SolverOptions
 ): MemberAssignment[] => {
-	const solver = new Solver(template, users, existingAssignments);
+	const solver = new Solver(template, users, existingAssignments, defaultOptions);
 	return solver.solve();
 };

@@ -5,7 +5,6 @@ import { UserData } from '@/types';
 import { DraggedMember, MemberAssignment } from '@/pages/Schedule/Schedule';
 import { AutoAssignPreferences } from '@/pages/Schedule/ScheduleSettings';
 import { BuildSchedule } from '@/algorithms/scheduler';
-import { log } from 'console';
 
 interface ScheduleContextType {
 	state: ScheduleState;
