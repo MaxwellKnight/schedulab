@@ -1,31 +1,50 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-
-name: Node.js CI
+name: Backend CI
 
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'backend/**'  # Only trigger on changes to backend files
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'backend/**'  # Only trigger on changes to backend files
 
 jobs:
-  build:
-
+  test:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./backend  # Set the working directory to backend
 
     strategy:
       matrix:
         node-version: [18.x, 20.x, 22.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
     - uses: actions/checkout@v4
+    
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+        cache-dependency-path: './backend/package-lock.json'
+
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build
+      run: npm run build --if-present
+      
+    - name: Run tests
+      run: npm test
+      env:
+        ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
+        REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
+        DATABASE_HOST: localhost
+        DATABASE_USER: test
+        DATABASE_PASSWORD: test
+        DATABASE_NAME: test_db
+        FRONTEND_URL: http://localhost:5173
