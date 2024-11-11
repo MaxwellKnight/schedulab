@@ -1,4 +1,7 @@
 db
 node_modules
+build
+
+./__tests__/controllers/*.test.js
 .env
 /src/db/seed.db.ts
