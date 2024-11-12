@@ -3,7 +3,7 @@ import { Users, Settings, Sheet, } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { TemplateScheduleData } from '@/types/template.dto';
 import { cn } from '@/lib/utils';
-import ScheduleEditable from './ScheduleEditable';
+import ScheduleGrid from './ScheduleGrid';
 import { useAuthenticatedFetch } from '@/hooks/useAuthFetch';
 import { ShiftType } from '@/types/shifts.dto';
 import { useAuth } from '@/hooks/useAuth/useAuth';
@@ -210,7 +210,7 @@ const Schedule: React.FC = () => {
 									</div>
 								</div>
 								<CardContent className="p-2">
-									<ScheduleEditable
+									<ScheduleGrid
 										template={state.template}
 										shiftTypes={shiftTypes}
 										members={members}
