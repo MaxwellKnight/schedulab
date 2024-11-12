@@ -7,21 +7,21 @@ import { getShiftAbbreviation } from '@/utils/shitUtils';
 import { TemplateScheduleData, TemplateShiftData } from '@/types/template.dto';
 import { ShiftType } from '@/types/shifts.dto';
 import { MemberAssignment } from './Schedule';
-import { ScheduleState } from './ScheduleGridHeader';
 import { calculateShiftGroupHeight, getRenderConfig } from '@/utils/scheduleUtils';
+import { ScheduleGridState } from './ScheduleGrid';
 
-export interface ScheduleTableProps {
+export interface ScheduleGridTableProps {
 	template: TemplateScheduleData;
 	shiftTypes: ShiftType[];
 	dates: Date[];
 	timeSlots: string[];
-	state: ScheduleState;
+	state: ScheduleGridState;
 	assignments: MemberAssignment[];
 	getAssignedSlots: (shift: TemplateShiftData, date: Date, timeSlot: string) => any[];
 	shiftColors: Record<string, string>;
 }
 
-export const ScheduleTable: React.FC<ScheduleTableProps> = ({
+export const ScheduleGridTable: React.FC<ScheduleGridTableProps> = ({
 	template,
 	shiftTypes,
 	dates,
