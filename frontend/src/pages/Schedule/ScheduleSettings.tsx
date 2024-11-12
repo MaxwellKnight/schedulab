@@ -166,6 +166,7 @@ const ScheduleSettings: React.FC<ScheduleSettingsProps> = ({
 
 				<div className="space-y-2">
 					<div className="text-xs font-medium text-gray-700 mb-2">Basic Preferences</div>
+					<Separator className="opacity-50" />
 					{preferenceOptions.map(({ id, label, description, checked, onChange }) => (
 						<div
 							key={id}
@@ -206,9 +207,10 @@ const ScheduleSettings: React.FC<ScheduleSettingsProps> = ({
 						<div className="text-xs text-gray-500">Constraints</div>
 					</div>
 
-					<div className="space-y-5">
+					<div className="flex flex-col gap-1 space-y-5 ">
 						{solverOptions.map(({ id, label, description, value, min, max, onChange }) => (
 							<div key={id} className="space-y-2">
+								<Separator className="opacity-50" />
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-1.5">
 										<span className="text-xs font-medium text-gray-900">{label}</span>
@@ -228,7 +230,7 @@ const ScheduleSettings: React.FC<ScheduleSettingsProps> = ({
 									</div>
 								</div>
 
-								<div className="flex items-center gap-3">
+								<div className="flex items-center gap-4">
 									<span className="text-xs text-gray-500 w-4 text-right">{min}</span>
 									<div className="relative flex-1 h-4">
 										<div className="absolute top-1/2 -translate-y-1/2 w-full h-1 bg-gray-100 rounded" />
