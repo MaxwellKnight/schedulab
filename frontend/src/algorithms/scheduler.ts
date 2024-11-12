@@ -69,7 +69,7 @@ class CSPSolver {
 	}
 
 
-	private validateAssignment(userId: string, slot: ShiftSlot): boolean {
+	private validate(userId: string, slot: ShiftSlot): boolean {
 		const dayKey = this.getDayKey(slot.date);
 
 		const dailyShifts = this.dailyAssignments.get(dayKey)?.get(userId) || 0;
@@ -132,7 +132,7 @@ class CSPSolver {
 		for (const user of sortedUsers) {
 			const userId = user.id.toString();
 
-			if (this.validateAssignment(userId, slot)) {
+			if (this.validate(userId, slot)) {
 				const assignment: Assignment = {
 					memberId: userId,
 					shiftSlot: slot,
