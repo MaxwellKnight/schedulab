@@ -5,7 +5,7 @@ import { Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getShiftColors } from '@/utils/shitUtils';
 import { useScheduleGrid } from '@/hooks';
-import { ScheduleTable } from './ScheduleTable';
+import { ScheduleGridTable } from './ScheduleGridTable';
 import { ScheduleGridHeader } from './ScheduleGridHeader';
 import { TemplateScheduleData } from '@/types/template.dto';
 import { ShiftType } from '@/types/shifts.dto';
@@ -33,15 +33,15 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
 	members,
 	assignments,
 }) => {
-	const [state, setState] = useState<ScheduleState>({
+	const [state, setState] = useState<ScheduleGridState>({
 		zoomLevel: 1.25,
 		visibleHoursStart: 0,
 		visibleHoursEnd: 24,
 		isFullScreen: false
 	});
 
-	const handleStateUpdate = (updates: Partial<ScheduleState>) => {
-		setState((prev: ScheduleState) => ({ ...prev, ...updates }));
+	const handleStateUpdate = (updates: Partial<ScheduleGridState>) => {
+		setState((prev: ScheduleGridState) => ({ ...prev, ...updates }));
 	};
 
 	const { getAssignedSlots, timeSlots, dates } = useScheduleGrid(template, assignments, members);
@@ -86,7 +86,7 @@ const ScheduleGrid: React.FC<ScheduleGridProps> = ({
 						: "h-full overflow-y-scroll"
 				)}>
 					<div className={cn("p-2", state.isFullScreen && "p-4")}>
-						<ScheduleTable
+						<ScheduleGridTable
 							template={template}
 							shiftTypes={shiftTypes}
 							dates={dates}

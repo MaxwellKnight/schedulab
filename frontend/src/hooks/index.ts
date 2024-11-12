@@ -3,7 +3,6 @@ import { useTeam } from "@/context";
 import { useScheduleGrid } from './useScheduleGrid';
 import { useAuthenticatedFetch } from "./useAuthFetch";
 import { useAuth } from "./useAuth/useAuth";
-import { useScheduleControls } from "./useScheduleControls";
 
 export {
 	useScheduleGrid,
@@ -11,5 +10,4 @@ export {
 	useTeam,
 	useAuthenticatedFetch,
 	useAuth,
-	useScheduleControls
 }

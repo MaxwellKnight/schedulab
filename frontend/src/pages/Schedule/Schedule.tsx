@@ -47,6 +47,7 @@ const Schedule: React.FC = () => {
 		error: templatesError,
 		fetchData: fetchTemplates
 	} = useAuthenticatedFetch<TemplateScheduleData[]>(`/templates/team/${selectedTeam?.id}`);
+
 	const {
 		data: shiftTypes,
 		loading: shiftTypesLoading,
@@ -62,19 +63,16 @@ const Schedule: React.FC = () => {
 	} = useAuthenticatedFetch<UserData[]>(`/users/team/${selectedTeam?.id}`);
 
 	useEffect(() => {
+		fetchShiftTypes();
+		fetchMembers();
 		if (selectedTeam?.id) {
 			fetchTemplates();
 		}
-	}, [selectedTeam?.id, fetchTemplates]);
-
-	useEffect(() => {
-		fetchShiftTypes();
-		fetchMembers();
-	}, [fetchShiftTypes, fetchMembers]);
+	}, [fetchShiftTypes, fetchMembers, fetchTemplates, selectedTeam]);
 
 	if (selectedTeam?.creator_id !== user?.id) return null;
 
-	if (shiftTypesLoading || membersLoading) {
+	if (shiftTypesLoading || membersLoading || templatesLoading) {
 		return <ScheduleLoadingSkeleton />;
 	}
 
