@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/tooltip"
 import { Separator } from "@/components/ui/separator"
 import { UserData } from '@/types';
+import { useSchedule } from '@/context';
 
 export interface AutoAssignPreferences {
 	respectExisting: boolean;
@@ -23,24 +24,17 @@ export interface AutoAssignPreferences {
 
 interface ScheduleSettingsProps {
 	members: UserData[];
-	onAutoAssign: (members: UserData[]) => void;
-	isProcessing: boolean;
-	hasAssignments: boolean;
-	onClearAssignments: () => void;
-	preferences: AutoAssignPreferences;
-	onPreferencesChange: (preferences: AutoAssignPreferences) => void;
 }
 
-const ScheduleSettings: React.FC<ScheduleSettingsProps> = ({
-	onAutoAssign,
-	isProcessing,
-	hasAssignments,
-	onClearAssignments,
-	preferences,
-	onPreferencesChange,
-	members
-}) => {
+const ScheduleSettings: React.FC<ScheduleSettingsProps> = ({ members }) => {
 	const [error, setError] = useState<string | null>(null);
+	const {
+		state,
+		handleAutoAssign: onAutoAssign,
+		handleClearAssignments: onClearAssignments,
+		updateAutoAssignPreferences: onPreferencesChange
+	} = useSchedule();
+	const { autoAssignPreferences: preferences, isProcessingAutoAssign: isProcessing } = state;
 
 	const handleAutoAssign = async () => {
 		try {
@@ -144,7 +138,7 @@ const ScheduleSettings: React.FC<ScheduleSettingsProps> = ({
 						)}
 					</Button>
 
-					{hasAssignments && (
+					{state.assignments.length > 0 && (
 						<Button
 							variant="outline"
 							onClick={onClearAssignments}

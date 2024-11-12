@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react';
-import { Save, Users, Settings, Sheet, Send } from 'lucide-react';
-import Combobox from "@/components/combobox/Combobox";
-import { Button } from "@/components/ui/button";
+import { Users, Settings, Sheet, } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { TemplateScheduleData } from '@/types/template.dto';
 import { cn } from '@/lib/utils';
@@ -11,16 +9,16 @@ import { ShiftType } from '@/types/shifts.dto';
 import { useAuth } from '@/hooks/useAuth/useAuth';
 import MembersList from './MembersList';
 import { UserData } from '@/types';
-import { DndContext, DragEndEvent, DragStartEvent, Modifier } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { useTeam } from '@/context/TeamContext';
 import ScheduleSettings from './ScheduleSettings';
 import { DragData, DropData } from './reducer';
 import { useSchedule } from '@/context';
 import { Sidebar } from './ScheduleSidebar';
-import type { Transform } from '@dnd-kit/utilities';
 import ScheduleLoadingSkeleton from './ScheduleLoadingSkeleton';
 import { AnimatePresence, motion } from 'framer-motion';
+import ScheduleHeader from './ScheduleHeader';
 
 export interface MemberAssignment {
 	memberId: string;
@@ -32,32 +30,16 @@ export interface MemberAssignment {
 
 export interface DraggedMember { member: UserData; isCurrentUser: boolean; }
 
-const centerModifier: Modifier = ({
-	transform,
-}): Transform => {
-	if (!transform) {
-		return {
-			x: 0,
-			y: 0,
-			scaleX: 1,
-			scaleY: 1,
-		};
-	}
-
-	return {
-		x: transform.x - 20,
-		y: transform.y - 20,
-		scaleX: transform.scaleX,
-		scaleY: transform.scaleY,
-	};
-};
-
 const Schedule: React.FC = () => {
-	const { state, handleTemplateSelect, handleSaveDraft, handlePublish, handleAutoAssign,
-		handleClearAssignments, toggleLeftSidebar, toggleRightSidebar, handleDraggedMember,
-		updateAutoAssignPreferences, handleAssignmentChanges } = useSchedule();
 	const { selectedTeam } = useTeam();
 	const { user } = useAuth();
+	const {
+		state,
+		toggleLeftSidebar,
+		toggleRightSidebar,
+		handleDraggedMember,
+		handleAssignmentChanges
+	} = useSchedule();
 
 	const {
 		data: templates,
@@ -184,99 +166,18 @@ const Schedule: React.FC = () => {
 			onDragStart={handleDragStart}
 			onDragEnd={handleDragEnd}
 			onDragCancel={() => handleDraggedMember(null)}
-			modifiers={[restrictToWindowEdges, centerModifier]}
+			modifiers={[restrictToWindowEdges]}
 		>
 			<motion.div
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				className="mx-auto p-4 space-y-4"
 			>
-				<motion.div
-					initial={{ opacity: 0, y: -10 }}
-					animate={{ opacity: 1, y: 0 }}
-					className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white p-4 rounded-lg shadow-sm"
-				>
-					<div className="flex-1 max-w-md">
-						<h1 className="text-sm text-gray-500 mb-2">Template</h1>
-						<Combobox
-							onTemplateSelect={handleTemplateSelect}
-							className="w-full"
-							templates={templates || []}
-							loading={templatesLoading}
-							error={templatesError}
-						/>
-					</div>
-					<div className="flex gap-2 self-end w-full sm:w-auto">
-						<Button
-							variant="outline"
-							onClick={handleSaveDraft}
-							disabled={!state.template || !state.isDirty}
-							className="flex-1 sm:flex-none text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-700 transition-all"
-						>
-							<Save className="h-4 w-4 mr-2" />
-							Save Draft
-						</Button>
-						<Button
-							onClick={handlePublish}
-							disabled={!state.template}
-							className="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 
-  hover:to-indigo-500 shadow-lg hover:shadow-indigo-100/50 
-  transition-all duration-300 ease-in-out relative group overflow-hidden"
-						>
-							<div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-500 opacity-0 
-    group-hover:opacity-100 transition-opacity duration-300 ease-in-out" />
-							<div className="relative flex gap-2 items-center justify-center">
-								<motion.div
-									initial={false}
-									animate={{
-										scale: 1,
-										y: 0,
-										x: 0,
-									}}
-									whileHover={{
-										scale: 1.1,
-										transition: {
-											duration: 2,
-											repeat: Infinity,
-											ease: "linear"
-										}
-									}}
-									className="relative"
-								>
-									<motion.div
-										initial={false}
-										animate={{
-											rotate: 0
-										}}
-										whileHover={{
-											rotate: 360,
-											transition: {
-												duration: 2,
-												repeat: Infinity,
-												ease: "linear"
-											}
-										}}
-									>
-										<Send className="h-4 w-4 mr-2" />
-									</motion.div>
-								</motion.div>
-								<motion.span
-									initial={false}
-									whileHover={{
-										transition: {
-											duration: 0.3,
-											ease: "easeOut"
-										}
-									}}
-									className="font-medium uppercase text-md tracking-wider"
-								>
-									Publish
-								</motion.span>
-							</div>
-						</Button>
-					</div>
-				</motion.div>
-
+				<ScheduleHeader
+					templates={templates || []}
+					templatesLoading={templatesLoading}
+					templatesError={templatesError}
+				/>
 				<AnimatePresence mode="wait">
 					{state.template ? (
 						<motion.div
@@ -325,15 +226,7 @@ const Schedule: React.FC = () => {
 								icon={<Settings />}
 								title="Settings"
 							>
-								<ScheduleSettings
-									members={members || []}
-									onAutoAssign={handleAutoAssign}
-									isProcessing={state.isProcessingAutoAssign}
-									hasAssignments={state.assignments.length > 0}
-									onClearAssignments={handleClearAssignments}
-									preferences={state.autoAssignPreferences}
-									onPreferencesChange={updateAutoAssignPreferences}
-								/>
+								<ScheduleSettings members={members || []} />
 							</Sidebar>
 						</motion.div>
 					) : (
