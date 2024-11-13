@@ -40,12 +40,17 @@ const ScheduleHeader: React.FC<ScheduleHeaderProps> = ({ templates, templatesErr
 					<Save className="h-4 w-4 mr-2" />
 					Save Draft
 				</Button>
-				<AnimatedGradientButton
-					onClick={handlePublish}
-					disabled={!state.template}
-					icon={Send}
-					text="Publish"
-				/>
+				<motion.div
+					whileHover={{ scale: 1.015 }}
+					whileTap={{ scale: 1 }}
+				>
+					<AnimatedGradientButton
+						onClick={handlePublish}
+						disabled={!state.template}
+						icon={Send}
+						text="Publish"
+					/>
+				</motion.div>
 			</div>
 		</motion.div>
 	);

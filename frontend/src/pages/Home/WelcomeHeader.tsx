@@ -15,7 +15,7 @@ export const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({ userName }) => (
 	>
 		<div className="space-y-1">
 			<h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-				Welcome back{userName ? `, ${userName}` : ''}
+				Welcome back{userName ? `, ${userName.split(" ")[0]}` : ''}
 			</h1>
 			<p className="text-sm text-gray-600 sm:text-base">
 				Here&apos;s an overview of your team&apos;s schedule and activities
