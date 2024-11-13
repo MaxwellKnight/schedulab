@@ -12,11 +12,23 @@ interface UseAuthenticatedFetchResult<T> extends FetchState<T> {
 	fetchData: () => Promise<void>;
 	clearError: () => void;
 	clearData: () => void;
+	clearCache: () => void;
 }
 
 interface AuthTokens {
 	accessToken: string;
 	refreshToken: string;
+}
+
+interface CacheEntry<T> {
+	data: T;
+	timestamp: number;
+}
+
+interface CacheConfig {
+	enabled: boolean;
+	ttl: number; // Time to live in milliseconds
+	key?: string; // Custom cache key
 }
 
 const CONFIG = {
@@ -26,9 +38,19 @@ const CONFIG = {
 		ACCESS_TOKEN: 'authToken',
 		REFRESH_TOKEN: 'refreshToken',
 		USER: 'user'
-	}
+	},
+	DEFAULT_CACHE_TTL: 5 * 60 * 1000, // 5 minutes
 } as const;
 
+// Cache storage
+const cacheStore = new Map<string, CacheEntry<unknown>>();
+
+// Helper to generate cache key
+const generateCacheKey = (url: string, options: AxiosRequestConfig): string => {
+	const params = options.params ? JSON.stringify(options.params) : '';
+	const body = options.data ? JSON.stringify(options.data) : '';
+	return `${options.method || 'GET'}-${url}-${params}-${body}`;
+};
 // Configure axios defaults
 axios.defaults.baseURL = CONFIG.BASE_URL;
 axios.defaults.withCredentials = true;
@@ -89,7 +111,8 @@ const refreshToken = async (): Promise<AuthTokens> => {
 
 export const useAuthenticatedFetch = <T,>(
 	url: string,
-	options: Omit<AxiosRequestConfig, 'url'> = {}
+	options: Omit<AxiosRequestConfig, 'url'> = {},
+	cacheConfig: CacheConfig = { enabled: false, ttl: CONFIG.DEFAULT_CACHE_TTL }
 ): UseAuthenticatedFetchResult<T> => {
 	const [state, setState] = useState<FetchState<T>>({
 		data: null,
@@ -101,16 +124,26 @@ export const useAuthenticatedFetch = <T,>(
 	const optionsRef = useRef(options);
 	const navigate = useNavigate();
 	const retryCount = useRef(0);
+	const cacheKey = useRef(
+		cacheConfig.key || generateCacheKey(url, options)
+	);
 
 	useEffect(() => {
 		optionsRef.current = options;
-	}, [options]);
+		if (!cacheConfig.key) {
+			cacheKey.current = generateCacheKey(url, options);
+		}
+	}, [options, url, cacheConfig.key]);
 
 	useEffect(() => {
 		mounted.current = true;
 		return () => {
 			mounted.current = false;
 		};
+	}, []);
+
+	const clearCache = useCallback(() => {
+		cacheStore.delete(cacheKey.current);
 	}, []);
 
 	const clearError = useCallback(() => {
@@ -123,7 +156,32 @@ export const useAuthenticatedFetch = <T,>(
 		if (mounted.current) {
 			setState(prev => ({ ...prev, data: null }));
 		}
-	}, []);
+		clearCache();
+	}, [clearCache]);
+
+	const checkCache = useCallback((): T | null => {
+		if (!cacheConfig.enabled) return null;
+
+		const cached = cacheStore.get(cacheKey.current);
+		if (!cached) return null;
+
+		const now = Date.now();
+		if (now - cached.timestamp > cacheConfig.ttl) {
+			cacheStore.delete(cacheKey.current);
+			return null;
+		}
+
+		return cached.data as T;
+	}, [cacheConfig.enabled, cacheConfig.ttl]);
+
+	const updateCache = useCallback((data: T) => {
+		if (cacheConfig.enabled) {
+			cacheStore.set(cacheKey.current, {
+				data,
+				timestamp: Date.now()
+			});
+		}
+	}, [cacheConfig.enabled]);
 
 	const executeRequest = useCallback(async (token: string): Promise<T | null> => {
 		try {
@@ -136,15 +194,20 @@ export const useAuthenticatedFetch = <T,>(
 				},
 				...optionsRef.current
 			});
+
+			if (response.data) {
+				updateCache(response.data);
+			}
+
 			return response.data;
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
 				const errorMessage = error.response?.data?.message || error.message;
 				console.log(errorMessage);
 			}
+			throw error;
 		}
-		return null;
-	}, [url]);
+	}, [url, updateCache]);
 
 	const handleTokenRefresh = useCallback(async (): Promise<string> => {
 		try {
@@ -168,6 +231,13 @@ export const useAuthenticatedFetch = <T,>(
 		setState(prev => ({ ...prev, loading: true, error: null }));
 
 		try {
+			// Check cache first
+			const cachedData = checkCache();
+			if (cachedData) {
+				setState({ data: cachedData, loading: false, error: null });
+				return;
+			}
+
 			const token = localStorage.getItem(CONFIG.STORAGE_KEYS.ACCESS_TOKEN);
 			if (!token) {
 				throw new Error('Authentication token not found');
@@ -222,7 +292,7 @@ export const useAuthenticatedFetch = <T,>(
 				}
 			}
 		}
-	}, [executeRequest, handleTokenRefresh, navigate]);
+	}, [executeRequest, handleTokenRefresh, navigate, checkCache]);
 
 	useEffect(() => {
 		fetchData();
@@ -232,6 +302,7 @@ export const useAuthenticatedFetch = <T,>(
 		...state,
 		fetchData,
 		clearError,
-		clearData
+		clearData,
+		clearCache
 	};
 };
