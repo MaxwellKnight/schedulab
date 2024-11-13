@@ -167,8 +167,9 @@ const Schedule: React.FC = () => {
 			modifiers={[restrictToWindowEdges]}
 		>
 			<motion.div
-				initial={{ opacity: 0 }}
-				animate={{ opacity: 1 }}
+				initial={{ opacity: 0, scale: 0.95 }}
+				animate={{ opacity: 1, scale: 1 }}
+				transition={{ duration: 0.3, ease: "easeOut" }}
 				className="mx-auto p-4 space-y-4"
 			>
 				<ScheduleHeader
@@ -180,9 +181,24 @@ const Schedule: React.FC = () => {
 					{state.template ? (
 						<motion.div
 							key="template-content"
-							initial={{ opacity: 0, y: 10 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: -10 }}
+							initial={{ opacity: 0, y: 20 }}
+							animate={{
+								opacity: 1,
+								y: 0,
+								transition: {
+									duration: 0.4,
+									ease: "easeOut",
+									staggerChildren: 0.1
+								}
+							}}
+							exit={{
+								opacity: 0,
+								y: -20,
+								transition: {
+									duration: 0.3,
+									ease: "easeIn"
+								}
+							}}
 							className="xl:grid xl:grid-cols-12 gap-4 flex flex-col xl:flex-none"
 						>
 							<Sidebar
@@ -194,29 +210,38 @@ const Schedule: React.FC = () => {
 							>
 								<MembersList members={members} />
 							</Sidebar>
-
 							<Card className={cn(
 								'col-span-12 transition-all duration-300',
 								state.leftSidebarOpen && state.rightSidebarOpen ? 'sm:col-span-8' :
 									(!state.leftSidebarOpen && !state.rightSidebarOpen) ? 'sm:col-span-10' :
 										'sm:col-span-9'
 							)}>
-								<div className="p-3 border-b">
+								<motion.div
+									className="p-3 border-b"
+									initial={{ opacity: 0 }}
+									animate={{ opacity: 1 }}
+									transition={{ delay: 0.2 }}
+								>
 									<div className="flex items-center text-md text-gray-600 font-normal">
 										<Sheet className="h-4 w-4 mr-2" />
 										Schedule Grid
 									</div>
-								</div>
+								</motion.div>
 								<CardContent className="p-2">
-									<ScheduleGrid
-										template={state.template}
-										shiftTypes={shiftTypes}
-										members={members}
-										assignments={state.assignments}
-									/>
+									<motion.div
+										initial={{ opacity: 0, y: 10 }}
+										animate={{ opacity: 1, y: 0 }}
+										transition={{ delay: 0.3, duration: 0.4 }}
+									>
+										<ScheduleGrid
+											template={state.template}
+											shiftTypes={shiftTypes}
+											members={members}
+											assignments={state.assignments}
+										/>
+									</motion.div>
 								</CardContent>
 							</Card>
-
 							<Sidebar
 								isOpen={state.rightSidebarOpen}
 								onToggle={toggleRightSidebar}
@@ -230,9 +255,10 @@ const Schedule: React.FC = () => {
 					) : (
 						<motion.div
 							key="empty-state"
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							exit={{ opacity: 0 }}
+							initial={{ opacity: 0, scale: 0.95 }}
+							animate={{ opacity: 1, scale: 1 }}
+							exit={{ opacity: 0, scale: 0.95 }}
+							transition={{ duration: 0.4, ease: "easeInOut" }}
 							className="grid grid-cols-12 gap-4"
 						>
 							<div className="col-span-12 h-96 flex items-center justify-center text-gray-500">
