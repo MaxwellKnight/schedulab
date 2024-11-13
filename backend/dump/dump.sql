@@ -321,6 +321,27 @@ CREATE TABLE template_constraints (
 
 DELIMITER $$
 
+CREATE TRIGGER before_user_insert 
+BEFORE INSERT ON users
+FOR EACH ROW
+BEGIN
+    -- Set default display name if not provided
+    IF NEW.display_name IS NULL OR NEW.display_name = '' THEN
+        -- Start with first name
+        SET NEW.display_name = NEW.first_name;
+        -- Add middle name if exists
+        IF NEW.middle_name IS NOT NULL AND NEW.middle_name != '' THEN
+            SET NEW.display_name = CONCAT(NEW.display_name, ' ', NEW.middle_name);
+        END IF;
+        -- Add last name
+        SET NEW.display_name = CONCAT(NEW.display_name, ' ', NEW.last_name);
+    END IF;
+END$$
+
+DELIMITER ;
+
+DELIMITER $$
+
 CREATE FUNCTION is_code_unique(check_code VARCHAR(255)) 
 RETURNS BOOLEAN
 DETERMINISTIC

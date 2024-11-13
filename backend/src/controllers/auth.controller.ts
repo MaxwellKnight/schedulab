@@ -35,7 +35,7 @@ export class AuthController {
 			id: user.id,
 			email: user.email,
 			googleId: user.google_id,
-			name: user.display_name,
+			display_name: user.display_name,
 			picture: user.picture
 		};
 
@@ -46,7 +46,7 @@ export class AuthController {
 		);
 
 		const refreshToken = jwt.sign(
-			{ id: user.id },
+			payload,
 			process.env.REFRESH_TOKEN_SECRET!,
 			{ expiresIn: '7d' }
 		);

@@ -1,3 +1,4 @@
+import AnimatedGradientButton from "@/components/AnimatedButton"
 import Combobox from "@/components/combobox/Combobox"
 import { Button } from "@/components/ui/button"
 import { useSchedule } from "@/context"
@@ -39,64 +40,17 @@ const ScheduleHeader: React.FC<ScheduleHeaderProps> = ({ templates, templatesErr
 					<Save className="h-4 w-4 mr-2" />
 					Save Draft
 				</Button>
-				<Button
-					onClick={handlePublish}
-					disabled={!state.template}
-					className="flex-1 sm:flex-none bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 
-  hover:to-indigo-500 shadow-lg hover:shadow-indigo-100/50 
-  transition-all duration-300 ease-in-out relative group overflow-hidden"
+				<motion.div
+					whileHover={{ scale: 1.015 }}
+					whileTap={{ scale: 1 }}
 				>
-					<div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-500 opacity-0 
-    group-hover:opacity-100 transition-opacity duration-300 ease-in-out" />
-					<div className="relative flex gap-2 items-center justify-center">
-						<motion.div
-							initial={false}
-							animate={{
-								scale: 1,
-								y: 0,
-								x: 0,
-							}}
-							whileHover={{
-								scale: 1.1,
-								transition: {
-									duration: 2,
-									repeat: Infinity,
-									ease: "linear"
-								}
-							}}
-							className="relative"
-						>
-							<motion.div
-								initial={false}
-								animate={{
-									rotate: 0
-								}}
-								whileHover={{
-									rotate: 360,
-									transition: {
-										duration: 2,
-										repeat: Infinity,
-										ease: "linear"
-									}
-								}}
-							>
-								<Send className="h-4 w-4 mr-2" />
-							</motion.div>
-						</motion.div>
-						<motion.span
-							initial={false}
-							whileHover={{
-								transition: {
-									duration: 0.3,
-									ease: "easeOut"
-								}
-							}}
-							className="font-medium uppercase text-md tracking-wider"
-						>
-							Publish
-						</motion.span>
-					</div>
-				</Button>
+					<AnimatedGradientButton
+						onClick={handlePublish}
+						disabled={!state.template}
+						icon={Send}
+						text="Publish"
+					/>
+				</motion.div>
 			</div>
 		</motion.div>
 	);
