@@ -1,7 +1,7 @@
 import React from 'react';
 import { Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
+import AnimatedGradientButton from '@/components/AnimatedButton';
 
 interface WelcomeHeaderProps {
 	userName?: string;
@@ -23,15 +23,15 @@ export const WelcomeHeader: React.FC<WelcomeHeaderProps> = ({ userName }) => (
 		</div>
 
 		<motion.div
-			whileHover={{ scale: 1.02 }}
-			whileTap={{ scale: 0.98 }}
+			whileHover={{ scale: 1.015 }}
+			whileTap={{ scale: 1 }}
 		>
-			<Button
-				className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700"
-			>
-				<Settings className="h-4 w-4" />
-				Publish Preferences
-			</Button>
+			<AnimatedGradientButton
+				onClick={() => console.log("preferences...")}
+				disabled={false}
+				icon={Settings}
+				text="Preferences"
+			/>
 		</motion.div>
 	</motion.div>
 );
