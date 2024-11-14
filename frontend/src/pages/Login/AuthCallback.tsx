@@ -71,7 +71,9 @@ const AuthCallback: React.FC = () => {
 				email: tokenPayload.email,
 				display_name: tokenPayload.display_name,
 				google_id: tokenPayload.google_id,
-				picture: tokenPayload.picture
+				picture: tokenPayload.picture,
+				exp: tokenPayload.exp,
+				iat: tokenPayload.iat
 			};
 
 			// Store tokens and user data only after validation
@@ -83,7 +85,7 @@ const AuthCallback: React.FC = () => {
 			axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
 			// Call login only once after all validations pass
-			login(accessToken, userPayload);
+			login(accessToken, userPayload, refreshToken);
 
 			setAuthState({
 				status: 'success',

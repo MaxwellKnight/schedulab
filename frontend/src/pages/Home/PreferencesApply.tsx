@@ -253,7 +253,7 @@ export const PreferencesApply: React.FC<PreferencesApplyProps> = ({
 											variant="ghost"
 											size="icon"
 											onClick={() => onRemoveTimeRange(currentDay.column, index)}
-											className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-600 hover:text-blue-700 hover:bg-blue-100"
+											className="group-hover:opacity-100 transition-opacity text-blue-600 hover:text-blue-700 hover:bg-blue-100"
 										>
 											<X className="h-4 w-4" />
 										</Button>
