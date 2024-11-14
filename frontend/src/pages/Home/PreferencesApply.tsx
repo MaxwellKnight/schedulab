@@ -24,7 +24,7 @@ interface PreferencesApplyProps {
 	onAddTimeRange: (date: Date) => void;
 	onRemoveTimeRange: (date: Date, index: number) => void;
 	onUpdateTimeRange: (date: Date, index: number, field: 'start_time' | 'end_time', value: string) => void;
-	onApplyToAll: (sourceDate: Date, ranges: Array<{ start_time: string; end_time: string }>) => void;
+	onApplyToAll: (ranges: Array<{ start_time: string; end_time: string }>) => void;
 }
 
 const TIME_OPTIONS = [
@@ -63,7 +63,7 @@ export const PreferencesApply: React.FC<PreferencesApplyProps> = ({
 	};
 
 	const handleApplyToAll = () => {
-		onApplyToAll(currentDay.column, currentDay.ranges);
+		onApplyToAll(currentDay.ranges);
 	};
 
 	return (

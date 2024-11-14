@@ -25,12 +25,12 @@ export interface DailyPreference {
 
 export const PreferencesDrawer: React.FC = () => {
 	const [timeRanges, setTimeRanges] = useState<DailyPreference[]>([]);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isSuccess, setIsSuccess] = useState(false);
 	const [range, setRange] = useState<DateRange | undefined>({
 		from: new Date(),
 		to: addDays(new Date(), 7),
 	});
-	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [isSuccess, setIsSuccess] = useState(false);
 
 	useEffect(() => {
 		if (!(range && range.from && range.to)) return;
@@ -88,7 +88,7 @@ export const PreferencesDrawer: React.FC = () => {
 		}));
 	};
 
-	const handleApplyAll = (_: Date, ranges: Array<{ start_time: string; end_time: string }>) => {
+	const handleApplyAll = (ranges: Array<{ start_time: string; end_time: string }>) => {
 		setTimeRanges(prev => prev.map(day => ({
 			column: day.column,
 			ranges: [...ranges]
