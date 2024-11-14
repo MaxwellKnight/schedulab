@@ -9,6 +9,7 @@ import { ShiftType } from '@/types/shifts.dto';
 import { MemberAssignment } from './Schedule';
 import { calculateShiftGroupHeight, getRenderConfig } from '@/utils/scheduleUtils';
 import { ScheduleGridState } from './ScheduleGrid';
+import { UserData } from '@/types';
 
 export interface ScheduleGridTableProps {
 	template: TemplateScheduleData;
@@ -17,7 +18,7 @@ export interface ScheduleGridTableProps {
 	timeSlots: string[];
 	state: ScheduleGridState;
 	assignments: MemberAssignment[];
-	getAssignedSlots: (shift: TemplateShiftData, date: Date, timeSlot: string) => any[];
+	getAssignedSlots: (shift: TemplateShiftData, date: Date, timeSlot: string) => { position: number; assignmnet: MemberAssignment, member: UserData }[];
 	shiftColors: Record<string, string>;
 }
 
