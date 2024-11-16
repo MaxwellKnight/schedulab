@@ -1,83 +1,153 @@
 import Joi from 'joi';
-import { PreferenceData, DailyPreferenceData } from '../interfaces';
+import { PreferenceTemplateData, TimeSlotData } from '../interfaces/dto/preferences.dto';
+import { TimeSlot } from '../models';
 
-const dailySchema = Joi.object<DailyPreferenceData>({
+const timeRangeSchema = Joi.object({
 	id: Joi.number()
 		.integer()
 		.optional()
 		.messages({
-			'number.base': 'ID must be an integer',
+			'number.base': 'Time range ID must be an integer'
 		}),
 	preference_id: Joi.number()
 		.integer()
 		.required()
 		.messages({
 			'number.base': 'Preference ID must be an integer',
-			'any.required': 'Preference ID is required',
+			'any.required': 'Preference ID is required'
+		}),
+	start_time: Joi.string()
+		.pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
+		.required()
+		.messages({
+			'string.pattern.base': 'Start time must be in HH:mm:ss format',
+			'any.required': 'Start time is required'
+		}),
+	end_time: Joi.string()
+		.pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
+		.required()
+		.messages({
+			'string.pattern.base': 'End time must be in HH:mm:ss format',
+			'any.required': 'End time is required'
+		}),
+	created_at: Joi.date()
+		.optional()
+});
+
+const timeSlotSchema = Joi.object<TimeSlotData>({
+	id: Joi.number()
+		.integer()
+		.optional()
+		.messages({
+			'number.base': 'Time slot ID must be an integer'
+		}),
+	template_id: Joi.number()
+		.integer()
+		.required()
+		.messages({
+			'number.base': 'Template ID must be an integer',
+			'any.required': 'Template ID is required'
 		}),
 	date: Joi.date()
 		.required()
 		.messages({
 			'date.base': 'Date must be a valid date',
-			'any.required': 'Date is required',
+			'any.required': 'Date is required'
 		}),
-	shift_type_id: Joi.number()
+	time_range_id: Joi.number()
 		.integer()
 		.required()
 		.messages({
-			'number.base': 'Shift type ID must be an integer',
-			'any.required': 'Shift type ID is required',
+			'number.base': 'Time range ID must be an integer',
+			'any.required': 'Time range ID is required'
 		}),
-	preference_level: Joi.number()
-		.integer()
-		.min(1)
-		.max(5)
-		.required()
-		.messages({
-			'number.base': 'Preference level must be an integer',
-			'number.min': 'Preference level must be at least 1',
-			'number.max': 'Preference level must be at most 5',
-			'any.required': 'Preference level is required',
-		}),
+	time_range: timeRangeSchema.optional(),
+	created_at: Joi.date()
+		.optional()
 });
 
-const schema = Joi.object<PreferenceData>({
+const schema = Joi.object<PreferenceTemplateData>({
 	id: Joi.number()
 		.integer()
 		.optional()
 		.messages({
-			'number.base': 'ID must be an integer',
+			'number.base': 'ID must be an integer'
 		}),
-	user_id: Joi.number()
+	team_id: Joi.number()
 		.integer()
 		.required()
 		.messages({
-			'number.base': 'User ID must be an integer',
-			'any.required': 'User ID is required',
+			'number.base': 'Team ID must be an integer',
+			'any.required': 'Team ID is required'
+		}),
+	name: Joi.string()
+		.required()
+		.min(3)
+		.max(255)
+		.messages({
+			'string.base': 'Name must be a string',
+			'string.min': 'Name must be at least 3 characters long',
+			'string.max': 'Name must not exceed 255 characters',
+			'any.required': 'Name is required'
 		}),
 	start_date: Joi.date()
 		.required()
 		.messages({
 			'date.base': 'Start date must be a valid date',
-			'any.required': 'Start date is required',
+			'any.required': 'Start date is required'
 		}),
 	end_date: Joi.date()
 		.required()
+		.greater(Joi.ref('start_date'))
 		.messages({
 			'date.base': 'End date must be a valid date',
-			'any.required': 'End date is required',
+			'date.greater': 'End date must be after start date',
+			'any.required': 'End date is required'
 		}),
-	daily_preferences: Joi.array()
-		.items(dailySchema)
+	status: Joi.string()
+		.valid('draft', 'published', 'closed')
+		.required()
 		.messages({
-			'array.base': 'Daily preferences must be an array of daily preference objects',
+			'string.base': 'Status must be a string',
+			'any.only': 'Status must be one of: draft, published, closed',
+			'any.required': 'Status is required'
 		}),
-	notes: Joi.string()
-		.allow(null)
+	created_by: Joi.number()
+		.integer()
 		.optional()
 		.messages({
-			'string.base': 'Notes must be a string',
+			'number.base': 'Created by must be an integer'
 		}),
-});
+	created_at: Joi.date()
+		.optional(),
+	updated_at: Joi.date()
+		.optional(),
+	time_slots: Joi.array()
+		.items(timeSlotSchema)
+		.optional()
+		.messages({
+			'array.base': 'Time slots must be an array of time slot objects'
+		})
+})
+	.custom((value, helpers) => {
+		// Additional custom validation if needed
+		const { start_date, end_date, time_slots } = value;
 
-export { schema as preferenceSchema };
+		// Validate that all time slot dates fall within the template date range
+		if (time_slots?.length) {
+			const invalidSlots = time_slots.filter((slot: TimeSlot) => {
+				const slotDate = new Date(slot.date);
+				return slotDate < start_date || slotDate > end_date;
+			});
+
+			if (invalidSlots.length) {
+				return helpers.error('custom.timeSlots', {
+					message: 'All time slots must fall within the template date range'
+				});
+			}
+		}
+
+		return value;
+	});
+
+export { schema as preferenceTemplateSchema };

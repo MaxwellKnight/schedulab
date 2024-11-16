@@ -1,17 +1,15 @@
 import Router from "express";
 import { makeSQL } from "../configs/db.config";
 import { makeValidator } from "../middlewares/middlewares";
-import { PreferenceService, UserService } from "../services";
-import { AuthController, PreferenceController } from "../controllers";
-import { PreferenceRepository, UserRepository } from "../repositories";
-import { preferenceSchema } from "../validations/preference.validation";
+import { PreferenceTemplateService, UserService } from "../services";
+import { AuthController, PreferenceTemplateController } from "../controllers";
+import { PreferenceTemplateRepository, UserRepository } from "../repositories";
+import { preferenceTemplateSchema } from "../validations/preference.validation";
 
-const repository = new PreferenceRepository(makeSQL());
-const service = new PreferenceService(repository);
-const controller = new PreferenceController(service);
-
-const validator = makeValidator(preferenceSchema);
-
+const repository = new PreferenceTemplateRepository(makeSQL());
+const service = new PreferenceTemplateService(repository);
+const controller = new PreferenceTemplateController(service);
+const validator = makeValidator(preferenceTemplateSchema);
 const userRepository = new UserRepository(makeSQL());
 const userService = new UserService(userRepository);
 const authController = new AuthController(userService);
@@ -29,13 +27,17 @@ router.route("/")
 		controller.create
 	);
 
-router.route("/user/:id")
+router.route("/team/:teamId")
 	.get(
 		authController.authenticate,
-		controller.getByUserId
+		controller.getByTeamId
 	);
 
 router.route("/:id")
+	.get(
+		authController.authenticate,
+		controller.getOne
+	)
 	.put(
 		authController.authenticate,
 		validator,
@@ -44,10 +46,18 @@ router.route("/:id")
 	.delete(
 		authController.authenticate,
 		controller.delete
-	)
-	.get(
+	);
+
+router.route("/:id/publish")
+	.post(
 		authController.authenticate,
-		controller.getOne
+		controller.publish
+	);
+
+router.route("/:id/close")
+	.post(
+		authController.authenticate,
+		controller.close
 	);
 
 router.route("/dates/:start_date/:end_date")
@@ -55,6 +65,5 @@ router.route("/dates/:start_date/:end_date")
 		authController.authenticate,
 		controller.getByDates
 	);
-
 
 export default router;

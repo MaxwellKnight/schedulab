@@ -1,5 +1,5 @@
 import { UserController } from "./user.controller";
-import { PreferenceController } from "./preference.controller";
+import { PreferenceTemplateController } from "./preference.controller";
 import { ShiftController } from "./shift.controller";
 import { ScheduleController } from "./schedule.controller";
 import { VacationController } from "./vacation.controller";
@@ -9,7 +9,7 @@ import { TeamController } from "./team.controller";
 
 export {
 	UserController,
-	PreferenceController,
+	PreferenceTemplateController,
 	ShiftController,
 	VacationController,
 	ScheduleController,

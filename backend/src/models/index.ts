@@ -1,5 +1,5 @@
 import { User } from "./user.model";
-import { Preference, DailyPreference } from "./preference.model";
+import { PreferenceTemplate, PreferenceTimeRange, TimeSlot, DailyTimeSlots } from "./preference.model";
 import { Shift, TimeRange, UserShifts } from "./shift.model";
 import { Schedule } from "./schedule.model";
 import { Vacation } from "./vacations.model";
@@ -8,8 +8,10 @@ import { Team, TeamRole } from "./user.model";
 
 export {
 	User,
-	Preference,
-	DailyPreference,
+	PreferenceTemplate,
+	PreferenceTimeRange,
+	TimeSlot,
+	DailyTimeSlots,
 	Shift,
 	UserShifts,
 	Schedule,

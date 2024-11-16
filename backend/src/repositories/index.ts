@@ -1,4 +1,4 @@
-import { PreferenceRepository } from "./preferences.repository";
+import { PreferenceTemplateRepository } from "./preferences.repository";
 import { ScheduleRepository } from "./schedule.repository";
 import { ShiftRepository } from "./shift.repository";
 import { UserRepository } from "./user.repository";
@@ -8,7 +8,7 @@ import { TemplateScheduleRepository } from "./template.repository";
 import { TeamRepository } from "./teams.repository";
 
 export {
-	PreferenceRepository,
+	PreferenceTemplateRepository,
 	ScheduleRepository,
 	ShiftRepository,
 	UserRepository,
