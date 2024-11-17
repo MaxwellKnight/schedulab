@@ -1,7 +1,6 @@
 import { User } from "../models";
 import { ShiftRepository } from "./shift.repository";
 import { VacationRepository } from "./vacation.repository";
-import { PreferenceRepository } from "./preferences.repository";
 import { Database } from "../configs/db.config";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
 import { Team } from "../models/user.model";
@@ -17,13 +16,11 @@ interface TeamRow extends RowDataPacket, Team { }
 export class UserRepository {
 	private readonly db: Database;
 	private readonly shift_repo: ShiftRepository;
-	private readonly preference_repo: PreferenceRepository;
 	private readonly vacation_repo: VacationRepository;
 
 	constructor(db: Database) {
 		this.db = db;
 		this.shift_repo = new ShiftRepository(db);
-		this.preference_repo = new PreferenceRepository(db);
 		this.vacation_repo = new VacationRepository(db);
 	}
 
@@ -224,7 +221,6 @@ export class UserRepository {
 		}
 
 		await this.vacation_repo.deleteByUserId(id);
-		await this.preference_repo.deleteByUserId(id);
 		await this.shift_repo.removeUser(id);
 
 		const result = await this.db.execute<ResultSetHeader>(

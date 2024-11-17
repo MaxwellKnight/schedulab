@@ -1,19 +1,40 @@
-export interface PreferenceData {
+// preferences.dto.ts
+import { PreferenceTimeRange } from "../../models";
+
+export interface PreferenceTemplateData {
 	id: number;
-	user_id: number;
+	team_id: number;
+	name: string;
 	start_date: Date;
 	end_date: Date;
-	daily_preferences: DailyPreferenceData[];
-	notes: string | null;
+	status: 'draft' | 'published' | 'closed';
+	creator: number;
 	created_at: Date;
+	updated_at: Date;
+	time_slots: TimeSlotData[];
 }
 
-export interface DailyPreferenceData {
+export interface TimeSlotData {
 	id: number;
-	preference_id: number;  // Added to explicitly show the relationship with Preference
+	template_id: number;
 	date: Date;
-	shift_type_id: number;  // Changed from specific shift types to a general shift_type_id
-	shift_type_name?: string;  // Optional field for when joined with shift_types table
-	preference_level: number;  // Replaces specific shift type fields with a general preference level
+	time_range_id: number;
 	created_at: Date;
+	time_range?: TimeRangeData;
+}
+
+export interface TimeRangeData extends Omit<PreferenceTimeRange, "preference_id" | "id"> {
+	id?: number;
+	preference_id?: number;
+}
+
+export interface MemberPreferenceData {
+	id: number;
+	template_id: number;
+	user_id: number;
+	status: 'draft' | 'submitted';
+	submitted_at?: Date | null;  // Using undefined instead of null
+	notes?: string | null;      // Using undefined instead of null
+	created_at: Date;
+	updated_at: Date;
 }

@@ -1,36 +1,23 @@
-import React from 'react';
+import React, { forwardRef, ButtonHTMLAttributes } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { LucideIcon } from 'lucide-react';
-import { ButtonHTMLAttributes } from 'react';
 
 type ButtonSize = 'sm' | 'default' | 'lg';
 
 interface AnimatedGradientButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'size'> {
-	/** Click handler function */
 	onClick?: () => void;
-	/** Disable state of the button */
 	disabled?: boolean;
-	/** Lucide icon component */
 	icon?: LucideIcon;
-	/** Button text content */
 	text: string;
-	/** Additional CSS classes */
 	className?: string;
-	/** Starting gradient color (Tailwind class) */
 	gradientFrom?: string;
-	/** Ending gradient color (Tailwind class) */
 	gradientTo?: string;
-	/** Starting hover gradient color (Tailwind class) */
 	gradientHoverFrom?: string;
-	/** Ending hover gradient color (Tailwind class) */
 	gradientHoverTo?: string;
-	/** Shadow color on hover (Tailwind class) */
 	shadowColor?: string;
-	/** Duration of icon animation in seconds */
 	iconAnimationDuration?: number;
-	/** Size variant of the button */
 	size?: ButtonSize;
 }
 
@@ -40,7 +27,7 @@ const sizeClasses: Record<ButtonSize, string> = {
 	lg: "px-6 py-3 text-lg"
 };
 
-const AnimatedGradientButton: React.FC<AnimatedGradientButtonProps> = ({
+const AnimatedGradientButton = forwardRef<HTMLButtonElement, AnimatedGradientButtonProps>(({
 	onClick,
 	disabled = false,
 	icon: Icon,
@@ -54,9 +41,10 @@ const AnimatedGradientButton: React.FC<AnimatedGradientButtonProps> = ({
 	iconAnimationDuration = 2,
 	size = "default",
 	...props
-}) => {
+}, ref) => {
 	return (
 		<Button
+			ref={ref}
 			onClick={onClick}
 			disabled={disabled}
 			className={cn(
@@ -136,6 +124,8 @@ const AnimatedGradientButton: React.FC<AnimatedGradientButtonProps> = ({
 			</div>
 		</Button>
 	);
-};
+});
+
+AnimatedGradientButton.displayName = 'AnimatedGradientButton';
 
 export default AnimatedGradientButton;

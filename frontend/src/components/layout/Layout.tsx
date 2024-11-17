@@ -378,32 +378,7 @@ const Layout = () => {
 		</div>
 	);
 
-	const renderError = () => (
-		<div className="min-h-screen w-full flex items-center justify-center bg-gray-50 p-4">
-			<Card className="w-full max-w-md border-red-100">
-				<CardContent className="pt-6">
-					<div className="flex flex-col items-center space-y-4">
-						<div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
-							<AlertCircle className="h-6 w-6 text-red-600" />
-						</div>
-						<div className="text-center">
-							<h3 className="text-lg font-medium text-gray-900 mb-1">Error Loading Teams</h3>
-							<p className="text-sm text-gray-500">{teamsError}</p>
-						</div>
-						<Button
-							onClick={() => window.location.reload()}
-							className="bg-red-600 hover:bg-red-700 text-white"
-						>
-							Try Again
-						</Button>
-					</div>
-				</CardContent>
-			</Card>
-		</div>
-	);
-
 	if (teamsLoading) return renderLoading();
-	if (teamsError) return renderError();
 	if (!teams || teams.length === 0) return renderTeamSetup();
 	return renderMainContent();
 };

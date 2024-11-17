@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '@/hooks/useAuth/useAuth';
-import { Label } from '@radix-ui/react-label';
-import { Mail, Lock, Loader2, User, AlertCircle, Zap, Calendar, Clock } from 'lucide-react';
+import { Zap, Calendar, Clock, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserData } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { TokenPayload } from '@/types/users.dto';
 import { decodeJwtToken } from '@/utils/jwt';
+import { LoginForm, RegisterForm } from '@/components';
+import { GoogleIcon } from './GoogleIcon';
 
 interface RegisterData {
 	username: string;
@@ -274,279 +274,25 @@ const Login: React.FC = () => {
 							<AnimatePresence mode="wait">
 								<motion.div key={activeTab}>
 									<TabsContent value="login" className="space-y-4">
-										<form onSubmit={handleLogin} className="space-y-4">
-											<motion.div
-												initial={{ opacity: 0, height: 0 }}
-												animate={{ opacity: 1, height: "auto" }}
-												transition={{
-													type: "spring",
-													stiffness: 200,
-													damping: 20,
-													mass: 0.8
-												}}
-												className="space-y-4"
-											>
-												<motion.div
-													className="space-y-2"
-													initial={{ x: -20, opacity: 0 }}
-													animate={{ x: 0, opacity: 1 }}
-													transition={{
-														type: "spring",
-														stiffness: 300,
-														damping: 20,
-														delay: 0.1
-													}}
-												>
-													<Label htmlFor="email">Email</Label>
-													<motion.div
-														className="relative"
-														whileFocus={{ scale: 1.02 }}
-														transition={{ type: "spring", stiffness: 400, damping: 25 }}
-													>
-														<Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-														<Input
-															id="email"
-															type="email"
-															placeholder="name@example.com"
-															className="pl-10"
-															value={email}
-															onChange={(e) => setEmail(e.target.value)}
-															required
-															disabled={loading}
-														/>
-													</motion.div>
-												</motion.div>
-
-												<motion.div
-													className="space-y-2"
-													initial={{ x: -20, opacity: 0 }}
-													animate={{ x: 0, opacity: 1 }}
-													transition={{
-														type: "spring",
-														stiffness: 300,
-														damping: 20,
-														delay: 0.2
-													}}
-												>
-													<Label htmlFor="password">Password</Label>
-													<motion.div
-														className="relative"
-														whileFocus={{ scale: 1.02 }}
-														transition={{ type: "spring", stiffness: 400, damping: 25 }}
-													>
-														<Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-														<Input
-															id="password"
-															type="password"
-															placeholder="Enter your password"
-															className="pl-10"
-															value={password}
-															onChange={(e) => setPassword(e.target.value)}
-															required
-															disabled={loading}
-														/>
-													</motion.div>
-												</motion.div>
-
-												<motion.div
-													initial={{ y: 20, opacity: 0 }}
-													animate={{ y: 0, opacity: 1 }}
-													transition={{ delay: 0.3 }}
-												>
-													<motion.div
-														whileHover={{ scale: 1.02 }}
-														whileTap={{ scale: 0.98 }}
-													>
-														<Button
-															className="w-full bg-indigo-600 hover:bg-indigo-700 relative overflow-hidden group"
-															type="submit"
-															disabled={loading}
-														>
-															<motion.div
-																className="absolute inset-0 bg-indigo-500 opacity-0 group-hover:opacity-20"
-																initial={false}
-																animate={loading ? { x: ["0%", "100%"] } : { x: "0%" }}
-																transition={{
-																	duration: 1,
-																	repeat: loading ? Infinity : 0,
-																	ease: "linear"
-																}}
-															/>
-															{loading ? (
-																<motion.div
-																	initial={{ opacity: 0, scale: 0.8 }}
-																	animate={{ opacity: 1, scale: 1 }}
-																	className="flex items-center justify-center"
-																>
-																	<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-																	<span>Logging in...</span>
-																</motion.div>
-															) : (
-																<motion.span
-																	initial={{ opacity: 0 }}
-																	animate={{ opacity: 1 }}
-																	transition={{ delay: 0.4 }}
-																>
-																	Login
-																</motion.span>
-															)}
-														</Button>
-													</motion.div>
-												</motion.div>
-											</motion.div>
-										</form>
+										<LoginForm
+											handleLogin={handleLogin}
+											setEmail={setEmail}
+											setPassword={setPassword}
+											email={email}
+											password={password}
+											loading={loading}
+										/>
 									</TabsContent>
 
 									<TabsContent value="register" className="space-y-4">
-										<form onSubmit={handleRegister} className="space-y-4">
-											<motion.div
-												initial={{ opacity: 0, height: 0 }}
-												animate={{ opacity: 1, height: "auto" }}
-												transition={{
-													type: "spring",
-													stiffness: 200,
-													damping: 20,
-													mass: 0.8
-												}}
-												className="space-y-4"
-											>
-												<motion.div
-													className="space-y-2"
-													initial={{ x: -20, opacity: 0 }}
-													animate={{ x: 0, opacity: 1 }}
-													transition={{
-														type: "spring",
-														stiffness: 300,
-														damping: 20,
-														delay: 0.1
-													}}
-												>
-													<Label htmlFor="username">Username</Label>
-													<motion.div
-														className="relative"
-														whileFocus={{ scale: 1.02 }}
-													>
-														<User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-														<Input
-															id="username"
-															type="text"
-															placeholder="Choose a username"
-															className="pl-10"
-															value={username}
-															onChange={(e) => setUsername(e.target.value)}
-															required
-															disabled={loading}
-														/>
-													</motion.div>
-												</motion.div>
-
-												<motion.div
-													className="space-y-2"
-													initial={{ x: -20, opacity: 0 }}
-													animate={{ x: 0, opacity: 1 }}
-													transition={{
-														type: "spring",
-														stiffness: 300,
-														damping: 20,
-														delay: 0.2
-													}}
-												>
-													<Label htmlFor="register-email">Email</Label>
-													<motion.div
-														className="relative"
-														whileFocus={{ scale: 1.02 }}
-													>
-														<Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-														<Input
-															id="register-email"
-															type="email"
-															placeholder="name@example.com"
-															className="pl-10"
-															value={email}
-															onChange={(e) => setEmail(e.target.value)}
-															required
-															disabled={loading}
-														/>
-													</motion.div>
-												</motion.div>
-
-												<motion.div
-													className="space-y-2"
-													initial={{ x: -20, opacity: 0 }}
-													animate={{ x: 0, opacity: 1 }}
-													transition={{
-														type: "spring",
-														stiffness: 300,
-														damping: 20,
-														delay: 0.3
-													}}
-												>
-													<Label htmlFor="register-password">Password</Label>
-													<motion.div
-														className="relative"
-														whileFocus={{ scale: 1.02 }}
-													>
-														<Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-														<Input
-															id="register-password"
-															type="password"
-															placeholder="Create a password"
-															className="pl-10"
-															value={password}
-															onChange={(e) => setPassword(e.target.value)}
-															required
-															disabled={loading}
-														/>
-													</motion.div>
-												</motion.div>
-
-												<motion.div
-													initial={{ y: 20, opacity: 0 }}
-													animate={{ y: 0, opacity: 1 }}
-													transition={{ delay: 0.4 }}
-												>
-													<motion.div
-														whileHover={{ scale: 1.02 }}
-														whileTap={{ scale: 0.98 }}
-													>
-														<Button
-															className="w-full bg-indigo-600 hover:bg-indigo-700 relative overflow-hidden group"
-															type="submit"
-															disabled={loading}
-														>
-															<motion.div
-																className="absolute inset-0 bg-indigo-500 opacity-0 group-hover:opacity-20"
-																initial={false}
-																animate={loading ? { x: ["0%", "100%"] } : { x: "0%" }}
-																transition={{
-																	duration: 1,
-																	repeat: loading ? Infinity : 0,
-																	ease: "linear"
-																}}
-															/>
-															{loading ? (
-																<motion.div
-																	initial={{ opacity: 0, scale: 0.8 }}
-																	animate={{ opacity: 1, scale: 1 }}
-																	className="flex items-center justify-center"
-																>
-																	<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-																	<span>Creating account...</span>
-																</motion.div>
-															) : (
-																<motion.span
-																	initial={{ opacity: 0 }}
-																	animate={{ opacity: 1 }}
-																	transition={{ delay: 0.5 }}
-																>
-																	Create account
-																</motion.span>
-															)}
-														</Button>
-													</motion.div>
-												</motion.div>
-											</motion.div>
-										</form>
+										<RegisterForm
+											handleRegister={handleRegister}
+											setEmail={setUsername}
+											setPassword={setPassword}
+											email={username}
+											password={password}
+											loading={loading}
+										/>
 									</TabsContent>
 								</motion.div>
 							</AnimatePresence>
@@ -604,24 +350,7 @@ const Login: React.FC = () => {
 										initial={false}
 										transition={{ duration: 0.3 }}
 									/>
-									<svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-										<path
-											d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-											fill="#4285F4"
-										/>
-										<path
-											d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-											fill="#34A853"
-										/>
-										<path
-											d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-											fill="#FBBC05"
-										/>
-										<path
-											d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-											fill="#EA4335"
-										/>
-									</svg>
+									<GoogleIcon />
 									Continue with Google
 								</Button>
 							</motion.div>

@@ -133,29 +133,69 @@ CREATE TABLE constraint_time_ranges (
   FOREIGN KEY (constraint_id) REFERENCES constraints(id)
 );
 
--- Table: preferences
-CREATE TABLE preferences (
+-- Table: preference_templates (controls available preference slots)
+CREATE TABLE preference_templates (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NOT NULL,
+  team_id INT NOT NULL,
+  name VARCHAR(255) NOT NULL,
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
-  notes VARCHAR(1024),
+  status ENUM('draft', 'published', 'closed') NOT NULL DEFAULT 'draft',
+  creator INT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  UNIQUE (user_id, start_date, end_date)
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (team_id) REFERENCES teams(id),
+  FOREIGN KEY (creator) REFERENCES users(id),
+  UNIQUE (team_id, start_date, end_date)
 );
 
--- Updated Table: daily_preferences
-CREATE TABLE daily_preferences (
+-- Table: time_ranges
+CREATE TABLE preference_time_ranges (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   preference_id INT NOT NULL,
-  date DATE NOT NULL,
-  shift_type_id INT NOT NULL,
-  preference_level INT NOT NULL, -- e.g., 1 (low) to 5 (high)
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (preference_id) REFERENCES preferences(id),
-  FOREIGN KEY (shift_type_id) REFERENCES shift_types(id),
-  UNIQUE (preference_id, date, shift_type_id)
+  FOREIGN KEY (preference_id) REFERENCES preference_templates(id)
+);
+
+-- Table: template_time_slots (available time slots defined by team creator)
+CREATE TABLE template_time_slots (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  template_id INT NOT NULL,
+  date DATE NOT NULL,
+  time_range_id INT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (template_id) REFERENCES preference_templates(id) ON DELETE CASCADE,
+  FOREIGN KEY (time_range_id) REFERENCES preference_time_ranges(id),
+  INDEX idx_template_date (template_id, date)
+);
+
+-- Table: member_preferences (members submitted preferences)
+CREATE TABLE member_preferences (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  template_id INT NOT NULL,
+  user_id INT NOT NULL,
+  status ENUM('draft', 'submitted') NOT NULL DEFAULT 'draft',
+  submitted_at TIMESTAMP NULL,
+  notes TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (template_id) REFERENCES preference_templates(id),
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  UNIQUE (template_id, user_id)
+);
+
+-- Table: preference_selections (members can only select from template slots)
+CREATE TABLE preference_selections (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  member_preference_id INT NOT NULL,
+  template_time_slot_id INT NOT NULL,
+  preference_level INT NOT NULL DEFAULT 3 CHECK (preference_level BETWEEN 1 AND 5),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (member_preference_id) REFERENCES member_preferences(id) ON DELETE CASCADE,
+  FOREIGN KEY (template_time_slot_id) REFERENCES template_time_slots(id),
+  UNIQUE (member_preference_id, template_time_slot_id)
 );
 
 -- Table: vacations

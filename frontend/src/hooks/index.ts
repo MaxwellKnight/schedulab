@@ -3,6 +3,8 @@ import { useTeam } from "@/context";
 import { useScheduleGrid } from './useScheduleGrid';
 import { useAuthenticatedFetch } from "./useAuthFetch";
 import { useAuth } from "./useAuth/useAuth";
+import { usePreferences } from "./usePreferences";
+import { usePreferencesState } from "./usePreferenceState";
 
 export {
 	useScheduleGrid,
@@ -10,4 +12,6 @@ export {
 	useTeam,
 	useAuthenticatedFetch,
 	useAuth,
+	usePreferences,
+	usePreferencesState
 }
