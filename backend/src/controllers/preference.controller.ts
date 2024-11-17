@@ -84,6 +84,18 @@ export class PreferenceController {
 		}
 	}
 
+	public getTimeRangesByTeam = async (req: Request, res: Response): Promise<void> => {
+		try {
+			const ranges = await this.service.getTimeRangesByTeam(
+				Number(req.params.teamId),
+				req.user!.id
+			);
+			res.json(ranges);
+		} catch (error) {
+			this.handleError(res, error);
+		}
+	};
+
 	public getByDates = async (req: Request, res: Response): Promise<void> => {
 		try {
 			const startDate = req.query.start_date as string;

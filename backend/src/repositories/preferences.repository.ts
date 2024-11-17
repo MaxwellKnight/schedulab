@@ -175,6 +175,27 @@ export class PreferenceRepository {
 		}));
 	}
 
+	public async getTimeRangesByTeam(teamId: number, userId: number): Promise<PreferenceTimeRange[]> {
+		const hasAccess = await this.validateUserTeamMembership(userId, teamId);
+		if (!hasAccess) throw new Error('User does not have access to this team');
+
+		const [rows] = await this.db.execute<(RowDataPacket & PreferenceTimeRange)[]>(`
+			SELECT DISTINCT ptr.*
+			FROM preference_time_ranges ptr
+			JOIN preference_templates pt ON ptr.preference_id = pt.id
+			WHERE pt.team_id = ?
+			ORDER BY ptr.start_time
+  		`, [teamId]);
+
+		return rows.map(row => ({
+			id: row.id,
+			preference_id: row.preference_id,
+			start_time: row.start_time,
+			end_time: row.end_time,
+			created_at: new Date(row.created_at)
+		}));
+	}
+
 	// Method to get all time slots for a template
 	public async getTimeSlotsForTemplate(templateId: number, userId: number): Promise<TimeSlot[]> {
 		const hasAccess = await this.validateTemplateAccess(templateId, userId);

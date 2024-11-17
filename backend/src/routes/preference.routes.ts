@@ -43,6 +43,12 @@ router.route("/team/:teamId")
 		controller.getByTeamId
 	);
 
+router.route("/team/:teamId/time-ranges")
+	.get(
+		authController.authenticate,
+		controller.getTimeRangesByTeam
+	);
+
 router.route("/dates")
 	.get(
 		authController.authenticate,

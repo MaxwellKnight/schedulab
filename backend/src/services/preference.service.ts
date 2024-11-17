@@ -47,17 +47,8 @@ export class PreferenceService {
 	}
 
 
-	private transformMemberPreference(pref: MemberPreferenceData): MemberPreferenceData {
-		return {
-			id: pref.id,
-			template_id: pref.template_id,
-			user_id: pref.user_id,
-			status: pref.status,
-			submitted_at: pref.submitted_at || undefined,  // Convert null to undefined
-			notes: pref.notes || undefined,               // Convert null to undefined
-			created_at: pref.created_at,
-			updated_at: pref.updated_at
-		};
+	public async getTimeRangesByTeam(teamId: number, userId: number): Promise<TimeRangeData[]> {
+		return await this.repo.getTimeRangesByTeam(teamId, userId);
 	}
 
 	// Template operations
