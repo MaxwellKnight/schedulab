@@ -141,7 +141,7 @@ CREATE TABLE preference_templates (
   start_date DATE NOT NULL,
   end_date DATE NOT NULL,
   status ENUM('draft', 'published', 'closed') NOT NULL DEFAULT 'draft',
-  created_by INT NOT NULL,
+  creator INT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (team_id) REFERENCES teams(id),

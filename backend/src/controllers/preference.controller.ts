@@ -1,161 +1,228 @@
 import { Response, Request } from "express";
-import { PreferenceTemplateService } from "../services";
-import { PreferenceTemplateData } from "../interfaces/dto/preferences.dto";
+import { PreferenceService } from "../services";
 
-export class PreferenceTemplateController {
-	private service: PreferenceTemplateService;
+export class PreferenceController {
+	private service: PreferenceService;
 
-	constructor(service: PreferenceTemplateService) {
+	constructor(service: PreferenceService) {
 		this.service = service;
+	}
+
+	private handleError(res: Response, error: Error | unknown) {
+		if (error instanceof Error) {
+			const errorMessage = error.message;
+
+			switch (errorMessage) {
+				// Access and permission errors - 403
+				case 'User does not have access to this team':
+				case 'User does not have access to this template':
+				case 'Cannot create preferences for other users':
+				case 'Cannot update preferences of other users':
+				case 'Cannot delete preferences of other users':
+					res.status(403).json({ error: errorMessage });
+					break;
+
+				// Not found errors - 404
+				case 'Template not found':
+				case 'Template not found or access denied':
+				case 'Time slot not found':
+				case 'Time range not found':
+				case 'Preference not found':
+					res.status(404).json({ error: errorMessage });
+					break;
+
+				// Validation/Business logic errors - 400
+				case 'Only draft templates can be published':
+				case 'Only published templates can be closed':
+				case 'Template must have at least one time slot before publishing':
+				case 'Invalid date range':
+				case 'End date must be after start date':
+				case 'Time range must be valid':
+					res.status(400).json({ error: errorMessage });
+					break;
+
+				// All other errors - 500
+				default:
+					console.error('Unhandled error:', error);
+					res.status(500).json({ error: "Internal server error" });
+					break;
+			}
+		} else {
+			console.error('Unknown error:', error);
+			res.status(500).json({ error: "Internal server error" });
+		}
 	}
 
 	public create = async (req: Request, res: Response): Promise<void> => {
 		try {
-			const template: Omit<PreferenceTemplateData, 'id' | 'created_at' | 'updated_at' | 'time_slots'> = req.body;
-			const result = await this.service.create(template, req.user!.id);
-			res.json({ message: "Preference template created", id: result });
-		} catch (error: any) {
-			if (error.message === 'User does not have access to this team') {
-				res.status(403).json({ error: "User does not have access to this team" });
-			} else {
-				res.status(400).json({ error: "Failed to create preference template" });
-			}
+			const id = await this.service.createTemplate(req.body, req.user!.id);
+			res.status(201).json({ message: "Template created successfully", id });
+		} catch (error) {
+			this.handleError(res, error);
 		}
 	}
 
 	public getOne = async (req: Request, res: Response): Promise<void> => {
 		try {
-			const id = Number(req.params.id);
-			const template = await this.service.getOne(id, req.user!.id);
-
-			if (template) {
-				res.json(template);
-			} else {
-				res.status(404).json({ error: "Preference template not found" });
+			const template = await this.service.getTemplate(Number(req.params.id), req.user!.id);
+			if (!template) {
+				res.status(404).json({ error: "Template not found" });
+				return;
 			}
+			res.json(template);
 		} catch (error) {
-			res.status(500).json({ error: "Failed to retrieve preference template" });
+			this.handleError(res, error);
 		}
 	}
 
 	public getMany = async (req: Request, res: Response): Promise<void> => {
 		try {
-			const templates = await this.service.getMany(req.user!.id);
-			if (templates.length > 0) {
-				res.json(templates);
-			} else {
-				res.status(404).json({ error: "No preference templates exist" });
-			}
+			const templates = await this.service.getTemplates(req.user!.id);
+			res.json(templates);
 		} catch (error) {
-			res.status(500).json({ error: "Failed to retrieve preference templates" });
+			this.handleError(res, error);
 		}
 	}
 
 	public getByDates = async (req: Request, res: Response): Promise<void> => {
 		try {
-			const { start_date, end_date } = req.params;
-			const templates = await this.service.getByDates(
-				new Date(start_date),
-				new Date(end_date),
+			const startDate = req.query.start_date as string;
+			const endDate = req.query.end_date as string;
+
+			if (!startDate || !endDate) {
+				res.status(400).json({ error: "Start and end dates are required" });
+				return;
+			}
+
+			const templates = await this.service.getTemplatesByDateRange(
+				new Date(startDate),
+				new Date(endDate),
 				req.user!.id
 			);
-
-			if (templates.length > 0) {
-				res.json(templates);
-			} else {
-				res.status(404).json({ error: "No preference templates found for given dates" });
-			}
+			res.json(templates);
 		} catch (error) {
-			res.status(500).json({ error: "Failed to retrieve preference templates" });
+			this.handleError(res, error);
 		}
 	}
 
 	public getByTeamId = async (req: Request, res: Response): Promise<void> => {
 		try {
-			const teamId = Number(req.params.teamId);
-			const templates = await this.service.getByTeamId(teamId, req.user!.id);
-
-			if (templates.length > 0) {
-				res.json(templates);
-			} else {
-				res.status(404).json({ error: "No preference templates found for team" });
-			}
-		} catch (error: any) {
-			if (error.message === 'User does not have access to this team') {
-				res.status(403).json({ error: "User does not have access to this team" });
-			} else {
-				res.status(500).json({ error: "Failed to retrieve team preference templates" });
-			}
+			const templates = await this.service.getTemplatesByTeam(
+				Number(req.params.teamId),
+				req.user!.id
+			);
+			res.json(templates);
+		} catch (error) {
+			this.handleError(res, error);
 		}
 	}
 
 	public update = async (req: Request, res: Response): Promise<void> => {
 		try {
-			const { id, ...rest }: Partial<PreferenceTemplateData> & { id: number } = req.body;
-			const template = await this.service.getOne(id, req.user!.id);
-
-			if (!template) {
-				res.status(404).json({ error: "Preference template not found" });
-				return;
-			}
-
-			const result = await this.service.update({ id, ...rest }, req.user!.id);
-			if (result === 0) {
-				res.status(400).json({ error: "Failed to update preference template" });
-			} else {
-				res.json({ message: "Preference template updated", id });
-			}
+			const templateId = Number(req.params.id);
+			await this.service.updateTemplate({
+				id: templateId,
+				...req.body
+			}, req.user!.id);
+			res.json({ message: "Template updated successfully" });
 		} catch (error) {
-			res.status(500).json({ error: "Failed to update preference template" });
+			this.handleError(res, error);
 		}
 	}
 
 	public delete = async (req: Request, res: Response): Promise<void> => {
 		try {
-			const id = Number(req.params.id);
-			const result = await this.service.delete(id, req.user!.id);
-
-			if (result !== 0) {
-				res.json({ message: "Preference template deleted", id });
-			} else {
-				res.status(404).json({ error: "Preference template not found" });
-			}
+			await this.service.deleteTemplate(Number(req.params.id), req.user!.id);
+			res.json({ message: "Template deleted successfully" });
 		} catch (error) {
-			res.status(500).json({ error: "Failed to delete preference template" });
+			this.handleError(res, error);
 		}
 	}
 
-	public publish = async (req: Request, res: Response): Promise<void> => {
+	public createTimeRange = async (req: Request, res: Response): Promise<void> => {
 		try {
-			const id = Number(req.params.id);
-			await this.service.publish(id, req.user!.id);
-
-			res.json({ message: "Preference template published", id });
-		} catch (error: any) {
-			if (error.message === 'Template not found or access denied') {
-				res.status(404).json({ error: "Template not found or access denied" });
-			} else if (error.message === 'Only draft templates can be published') {
-				res.status(400).json({ error: "Only draft templates can be published" });
-			} else {
-				res.status(500).json({ error: "Failed to publish template" });
-			}
+			const templateId = Number(req.params.templateId);
+			const id = await this.service.createTimeRange({
+				...req.body,
+				preference_id: templateId
+			}, req.user!.id);
+			res.status(201).json({ message: "Time range created successfully", id });
+		} catch (error) {
+			this.handleError(res, error);
 		}
 	}
 
-	public close = async (req: Request, res: Response): Promise<void> => {
+	public updateTimeRange = async (req: Request, res: Response): Promise<void> => {
 		try {
-			const id = Number(req.params.id);
-			await this.service.close(id, req.user!.id);
+			const rangeId = Number(req.params.rangeId);
+			await this.service.updateTimeRange({
+				id: rangeId,
+				...req.body
+			}, req.user!.id);
+			res.json({ message: "Time range updated successfully" });
+		} catch (error) {
+			this.handleError(res, error);
+		}
+	}
 
-			res.json({ message: "Preference template closed", id });
-		} catch (error: any) {
-			if (error.message === 'Template not found or access denied') {
-				res.status(404).json({ error: "Template not found or access denied" });
-			} else if (error.message === 'Only published templates can be closed') {
-				res.status(400).json({ error: "Only published templates can be closed" });
-			} else {
-				res.status(500).json({ error: "Failed to close template" });
-			}
+	public deleteTimeRange = async (req: Request, res: Response): Promise<void> => {
+		try {
+			const rangeId = Number(req.params.rangeId);
+			await this.service.deleteTimeRange(rangeId, req.user!.id);
+			res.json({ message: "Time range deleted successfully" });
+		} catch (error) {
+			this.handleError(res, error);
+		}
+	}
+
+	public createTimeSlot = async (req: Request, res: Response): Promise<void> => {
+		try {
+			const templateId = Number(req.params.templateId);
+			const id = await this.service.createTimeSlot({
+				...req.body,
+				template_id: templateId
+			}, req.user!.id);
+			res.status(201).json({ message: "Time slot created successfully", id });
+		} catch (error) {
+			this.handleError(res, error);
+		}
+	}
+
+	public createBulkTimeSlots = async (req: Request, res: Response): Promise<void> => {
+		try {
+			const templateId = Number(req.params.templateId);
+			const slots = req.body.slots.map((slot: Record<string, unknown>) => ({
+				...slot,
+				template_id: templateId
+			}));
+
+			await this.service.createBulkTimeSlots(slots, req.user!.id);
+			res.status(201).json({ message: "Time slots created successfully" });
+		} catch (error) {
+			this.handleError(res, error);
+		}
+	}
+
+	public updateTimeSlot = async (req: Request, res: Response): Promise<void> => {
+		try {
+			const slotId = Number(req.params.slotId);
+			await this.service.updateTimeSlot({
+				id: slotId,
+				...req.body
+			}, req.user!.id);
+			res.json({ message: "Time slot updated successfully" });
+		} catch (error) {
+			this.handleError(res, error);
+		}
+	}
+
+	public deleteTimeSlot = async (req: Request, res: Response): Promise<void> => {
+		try {
+			const slotId = Number(req.params.slotId);
+			await this.service.deleteTimeSlot(slotId, req.user!.id);
+			res.json({ message: "Time slot deleted successfully" });
+		} catch (error) {
+			this.handleError(res, error);
 		}
 	}
 }

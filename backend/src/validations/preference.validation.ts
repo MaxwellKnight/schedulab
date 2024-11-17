@@ -2,6 +2,7 @@ import Joi from 'joi';
 import { PreferenceTemplateData, TimeSlotData } from '../interfaces/dto/preferences.dto';
 import { TimeSlot } from '../models';
 
+// Base time range schema
 const timeRangeSchema = Joi.object({
 	id: Joi.number()
 		.integer()
@@ -32,8 +33,18 @@ const timeRangeSchema = Joi.object({
 		}),
 	created_at: Joi.date()
 		.optional()
-});
+})
+	.custom((value, helpers) => {
+		const { start_time, end_time } = value;
+		if (start_time >= end_time) {
+			return helpers.error('custom.timeRange', {
+				message: 'End time must be after start time'
+			});
+		}
+		return value;
+	});
 
+// Base time slot schema
 const timeSlotSchema = Joi.object<TimeSlotData>({
 	id: Joi.number()
 		.integer()
@@ -66,7 +77,8 @@ const timeSlotSchema = Joi.object<TimeSlotData>({
 		.optional()
 });
 
-const schema = Joi.object<PreferenceTemplateData>({
+// Preference template schema
+const preferenceTemplateSchema = Joi.object<PreferenceTemplateData>({
 	id: Joi.number()
 		.integer()
 		.optional()
@@ -112,7 +124,7 @@ const schema = Joi.object<PreferenceTemplateData>({
 			'any.only': 'Status must be one of: draft, published, closed',
 			'any.required': 'Status is required'
 		}),
-	created_by: Joi.number()
+	creator: Joi.number()
 		.integer()
 		.optional()
 		.messages({
@@ -130,24 +142,67 @@ const schema = Joi.object<PreferenceTemplateData>({
 		})
 })
 	.custom((value, helpers) => {
-		// Additional custom validation if needed
 		const { start_date, end_date, time_slots } = value;
-
-		// Validate that all time slot dates fall within the template date range
 		if (time_slots?.length) {
 			const invalidSlots = time_slots.filter((slot: TimeSlot) => {
 				const slotDate = new Date(slot.date);
 				return slotDate < start_date || slotDate > end_date;
 			});
-
 			if (invalidSlots.length) {
 				return helpers.error('custom.timeSlots', {
 					message: 'All time slots must fall within the template date range'
 				});
 			}
 		}
-
 		return value;
 	});
 
-export { schema as preferenceTemplateSchema };
+// Bulk time slot creation schema
+const bulkTimeSlotSchema = Joi.object({
+	slots: Joi.array()
+		.items(Joi.object({
+			date: Joi.date()
+				.required()
+				.messages({
+					'date.base': 'Date must be a valid date',
+					'any.required': 'Date is required'
+				}),
+			time_range_id: Joi.number()
+				.integer()
+				.required()
+				.messages({
+					'number.base': 'Time range ID must be an integer',
+					'any.required': 'Time range ID is required'
+				})
+		}))
+		.min(1)
+		.required()
+		.messages({
+			'array.min': 'At least one time slot is required',
+			'array.base': 'Slots must be an array of time slot objects',
+			'any.required': 'Slots array is required'
+		})
+})
+	.custom((value, helpers) => {
+		const { slots } = value;
+		// Check for duplicate date/time_range combinations
+		const seen = new Set();
+		const duplicates = slots.filter((slot: TimeSlot) => {
+			const key = `${slot.date}_${slot.time_range_id}`;
+			return seen.size === seen.add(key).size;
+		});
+
+		if (duplicates.length) {
+			return helpers.error('custom.duplicates', {
+				message: 'Duplicate date and time range combinations are not allowed'
+			});
+		}
+		return value;
+	});
+
+export {
+	preferenceTemplateSchema,
+	timeRangeSchema,
+	timeSlotSchema,
+	bulkTimeSlotSchema
+};

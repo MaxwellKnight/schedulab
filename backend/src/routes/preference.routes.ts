@@ -1,21 +1,31 @@
 import Router from "express";
 import { makeSQL } from "../configs/db.config";
 import { makeValidator } from "../middlewares/middlewares";
-import { PreferenceTemplateService, UserService } from "../services";
-import { AuthController, PreferenceTemplateController } from "../controllers";
-import { PreferenceTemplateRepository, UserRepository } from "../repositories";
-import { preferenceTemplateSchema } from "../validations/preference.validation";
+import { PreferenceService, UserService } from "../services";
+import { AuthController, PreferenceController } from "../controllers";
+import { PreferenceRepository, UserRepository } from "../repositories";
+import {
+	preferenceTemplateSchema,
+	timeRangeSchema,
+	timeSlotSchema,
+	bulkTimeSlotSchema
+} from "../validations/preference.validation";
 
-const repository = new PreferenceTemplateRepository(makeSQL());
-const service = new PreferenceTemplateService(repository);
-const controller = new PreferenceTemplateController(service);
-const validator = makeValidator(preferenceTemplateSchema);
+const repository = new PreferenceRepository(makeSQL());
+const service = new PreferenceService(repository);
+const controller = new PreferenceController(service);
 const userRepository = new UserRepository(makeSQL());
 const userService = new UserService(userRepository);
 const authController = new AuthController(userService);
 
+const templateValidator = makeValidator(preferenceTemplateSchema);
+const timeRangeValidator = makeValidator(timeRangeSchema);
+const timeSlotValidator = makeValidator(timeSlotSchema);
+const bulkTimeSlotValidator = makeValidator(bulkTimeSlotSchema);
+
 const router = Router();
 
+// Template routes
 router.route("/")
 	.get(
 		authController.authenticate,
@@ -23,7 +33,7 @@ router.route("/")
 	)
 	.post(
 		authController.authenticate,
-		validator,
+		templateValidator,
 		controller.create
 	);
 
@@ -33,6 +43,12 @@ router.route("/team/:teamId")
 		controller.getByTeamId
 	);
 
+router.route("/dates")
+	.get(
+		authController.authenticate,
+		controller.getByDates
+	);
+
 router.route("/:id")
 	.get(
 		authController.authenticate,
@@ -40,7 +56,7 @@ router.route("/:id")
 	)
 	.put(
 		authController.authenticate,
-		validator,
+		templateValidator,
 		controller.update
 	)
 	.delete(
@@ -48,22 +64,62 @@ router.route("/:id")
 		controller.delete
 	);
 
-router.route("/:id/publish")
+// Template status management
+//router.route("/:id/publish")
+//	.post(
+//		authController.authenticate,
+//		controller.publish
+//	);
+//
+//router.route("/:id/close")
+//	.post(
+//		authController.authenticate,
+//		controller.close
+//	);
+
+// Time range routes
+router.route("/:templateId/time-ranges")
 	.post(
 		authController.authenticate,
-		controller.publish
+		timeRangeValidator,
+		controller.createTimeRange
 	);
 
-router.route("/:id/close")
+router.route("/:templateId/time-ranges/:rangeId")
+	.put(
+		authController.authenticate,
+		timeRangeValidator,
+		controller.updateTimeRange
+	)
+	.delete(
+		authController.authenticate,
+		controller.deleteTimeRange
+	);
+
+// Time slot routes
+router.route("/:templateId/time-slots")
 	.post(
 		authController.authenticate,
-		controller.close
+		timeSlotValidator,
+		controller.createTimeSlot
 	);
 
-router.route("/dates/:start_date/:end_date")
-	.get(
+router.route("/:templateId/time-slots/bulk")
+	.post(
 		authController.authenticate,
-		controller.getByDates
+		bulkTimeSlotValidator,
+		controller.createBulkTimeSlots
+	);
+
+router.route("/:templateId/time-slots/:slotId")
+	.put(
+		authController.authenticate,
+		timeSlotValidator,
+		controller.updateTimeSlot
+	)
+	.delete(
+		authController.authenticate,
+		controller.deleteTimeSlot
 	);
 
 export default router;

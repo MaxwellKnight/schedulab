@@ -5,7 +5,7 @@ export interface PreferenceTemplate {
 	start_date: Date;
 	end_date: Date;
 	status: 'draft' | 'published' | 'closed';
-	created_by: number;
+	creator: number;
 	created_at: Date;
 	updated_at: Date;
 	time_slots?: TimeSlot[];
@@ -32,4 +32,11 @@ export interface TimeSlot {
 export interface DailyTimeSlots {
 	date: Date;
 	time_slots: TimeSlot[];
+}
+
+export interface CreateMemberPreferenceData {
+	template_id: number;
+	user_id: number;
+	status?: 'draft' | 'submitted';
+	notes?: string | null;
 }
