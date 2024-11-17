@@ -17,7 +17,7 @@ import {
 import { format } from "date-fns";
 import { Plus, X, ChevronLeft, ChevronRight, Copy, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { DailyPreference } from "./PreferencesDrawer";
+import { DailyPreference } from './types';
 
 interface PreferencesApplyProps {
 	timeRanges: DailyPreference[];

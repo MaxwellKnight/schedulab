@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { PreferencesDrawer } from './PreferencesDrawer';
 import { Clock } from 'lucide-react';
 import { Greeting } from './Greeting';
+import { PreferencesDrawer } from '@/components/preferences/PreferencesDrawer';
 
 interface WelcomeHeaderProps {
 	userName?: string;
