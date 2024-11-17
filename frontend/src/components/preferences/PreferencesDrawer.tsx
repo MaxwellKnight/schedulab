@@ -34,7 +34,6 @@ export const PreferencesDrawer: React.FC<PreferencesDrawerProps> = ({ onSuccess 
 		<Drawer>
 			<DrawerTrigger asChild>
 				<AnimatedGradientButton
-					onClick={() => console.log("preferences...")}
 					disabled={false}
 					icon={Settings}
 					text="Preferences"

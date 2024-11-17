@@ -3,10 +3,11 @@ import { DateRangePicker } from "../DateRangePicker";
 import PreferencesApply from "./PreferencesApply";
 import { DateRange } from "react-day-picker";
 import { DailyPreference, PreferenceRange } from "./types";
+import { Dispatch, SetStateAction } from "react";
 
 export interface PreferencesContentProps {
 	range: DateRange | undefined
-	setRange: (range: DateRange | undefined) => void
+	setRange: Dispatch<SetStateAction<DateRange | undefined>>
 	timeRanges: DailyPreference[]
 	onAddTimeRange: (date: Date) => void
 	onRemoveTimeRange: (date: Date, index: number) => void
