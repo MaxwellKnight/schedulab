@@ -8,29 +8,35 @@ import {
 	DrawerFooter,
 } from "@/components/ui/drawer"
 import AnimatedGradientButton from "@/components/AnimatedButton"
-import { Settings, Loader2, Check } from "lucide-react"
+import { Settings, Loader2, Check, AlertCircle } from "lucide-react"
 import { DateRangePicker } from "@/components/DateRangePicker"
 import { useEffect, useState } from "react"
 import { DateRange } from "react-day-picker"
-import { addDays, eachDayOfInterval } from "date-fns"
+import { addDays, eachDayOfInterval, format } from "date-fns"
 import PreferencesApply from "./PreferencesApply"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import axios from "axios"
+import { useTeam } from "@/context"
 
 export interface DailyPreference {
 	column: Date;
 	ranges: { start_time: string; end_time: string }[];
 }
 
-export const PreferencesDrawer: React.FC = () => {
+interface PreferencesDrawerProps {
+	onSuccess?: () => void;
+}
+
+export const PreferencesDrawer: React.FC<PreferencesDrawerProps> = ({ onSuccess }) => {
 	const [timeRanges, setTimeRanges] = useState<DailyPreference[]>([]);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isSuccess, setIsSuccess] = useState(false);
-	const [range, setRange] = useState<DateRange | undefined>({
-		from: new Date(),
-		to: addDays(new Date(), 7),
-	});
+	const [error, setError] = useState<string | null>(null);
+	const [range, setRange] = useState<DateRange | undefined>({ from: new Date(), to: addDays(new Date(), 7) });
+	const { selectedTeam } = useTeam();
 
 	useEffect(() => {
 		if (!(range && range.from && range.to)) return;
@@ -96,12 +102,95 @@ export const PreferencesDrawer: React.FC = () => {
 	}
 
 	const handleSubmit = async () => {
+		if (!range?.from || !range?.to) return;
 		setIsSubmitting(true);
-		// Simulate API call
-		await new Promise(resolve => setTimeout(resolve, 1000));
-		setIsSubmitting(false);
-		setIsSuccess(true);
-		setTimeout(() => setIsSuccess(false), 2000);
+		setError(null);
+
+		try {
+			// 1. Create template
+			const templateResponse = await axios.post('/preferences', {
+				name: `Preferences ${format(range.from, 'MMM d')} - ${format(range.to, 'MMM d, yyyy')}`,
+				team_id: selectedTeam?.id,
+				status: 'draft',
+				start_date: format(range.from, 'yyyy-MM-dd'),
+				end_date: format(range.to, 'yyyy-MM-dd')
+			});
+
+			const templateId = templateResponse.data.id;
+
+			// 2. Create time ranges first
+			const timeRangePromises = timeRanges.flatMap(day =>
+				day.ranges.map(range => ({
+					start_time: range.start_time,
+					end_time: range.end_time,
+					preference_id: templateId
+				}))
+			).filter((range, index, self) =>
+				// Remove duplicates based on start and end time
+				index === self.findIndex(r =>
+					r.start_time === range.start_time &&
+					r.end_time === range.end_time
+				)
+			).map(range =>
+				axios.post(`/preferences/${templateId}/time-ranges`, range)
+			);
+
+			const createdRanges = await Promise.all(timeRangePromises);
+
+			// 3. Create a lookup map using start_time and end_time as key
+			const rangeIdMap = new Map<string, number>();
+			createdRanges.forEach(response => {
+				const { range, id } = response.data;
+				const key = `${range.start_time}-${range.end_time}`;
+				rangeIdMap.set(key, id);
+			});
+			console.table(rangeIdMap);
+
+			// 4. Create time slots using the lookup map
+			const slots = timeRanges.flatMap(day =>
+				day.ranges.map(range => {
+					const key = `${range.start_time}-${range.end_time}`;
+					const timeRangeId = rangeIdMap.get(key);
+
+					if (!timeRangeId) {
+						throw new Error(`Could not find time range ID for ${key}`);
+					}
+
+					return {
+						date: format(day.column, 'yyyy-MM-dd'),
+						time_range_id: timeRangeId
+					};
+				})
+			);
+
+			if (slots.length > 0) {
+				await axios.post(
+					`/preferences/${templateId}/time-slots/bulk`,
+					{ slots }
+				);
+			}
+
+			setIsSuccess(true);
+			onSuccess?.();
+			setTimeout(() => setIsSuccess(false), 2000);
+
+		} catch (err) {
+			if (axios.isAxiosError(err)) {
+				const errorMessage = err.response?.data?.errors?.[0]?.message ||
+					err.response?.data?.message ||
+					err.message;
+				setError(errorMessage);
+				console.error('API Error:', {
+					status: err.response?.status,
+					data: err.response?.data,
+					message: errorMessage
+				});
+			} else {
+				setError(err instanceof Error ? err.message : 'An error occurred');
+			}
+		} finally {
+			setIsSubmitting(false);
+		}
 	};
 
 	const hasTimeRanges = timeRanges.some(day => day.ranges.length > 0);
@@ -159,6 +248,13 @@ export const PreferencesDrawer: React.FC = () => {
 					</motion.div>
 
 					<DrawerFooter className="w-full max-w-md mx-auto">
+						{error && (
+							<Alert variant="destructive" className="mb-4">
+								<AlertCircle className="h-4 w-4" />
+								<AlertDescription>{error}</AlertDescription>
+							</Alert>
+						)}
+
 						<motion.div
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}

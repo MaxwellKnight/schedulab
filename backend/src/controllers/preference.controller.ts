@@ -158,7 +158,7 @@ export class PreferenceController {
 				...req.body,
 				preference_id: templateId
 			}, req.user!.id);
-			res.status(201).json({ message: "Time range created successfully", id });
+			res.status(201).json({ message: "Time range created successfully", id, range: req.body });
 		} catch (error) {
 			this.handleError(res, error);
 		}

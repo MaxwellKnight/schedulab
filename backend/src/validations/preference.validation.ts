@@ -18,14 +18,14 @@ const timeRangeSchema = Joi.object({
 			'any.required': 'Preference ID is required'
 		}),
 	start_time: Joi.string()
-		.pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
+		.pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
 		.required()
 		.messages({
 			'string.pattern.base': 'Start time must be in HH:mm:ss format',
 			'any.required': 'Start time is required'
 		}),
 	end_time: Joi.string()
-		.pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
+		.pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
 		.required()
 		.messages({
 			'string.pattern.base': 'End time must be in HH:mm:ss format',

@@ -145,7 +145,7 @@ CREATE TABLE preference_templates (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (team_id) REFERENCES teams(id),
-  FOREIGN KEY (created_by) REFERENCES users(id),
+  FOREIGN KEY (creator) REFERENCES users(id),
   UNIQUE (team_id, start_date, end_date)
 );
 
@@ -198,7 +198,6 @@ CREATE TABLE preference_selections (
   UNIQUE (member_preference_id, template_time_slot_id)
 );
 
-
 -- Table: vacations
 CREATE TABLE vacations (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -241,6 +240,59 @@ CREATE TABLE user_shifts (
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (shift_id) REFERENCES shifts(id),
   UNIQUE (user_id, shift_id)
+);
+
+-- Table: attendance
+CREATE TABLE attendance (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  shift_id INT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (shift_id) REFERENCES shifts(id)
+);
+
+-- Table: late
+CREATE TABLE late (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  shift_id INT NOT NULL,
+  comment VARCHAR(1024) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (shift_id) REFERENCES shifts(id)
+);
+
+-- Table: events
+CREATE TABLE events (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  team_id INT NOT NULL,
+  event_participants INT,
+  start_time TIMESTAMP NOT NULL,
+  end_time TIMESTAMP NOT NULL,
+  location_id INT,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (team_id) REFERENCES teams(id)
+);
+
+-- Table: event_participants
+CREATE TABLE event_participants (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  event_id INT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (event_id) REFERENCES events(id)
+);
+
+-- Table: locations
+CREATE TABLE locations (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  event_id INT NOT NULL,
+  longitude DECIMAL(9,6),
+  latitude DECIMAL(9,6),
+  FOREIGN KEY (event_id) REFERENCES events(id)
 );
 
 -- Table: remarks
