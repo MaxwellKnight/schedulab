@@ -1,17 +1,20 @@
 import { PreferencesHeader } from "./PreferencesHeader";
 import { PreferencesContent } from "./PreferencesContent";
 import { PreferencesFooter } from "./PreferencesFooter";
-import { usePreferences, usePreferencesState } from "@/hooks";
+import { usePreferences, usePreferencesState, useTeam } from "@/hooks";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import AnimatedGradientButton from "../AnimatedButton";
 import { motion } from "framer-motion";
 import { Settings } from "lucide-react";
+import PreferenceSelector from "./PreferenceSelector";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export interface PreferencesDrawerProps {
-	onSuccess?: () => void
+	onSuccess?: () => void;
 }
 
 export const PreferencesDrawer: React.FC<PreferencesDrawerProps> = ({ onSuccess }) => {
+	const { isAdmin } = useTeam();
 	const {
 		timeRanges,
 		range,
@@ -41,30 +44,46 @@ export const PreferencesDrawer: React.FC<PreferencesDrawerProps> = ({ onSuccess 
 			</DrawerTrigger>
 			<DrawerContent>
 				<motion.div
-					className="grid place-items-center w-full"
+					className="flex flex-col h-[calc(90vh-2rem)] px-2 mx-auto w-full"
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.3 }}
 				>
-					<PreferencesHeader />
+					<div className="flex-shrink-0">
+						<PreferencesHeader />
+					</div>
 
-					<PreferencesContent
-						range={range}
-						setRange={setRange}
-						timeRanges={timeRanges}
-						onAddTimeRange={handleAddTimeRange}
-						onRemoveTimeRange={handleRemoveTimeRange}
-						onUpdateTimeRange={handleUpdateTimeRange}
-						onApplyToAll={handleApplyAll}
-					/>
+					<div className="flex-1 min-h-0"> {/* This ensures proper scroll containment */}
+						<ScrollArea className="h-full">
+							<div className="px-4 py-2">
+								{isAdmin ? (
+									<PreferencesContent
+										range={range}
+										setRange={setRange}
+										timeRanges={timeRanges}
+										onAddTimeRange={handleAddTimeRange}
+										onRemoveTimeRange={handleRemoveTimeRange}
+										onUpdateTimeRange={handleUpdateTimeRange}
+										onApplyToAll={handleApplyAll}
+									/>
+								) : (
+									<PreferenceSelector />
+								)}
+							</div>
+						</ScrollArea>
+					</div>
 
-					<PreferencesFooter
-						error={error}
-						isSubmitting={isSubmitting}
-						isSuccess={isSuccess}
-						hasTimeRanges={hasTimeRanges}
-						onSubmit={handleSubmit}
-					/>
+					{isAdmin && (
+						<div className="flex-shrink-0 border-t bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+							<PreferencesFooter
+								error={error}
+								isSubmitting={isSubmitting}
+								isSuccess={isSuccess}
+								hasTimeRanges={hasTimeRanges}
+								onSubmit={handleSubmit}
+							/>
+						</div>
+					)}
 				</motion.div>
 			</DrawerContent>
 		</Drawer>

@@ -19,6 +19,7 @@ interface Team {
 
 interface TeamContextType {
 	teams: Team[] | null;
+	isAdmin: boolean;
 	selectedTeam: Team | null;
 	setSelectedTeam: (team: Team) => void;
 	loading: boolean;
@@ -32,6 +33,7 @@ const TeamContext = createContext<TeamContextType | undefined>(undefined);
 
 export const TeamProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 	const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+	const [isAdmin, setIsAdmin] = useState(false);
 	const { user } = useAuth();
 	const {
 		data: teams = [],
@@ -44,15 +46,17 @@ export const TeamProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 		if (teams && teams.length > 0 && !selectedTeam) {
 			setSelectedTeam(teams[0]);
 		}
-	}, [teams, selectedTeam]);
+	}, [teams, selectedTeam, user]);
 
 	useEffect(() => {
 		if (selectedTeam) {
 			localStorage.setItem('selectedTeam', JSON.stringify(selectedTeam));
+			if (selectedTeam.creator_id === user?.id) setIsAdmin(true);
+			else setIsAdmin(false);
 		}
 
 		return () => localStorage.removeItem('selectedTeam');
-	}, [selectedTeam]);
+	}, [selectedTeam, user]);
 
 	useEffect(() => {
 		const savedTeam = localStorage.getItem('selectedTeam');
@@ -103,7 +107,8 @@ export const TeamProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 		error,
 		refetchTeams,
 		createTeam,
-		joinTeam
+		joinTeam,
+		isAdmin,
 	};
 
 	return (
