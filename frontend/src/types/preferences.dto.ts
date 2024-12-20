@@ -1,18 +1,27 @@
-export interface PreferenceData {
+export interface TimeRangePreferences {
 	id: number;
-	user_id: number;
-	start_date: Date;
-	end_date: Date;
-	daily_preferences: DailyPreferenceData[];
-	notes?: string | null;
-	created_at: Date;
+	preference_id: number;
+	start_time: string;
+	end_time: string;
+	created_at: string;
 }
 
-export interface DailyPreferenceData {
+export interface TimeSlot {
 	id: number;
-	date: Date;
-	morning: number;
-	noon: number;
-	night: number;
-	created_at: Date;
+	template_id: number;
+	date: string;
+	time_range_id: number;
+	created_at: string;
+	time_range: TimeRangePreferences;
+}
+
+export interface DaySchedule {
+	date: string;
+	slots: TimeSlot[];
+}
+
+export interface SchedulePreferences {
+	id: number;
+	name: string;
+	time_slots: DaySchedule[];
 }
