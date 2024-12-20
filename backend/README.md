@@ -12,7 +12,7 @@ npm install
 cp .env.example .env
 
 # Set up database
-mysql -u root -p shifty < dump/dump.sql
+mysql -u root -p schedula < dump/dump.sql
 
 # Run development server
 npm run dev
@@ -173,5 +173,3 @@ npm run dev
 - Application uses JWT for authentication
 - Access and refresh tokens are configured with the same secret (consider using different secrets in production)
 - Default database has no password set (consider adding password for production)
-
-Need help? Check the issues tab or contact the maintainer.
