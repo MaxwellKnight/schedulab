@@ -53,7 +53,7 @@ Intelligent shift scheduling system that combines automated scheduling with pref
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/maxwellknight/schedula.git
+git clone https://github.com/maxwellknight/schedulab.git
 cd schedula
 ```
 
