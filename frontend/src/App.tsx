@@ -1,11 +1,23 @@
 import { AuthProvider } from "./context/AuthContext";
 import { TeamProvider } from "./context/TeamContext";
-import { ReactNode } from 'react';
+import { ReactNode } from "react";
 import { useAuth } from "./hooks/useAuth/useAuth";
-import { createBrowserRouter, RouterProvider, Navigate, useLocation } from "react-router-dom";
-import { ScheduleBuilder, ErrorBoundary, Schedule, Login, Home, Members } from "./pages";
-import AuthCallback from './pages/Login/AuthCallback';
-import { setupAxiosAuth } from './utils/authInterceptor';
+import {
+	createBrowserRouter,
+	Navigate,
+	RouterProvider,
+	useLocation,
+} from "react-router-dom";
+import {
+	ErrorBoundary,
+	Home,
+	Login,
+	Members,
+	Schedule,
+	ScheduleBuilder,
+} from "./pages";
+import AuthCallback from "./pages/Login/AuthCallback";
+import { setupAxiosAuth } from "./utils/authInterceptor";
 import Layout from "./components/layout/Layout";
 import { ScheduleProvider } from "./context";
 
@@ -27,12 +39,12 @@ const AppRoutes: React.FC = () => {
 		{
 			path: "/login",
 			element: <Login />,
-			errorElement: <ErrorBoundary />
+			errorElement: <ErrorBoundary />,
 		},
 		{
 			path: "/auth/callback",
 			element: <AuthCallback />,
-			errorElement: <ErrorBoundary />
+			errorElement: <ErrorBoundary />,
 		},
 		{
 			path: "/",
@@ -47,24 +59,25 @@ const AppRoutes: React.FC = () => {
 			children: [
 				{
 					index: true,
-					element: <Home />
+					element: <Home />,
 				},
 				{
 					path: "build",
-					element: <ScheduleBuilder />
+					element: <ScheduleBuilder />,
 				},
 				{
 					path: "members",
-					element: <Members />
+					element: <Members />,
 				},
 				{
 					path: "schedule",
-					element:
+					element: (
 						<ScheduleProvider>
 							<Schedule />
 						</ScheduleProvider>
+					),
 				},
-			]
+			],
 		},
 	]);
 

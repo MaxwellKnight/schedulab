@@ -36,6 +36,7 @@
         "clsx": "^2.1.1",
         "cmdk": "^1.0.0",
         "date-fns": "^2.30.0",
+        "esbuild": "^0.24.2",
         "framer-motion": "^11.11.10",
         "lucide-react": "^0.452.0",
         "react": "^18.3.1",
@@ -67,6 +68,6 @@
         "rimraf": "^4.4.0",
         "tailwindcss": "^3.4.13",
         "typescript": "^5.2.2",
-        "vite": "^5.3.1"
+        "vite": "^6.0.11"
     }
 }
