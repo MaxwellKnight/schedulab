@@ -18,7 +18,7 @@ Intelligent shift scheduling system that combines automated scheduling with pref
   </p>
 </div>
 
-## ✨ Key Features
+## Key Features
 
 - **Smart Scheduling**
   - Constraint-based optimization
@@ -37,19 +37,17 @@ Intelligent shift scheduling system that combines automated scheduling with pref
   - Mobile-friendly design
   - Clear schedule visualization
 
-## 🏗️ Tech Stack
+## Tech Stack
 
 - **Backend**
   - Node.js + TypeScript
   - MySQL
-  - Express.js
-  
+
 - **Frontend**
   - React + TypeScript
   - Tailwind CSS
-  - shadcn/ui components
 
-## 🚀 Quick Start
+## Quick Start
 
 1. **Clone the repository**
 ```bash
@@ -65,19 +63,6 @@ mv .env.example .env
 4. **Start with Docker**
 ```bash
 docker-compose up
-```
-
-5. **Or start services individually**
-```bash
-# Terminal 1 - Backend
-cd backend
-npm install
-npm run dev
-
-# Terminal 2 - Frontend
-cd frontend
-npm install
-npm run dev
 ```
 
 See individual README files in [backend](./backend/README.md) and [frontend](./frontend/README.md) directories for detailed setup instructions.
@@ -105,7 +90,7 @@ See individual README files in [backend](./backend/README.md) and [frontend](./f
 
 - Node.js 16+
 - MySQL 9.0.1+
-- Docker (optional)
+- Docker
 
 ## 📖 Documentation
 
@@ -113,38 +98,11 @@ See individual README files in [backend](./backend/README.md) and [frontend](./f
   - API endpoints
   - Database schema
   - Authentication system
-  
+
 - [Frontend Documentation](./frontend/README.md)
   - Component structure
   - State management
   - Routing system
-
-## 🛠️ Development
-
-### Environment Setup
-1. Copy example environment files
-```bash
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
-```
-
-2. Update environment variables as needed
-
-### Database Setup
-```bash
-cd backend
-# Run database setup
-mysql -u <username> -p < dump/dump.sql
-```
-
-## 📝 Roadmap
-
-- [ ] Add comprehensive test suite
-- [ ] Implement real-time notifications
-- [ ] Add schedule export options
-- [ ] Enhance scheduling algorithm
-- [ ] Add advanced reporting
-- [ ] Mobile app development
 
 ## 📫 Contact
 
