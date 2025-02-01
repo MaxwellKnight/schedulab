@@ -1,14 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useState } from 'react';
-import { TimeSlot } from '@/types';
+import { SchedulePreferences, TimeSlot, DaySchedule, TimeRangePreferences } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Calendar, ChevronDown, X, Info, Check, MessageSquare } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from "@/components/ui/tooltip";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useTeam } from '@/context';
+import { useAuthenticatedFetch } from '@/hooks';
 
 interface TimeSlotButtonProps {
 	slot: TimeSlot;
@@ -21,13 +23,35 @@ interface NotesSummaryProps {
 	notes: Record<number, string>;
 	selectedSlots: Set<number>;
 	formatDate: (date: string) => string;
+	formatTime: (date: string) => string;
 	onNoteDelete: (slotId: number) => void;
 	findSlotById: (slotId: number) => TimeSlot | null;
+}
+
+interface APISchedulePreferences {
+	id: number;
+	team_id: number;
+	name: string;
+	start_date: string;
+	end_date: string;
+	status: string;
+	creator: number;
+	created_at: string;
+	updated_at: string;
+	time_slots: {
+		id: number;
+		template_id: number;
+		date: string;
+		time_range_id: number;
+		created_at: string;
+		time_range: TimeRangePreferences;
+	}[];
 }
 
 const NotesSummary: React.FC<NotesSummaryProps> = ({
 	notes,
 	formatDate,
+	formatTime,
 	onNoteDelete,
 	findSlotById
 }) => {
@@ -65,7 +89,7 @@ const NotesSummary: React.FC<NotesSummaryProps> = ({
 											{formatDate(slot.date)}
 										</span>
 										<span className="text-xs text-indigo-600">
-											{formatDate(slot.time_range.start_time)} - {formatDate(slot.time_range.end_time)}
+											{formatTime(slot.time_range.start_time)} - {formatTime(slot.time_range.end_time)}
 										</span>
 									</div>
 									<p className="text-sm text-indigo-700">{note}</p>
@@ -93,13 +117,57 @@ const PreferenceSelector = () => {
 	const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set());
 	const [notes, setNotes] = useState<Record<number, string>>({});
 	const [hoveredSlot, setHoveredSlot] = useState<number | null>(null);
+	const { selectedTeam } = useTeam();
+	const {
+		data: apiPreferences,
+		loading
+	} = useAuthenticatedFetch<APISchedulePreferences[]>(`preferences/team/${selectedTeam?.id}`);
+
+	// Transform API data to match our types
+	const preferences = useMemo(() => {
+		if (!apiPreferences?.length) return null;
+
+		const groupedSlots = apiPreferences[0].time_slots.reduce((acc, slot) => {
+			const date = slot.date.split('T')[0];
+			if (!acc[date]) {
+				acc[date] = [];
+			}
+			acc[date].push(slot);
+			return acc;
+		}, {} as Record<string, TimeSlot[]>);
+
+		const daySchedules: DaySchedule[] = Object.entries(groupedSlots).map(([date, slots]) => ({
+			date,
+			slots: slots.sort((a, b) => a.time_range.start_time.localeCompare(b.time_range.start_time))
+		}));
+
+		return {
+			id: apiPreferences[0].id,
+			name: apiPreferences[0].name,
+			time_slots: daySchedules.sort((a, b) => a.date.localeCompare(b.date))
+		} as SchedulePreferences;
+	}, [apiPreferences]);
 
 	const findSlotById = (slotId: number): TimeSlot | null => {
-		for (const daySlots of scheduleData.time_slots) {
-			const slot = daySlots.slots.find(s => s.id === slotId);
+		if (!preferences?.time_slots) return null;
+		for (const daySchedule of preferences.time_slots) {
+			const slot = daySchedule.slots.find(s => s.id === slotId);
 			if (slot) return slot;
 		}
 		return null;
+	};
+
+	const getUniqueTimeRanges = () => {
+		if (!preferences?.time_slots) return [];
+
+		const allTimeRanges = preferences.time_slots.flatMap(day =>
+			day.slots.map(slot => `${slot.time_range.start_time}-${slot.time_range.end_time}`)
+		);
+
+		return Array.from(new Set(allTimeRanges)).map(timeRange => {
+			const [start_time, end_time] = timeRange.split('-');
+			return { start_time, end_time };
+		});
 	};
 
 	const deleteNote = (slotId: number): void => {
@@ -108,64 +176,6 @@ const PreferenceSelector = () => {
 			delete newNotes[slotId];
 			return newNotes;
 		});
-	};
-
-	const scheduleData = {
-		"id": 1,
-		"name": "Preferences Nov 20 - Nov 27, 2024",
-		"time_slots": [
-			...Array.from({ length: 8 }, (_, i) => {
-				const date = new Date('2024-11-20');
-				date.setDate(date.getDate() + i);
-				return {
-					date: date.toISOString().split('T')[0],
-					slots: [
-						{
-							id: i * 3 + 1,
-							template_id: 1,
-							date: date.toISOString(),
-							time_range_id: 1,
-							created_at: new Date().toISOString(),
-							time_range: {
-								id: 1,
-								preference_id: 1,
-								start_time: "06:00:00",
-								end_time: "15:00:00",
-								created_at: new Date().toISOString()
-							}
-						},
-						{
-							id: i * 3 + 2,
-							template_id: 1,
-							date: date.toISOString(),
-							time_range_id: 2,
-							created_at: new Date().toISOString(),
-							time_range: {
-								id: 2,
-								preference_id: 1,
-								start_time: "15:00:00",
-								end_time: "22:00:00",
-								created_at: new Date().toISOString()
-							}
-						},
-						{
-							id: i * 3 + 3,
-							template_id: 1,
-							date: date.toISOString(),
-							time_range_id: 3,
-							created_at: new Date().toISOString(),
-							time_range: {
-								id: 3,
-								preference_id: 1,
-								start_time: "20:00:00",
-								end_time: "23:00:00",
-								created_at: new Date().toISOString()
-							}
-						}
-					]
-				};
-			})
-		]
 	};
 
 	const formatTime = (timeStr: string): string => {
@@ -227,7 +237,7 @@ const PreferenceSelector = () => {
 
 		useEffect(() => {
 			setLocalNote(notes[slot.id] || '');
-		}, [slot.id]);
+		}, [slot.id,]);
 
 		const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 			e.stopPropagation();
@@ -260,13 +270,13 @@ const PreferenceSelector = () => {
 					onMouseEnter={() => setHoveredSlot(slot.id)}
 					onMouseLeave={() => setHoveredSlot(null)}
 					className={`
-          relative w-full p-3 rounded-lg transition-all duration-300 transform
-          ${isSelected
+            relative w-full p-3 rounded-lg transition-all duration-300 transform
+            ${isSelected
 							? 'bg-indigo-50 border-2 border-indigo-500 shadow-md scale-105'
 							: 'bg-white border border-indigo-200 hover:border-indigo-300 hover:bg-indigo-50/50 hover:scale-105'
 						}
-          ${isHovered ? 'shadow-lg' : ''}
-        `}
+            ${isHovered ? 'shadow-lg' : ''}
+          `}
 				>
 					<div className="flex flex-col space-y-2">
 						<div className="flex items-center justify-between">
@@ -282,9 +292,9 @@ const PreferenceSelector = () => {
 						<Badge
 							variant={isSelected ? "default" : "secondary"}
 							className={`
-              w-full py-1.5 transition-colors duration-300 flex items-center justify-center gap-2
-              ${isSelected ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-indigo-100 text-indigo-700'}
-            `}
+                w-full py-1.5 transition-colors duration-300 flex items-center justify-center gap-2
+                ${isSelected ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-indigo-100 text-indigo-700'}
+              `}
 						>
 							{isSelected && <Check className="w-4 h-4" />}
 							{isSelected ? 'Selected' : 'Available'}
@@ -296,7 +306,7 @@ const PreferenceSelector = () => {
 					<Popover
 						open={isPopoverOpen}
 						onOpenChange={setIsPopoverOpen}
-						modal={true}  // This prevents the popover from closing on hover out
+						modal={true}
 					>
 						<PopoverTrigger asChild>
 							<button
@@ -345,11 +355,11 @@ const PreferenceSelector = () => {
 										onClick={handleSaveNote}
 										disabled={!localNote.trim()}
 										className={`
-                    px-3 py-1.5 text-sm text-white rounded-md transition-colors
-                    ${localNote.trim()
+                      px-3 py-1.5 text-sm text-white rounded-md transition-colors
+                      ${localNote.trim()
 												? 'bg-indigo-600 hover:bg-indigo-700'
 												: 'bg-indigo-300 cursor-not-allowed'}
-                  `}
+                    `}
 									>
 										Save Note
 									</button>
@@ -379,97 +389,125 @@ const PreferenceSelector = () => {
 		);
 	};
 
-	const DesktopView = () => (
-		<div className="hidden lg:block">
-			<Table>
-				<TableHeader className="bg-indigo-50/50 sticky top-0 z-10">
-					<TableRow>
-						<TableHead className="w-40 text-indigo-900">Shift Times</TableHead>
-						{scheduleData.time_slots.map(({ date }) => (
-							<TableHead key={date} className="text-center text-indigo-900">
-								<TooltipProvider>
-									<Tooltip>
-										<TooltipTrigger>
-											<span className="cursor-help border-dotted border-indigo-400">
-												{formatDate(date)}
-											</span>
-										</TooltipTrigger>
-										<TooltipContent>
-											<p>Click time slot to select</p>
-										</TooltipContent>
-									</Tooltip>
-								</TooltipProvider>
-							</TableHead>
-						))}
-					</TableRow>
-				</TableHeader>
-				<TableBody>
-					{['Morning (6 AM - 3 PM)', 'Afternoon (3 PM - 10 PM)', 'Evening (8 PM - 11 PM)'].map((shift, shiftIndex) => (
-						<TableRow key={shift}>
-							<TableCell className="font-medium whitespace-nowrap text-indigo-700">
-								{shift}
-							</TableCell>
-							{scheduleData.time_slots.map(({ date, slots }) => (
-								<TableCell key={date} className="p-2">
-									<TimeSlotButton
-										slot={slots[shiftIndex]}
-										date={date}
-										onSelect={() => { }}
-									/>
-								</TableCell>
+	const DesktopView = () => {
+		if (!preferences?.time_slots) return null;
+
+		const timeRanges = getUniqueTimeRanges();
+
+		return (
+			<div className="hidden lg:block">
+				<Table>
+					<TableHeader className="bg-indigo-50/50 sticky top-0 z-10">
+						<TableRow>
+							<TableHead className="w-40 text-indigo-900">Time Slots</TableHead>
+							{preferences.time_slots.map(daySchedule => (
+								<TableHead key={daySchedule.date} className="text-center text-indigo-900">
+									<TooltipProvider>
+										<Tooltip>
+											<TooltipTrigger>
+												<span className="cursor-help border-dotted border-indigo-400">
+													{formatDate(daySchedule.date)}
+												</span>
+											</TooltipTrigger>
+											<TooltipContent>
+												<p>Click time slot to select</p>
+											</TooltipContent>
+										</Tooltip>
+									</TooltipProvider>
+								</TableHead>
 							))}
 						</TableRow>
-					))}
-				</TableBody>
-			</Table>
-		</div>
-	);
+					</TableHeader>
+					<TableBody>
+						{timeRanges.map((timeRange, index) => (
+							<TableRow key={index}>
+								<TableCell className="font-medium whitespace-nowrap text-indigo-700">
+									{formatTime(timeRange.start_time)} - {formatTime(timeRange.end_time)}
+								</TableCell>
+								{preferences.time_slots.map(daySchedule => {
+									const matchingSlot = daySchedule.slots.find(
+										slot =>
+											slot.time_range.start_time === timeRange.start_time &&
+											slot.time_range.end_time === timeRange.end_time
+									);
 
-	const MobileView = () => (
-		<div className="lg:hidden space-y-2">
-			{scheduleData.time_slots.map(({ date, slots }) => (
-				<Card key={date} className="overflow-hidden border border-indigo-100 shadow-sm hover:shadow-md transition-shadow duration-300">
-					<button
-						onClick={() => toggleExpanded(date)}
-						className="w-full hover:bg-indigo-50/50 transition-colors duration-300"
-					>
-						<CardHeader className="py-3">
-							<div className="flex items-center justify-between">
-								<CardTitle className="text-base font-semibold text-indigo-900">
-									{formatDate(date)}
-								</CardTitle>
-								<ChevronDown
-									className={`h-5 w-5 text-indigo-500 transition-transform duration-300 ${expandedDays.has(date) ? 'transform rotate-180' : ''}`}
-								/>
-							</div>
-						</CardHeader>
-					</button>
-					<div className={`transition-all duration-300 ease-in-out ${expandedDays.has(date) ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-						<CardContent className="pt-0">
-							<div className="space-y-2">
-								{slots.map((slot) => (
-									<TimeSlotButton
-										key={slot.id}
-										slot={slot}
-										date={date}
-										onSelect={() => { }}
+									return (
+										<TableCell key={daySchedule.date} className="p-2">
+											{matchingSlot && (
+												<TimeSlotButton
+													slot={matchingSlot}
+													date={daySchedule.date}
+													onSelect={() => { }}
+												/>
+											)}
+										</TableCell>
+									);
+								})}
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</div>
+		);
+	};
+
+	const MobileView = () => {
+		if (!preferences?.time_slots) return null;
+
+		return (
+			<div className="lg:hidden space-y-2">
+				{preferences.time_slots.map((daySchedule) => (
+					<Card key={daySchedule.date} className="overflow-hidden border border-indigo-100 shadow-sm hover:shadow-md transition-shadow duration-300">
+						<button
+							onClick={() => toggleExpanded(daySchedule.date)}
+							className="w-full hover:bg-indigo-50/50 transition-colors duration-300"
+						>
+							<CardHeader className="py-3">
+								<div className="flex items-center justify-between">
+									<CardTitle className="text-base font-semibold text-indigo-900">
+										{formatDate(daySchedule.date)}
+									</CardTitle>
+									<ChevronDown
+										className={`h-5 w-5 text-indigo-500 transition-transform duration-300 ${expandedDays.has(daySchedule.date) ? 'transform rotate-180' : ''}`}
 									/>
-								))}
-							</div>
-						</CardContent>
-					</div>
-					<Separator className="bg-indigo-100" />
-				</Card>
-			))}
-		</div>
-	);
+								</div>
+							</CardHeader>
+						</button>
+						<div className={`transition-all duration-300 ease-in-out ${expandedDays.has(daySchedule.date) ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+							<CardContent className="pt-0">
+								<div className="space-y-2">
+									{daySchedule.slots.map((slot) => (
+										<TimeSlotButton
+											key={slot.id}
+											slot={slot}
+											date={daySchedule.date}
+											onSelect={() => { }}
+										/>
+									))}
+								</div>
+							</CardContent>
+						</div>
+						<Separator className="bg-indigo-100" />
+					</Card>
+				))}
+			</div>
+		);
+	};
+
+	if (loading) {
+		return <div className="p-4">Loading...</div>;
+	}
+
+	if (!preferences) {
+		return <div className="p-4">No preferences found.</div>;
+	}
 
 	return (
 		<div className="flex flex-col">
 			<div className="flex items-center justify-between py-4 px-4 border-b border-indigo-100 bg-white shadow-sm sticky top-0 z-20">
 				<div className="flex items-center space-x-2">
 					<Calendar className="h-5 w-5 text-indigo-600" />
-					<h1 className="text-lg font-semibold text-indigo-900">{scheduleData.name}</h1>
+					<h1 className="text-lg font-semibold text-indigo-900">{preferences.name}</h1>
 				</div>
 				<div className="flex items-center gap-4">
 					<div className="flex items-center gap-2">
@@ -486,6 +524,7 @@ const PreferenceSelector = () => {
 				<MobileView />
 				<NotesSummary
 					notes={notes}
+					formatTime={formatTime}
 					selectedSlots={selectedSlots}
 					formatDate={formatDate}
 					onNoteDelete={deleteNote}

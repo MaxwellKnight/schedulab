@@ -55,7 +55,7 @@ router.route("/dates")
 		controller.getByDates
 	);
 
-router.route("/:id")
+router.route("/:teamId")
 	.get(
 		authController.authenticate,
 		controller.getOne
