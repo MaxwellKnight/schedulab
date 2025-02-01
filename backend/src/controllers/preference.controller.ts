@@ -64,7 +64,7 @@ export class PreferenceController {
 
 	public getOne = async (req: Request, res: Response): Promise<void> => {
 		try {
-			const template = await this.service.getTemplate(Number(req.params.id), req.user!.id);
+			const template = await this.service.getTemplate(Number(req.params.teamId), req.user!.id);
 			if (!template) {
 				res.status(404).json({ error: "Template not found" });
 				return;
