@@ -1,4 +1,4 @@
-import React, { forwardRef, ButtonHTMLAttributes } from 'react';
+import { forwardRef, ButtonHTMLAttributes } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -12,11 +12,6 @@ interface AnimatedGradientButtonProps extends Omit<ButtonHTMLAttributes<HTMLButt
 	icon?: LucideIcon;
 	text: string;
 	className?: string;
-	gradientFrom?: string;
-	gradientTo?: string;
-	gradientHoverFrom?: string;
-	gradientHoverTo?: string;
-	shadowColor?: string;
 	iconAnimationDuration?: number;
 	size?: ButtonSize;
 }
@@ -33,11 +28,6 @@ const AnimatedGradientButton = forwardRef<HTMLButtonElement, AnimatedGradientBut
 	icon: Icon,
 	text,
 	className,
-	gradientFrom = "from-blue-600",
-	gradientTo = "to-indigo-600",
-	gradientHoverFrom = "from-blue-500",
-	gradientHoverTo = "to-indigo-500",
-	shadowColor = "shadow-indigo-100/50",
 	iconAnimationDuration = 2,
 	size = "default",
 	...props
@@ -48,36 +38,32 @@ const AnimatedGradientButton = forwardRef<HTMLButtonElement, AnimatedGradientBut
 			onClick={onClick}
 			disabled={disabled}
 			className={cn(
-				"flex-1 sm:flex-none",
-				`bg-gradient-to-r ${gradientFrom} ${gradientTo}`,
-				`hover:${gradientHoverFrom} hover:${gradientHoverTo}`,
-				"shadow-lg",
-				`hover:${shadowColor}`,
+				"flex-1 sm:flex-none relative group",
+				"bg-gradient-to-r from-indigo-600 to-indigo-500",
+				"hover:from-indigo-500 hover:to-indigo-400",
+				"shadow-sm hover:shadow-md",
+				"shadow-indigo-200/50",
 				"transition-all duration-300 ease-in-out",
-				"relative group overflow-hidden",
+				"overflow-hidden",
+				"border border-indigo-400/20",
+				"text-white",
+				"hover:scale-[1.02]",
+				"active:scale-[0.98]",
+				"disabled:opacity-50 disabled:pointer-events-none",
 				sizeClasses[size],
 				className
 			)}
 			{...props}
 		>
-			<div
-				className={cn(
-					"absolute inset-0 bg-gradient-to-r",
-					gradientFrom,
-					gradientTo.replace('to-', 'to-'),
-					"opacity-0 group-hover:opacity-100",
-					"transition-opacity duration-300 ease-in-out"
-				)}
-			/>
+			<div className="absolute inset-0 bg-gradient-to-r from-indigo-500/0 via-white/10 to-indigo-500/0 
+                    opacity-0 group-hover:opacity-100 transition-opacity duration-300 
+                    group-hover:translate-x-full transform-gpu">
+			</div>
 			<div className="relative flex gap-2 items-center justify-center">
 				{Icon && (
 					<motion.div
 						initial={false}
-						animate={{
-							scale: 1,
-							y: 0,
-							x: 0,
-						}}
+						animate={{ scale: 1, y: 0, x: 0 }}
 						whileHover={{
 							scale: 1.1,
 							transition: {
@@ -90,9 +76,7 @@ const AnimatedGradientButton = forwardRef<HTMLButtonElement, AnimatedGradientBut
 					>
 						<motion.div
 							initial={false}
-							animate={{
-								rotate: 0
-							}}
+							animate={{ rotate: 0 }}
 							whileHover={{
 								rotate: 360,
 								transition: {
@@ -103,8 +87,9 @@ const AnimatedGradientButton = forwardRef<HTMLButtonElement, AnimatedGradientBut
 							}}
 						>
 							<Icon className={cn(
-								"mr-2",
-								size === "sm" ? "h-3 w-3" : size === "lg" ? "h-5 w-5" : "h-4 w-4"
+								"mr-1",
+								size === "sm" ? "h-3 w-3" : size === "lg" ? "h-5 w-5" : "h-4 w-4",
+								"stroke-[2.5px]"
 							)} />
 						</motion.div>
 					</motion.div>
@@ -117,7 +102,7 @@ const AnimatedGradientButton = forwardRef<HTMLButtonElement, AnimatedGradientBut
 							ease: "easeOut"
 						}
 					}}
-					className="font-medium uppercase tracking-wider"
+					className="font-medium tracking-wide text-sm"
 				>
 					{text}
 				</motion.span>
