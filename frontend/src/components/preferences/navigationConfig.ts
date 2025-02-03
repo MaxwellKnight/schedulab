@@ -5,6 +5,13 @@ export const preferencesNavigationConfig: PreferencesNavigationConfig = {
 	defaultView: 'view',
 	items: [
 		{
+			id: 'view',
+			label: 'Current Active',
+			icon: Eye,
+			description: 'View currently active preference setting and apply',
+			enabled: true,
+		},
+		{
 			id: 'create',
 			label: 'Create New',
 			icon: Plus,
@@ -13,19 +20,11 @@ export const preferencesNavigationConfig: PreferencesNavigationConfig = {
 			requiresAdmin: true,
 		},
 		{
-			id: 'view',
-			label: 'Current Active',
-			icon: Eye,
-			description: 'View currently active preference setting and apply',
-			enabled: true,
-		},
-		{
 			id: 'history',
 			label: 'History',
 			icon: History,
 			description: 'View preference history',
 			enabled: true,
-			requiresAdmin: true,
 		}
 	]
 };
