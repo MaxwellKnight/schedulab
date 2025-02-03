@@ -1,6 +1,7 @@
 import Joi from 'joi';
-import { PreferenceTemplateData, TimeSlotData } from '../interfaces/dto/preferences.dto';
+import { MemberPreferenceData, PreferenceTemplateData, TimeSlotData } from '../interfaces/dto/preferences.dto';
 import { TimeSlot } from '../models';
+import { PreferenceSubmissionSlotData } from '../models/preference.model';
 
 // Base time range schema
 const timeRangeSchema = Joi.object({
@@ -200,9 +201,91 @@ const bulkTimeSlotSchema = Joi.object({
 		return value;
 	});
 
+const memberPreferenceSchema = Joi.object<MemberPreferenceData>({
+	id: Joi.number()
+		.integer()
+		.optional()
+		.messages({
+			'number.base': 'ID must be an integer'
+		}),
+	template_id: Joi.number()
+		.integer()
+		.required()
+		.messages({
+			'number.base': 'Template ID must be an integer',
+			'any.required': 'Template ID is required'
+		}),
+	user_id: Joi.number()
+		.integer()
+		.optional(), // User ID typically comes from authentication
+	status: Joi.string()
+		.valid('draft', 'submitted')
+		.optional()
+		.default('draft')
+		.messages({
+			'any.only': 'Status must be either draft or submitted'
+		}),
+	submitted_at: Joi.date()
+		.optional()
+		.messages({
+			'date.base': 'Submitted date must be a valid date'
+		}),
+	notes: Joi.string()
+		.allow(null)
+		.optional()
+		.max(1000)
+		.messages({
+			'string.max': 'Notes must not exceed 1000 characters'
+		})
+});
+
+// Member Preference Slot Selection Schema
+const memberPreferenceSelectionSchema = Joi.object({
+	slots: Joi.array()
+		.items(Joi.object<PreferenceSubmissionSlotData>({
+			template_time_slot_id: Joi.number()
+				.integer()
+				.required()
+				.messages({
+					'number.base': 'Time slot ID must be an integer',
+					'any.required': 'Time slot ID is required'
+				}),
+			preference_level: Joi.number()
+				.integer()
+				.min(1)
+				.max(5)
+				.required()
+				.messages({
+					'number.base': 'Preference level must be an integer',
+					'number.min': 'Preference level must be between 1 and 5',
+					'number.max': 'Preference level must be between 1 and 5',
+					'any.required': 'Preference level is required'
+				})
+		}))
+		.min(1)
+		.messages({
+			'array.min': 'At least one time slot selection is required'
+		})
+})
+	.custom((value, helpers) => {
+		// Check for duplicate time slot selections
+		const slotIds = value.slots.map((slot: PreferenceSubmissionSlotData) => slot.template_time_slot_id);
+		const uniqueSlotIds = new Set(slotIds);
+
+		if (slotIds.length !== uniqueSlotIds.size) {
+			return helpers.error('any.unique', {
+				message: 'Duplicate time slot selections are not allowed'
+			});
+		}
+
+		return value;
+	});
+
 export {
 	preferenceTemplateSchema,
 	timeRangeSchema,
 	timeSlotSchema,
-	bulkTimeSlotSchema
+	bulkTimeSlotSchema,
+	memberPreferenceSchema,
+	memberPreferenceSelectionSchema
 };

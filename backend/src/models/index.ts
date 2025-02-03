@@ -1,5 +1,5 @@
 import { User } from "./user.model";
-import { PreferenceTemplate, PreferenceTimeRange, TimeSlot, DailyTimeSlots } from "./preference.model";
+import { PreferenceTemplate, PreferenceTimeRange, TimeSlot, DailyTimeSlots, PreferenceSubmission, PreferenceSubmissionSlot, PreferenceSubmissionWithSlots, CreatePreferenceSubmissionData, CreatePreferenceSubmissionSlotData } from "./preference.model";
 import { Shift, TimeRange, UserShifts } from "./shift.model";
 import { Schedule } from "./schedule.model";
 import { Vacation } from "./vacations.model";
@@ -22,5 +22,10 @@ export {
 	TemplateTimeRange,
 	TemplateConstraint,
 	TeamRole,
-	Team
+	Team,
+	PreferenceSubmissionWithSlots,
+	PreferenceSubmissionSlot,
+	PreferenceSubmission,
+	CreatePreferenceSubmissionSlotData,
+	CreatePreferenceSubmissionData
 };

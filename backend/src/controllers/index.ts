@@ -6,6 +6,7 @@ import { VacationController } from "./vacation.controller";
 import { AuthController } from "./auth.controller";
 import { TemplateController } from "./template.controller";
 import { TeamController } from "./team.controller";
+import { PreferenceSubmissionController } from "./preferences_submission.controller";
 
 export {
 	UserController,
@@ -15,5 +16,6 @@ export {
 	ScheduleController,
 	AuthController,
 	TemplateController,
-	TeamController
+	TeamController,
+	PreferenceSubmissionController
 }
