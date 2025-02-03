@@ -161,13 +161,11 @@ export const PreferencesDrawer: React.FC<PreferencesDrawerProps> = ({ onSuccess 
 								</div>
 							</ScrollArea>
 						</div>
-						{isAdmin && (
-							<PreferencesSidebar
-								onViewChange={setCurrentView}
-								currentView={currentView}
-								isAdmin={isAdmin}
-							/>
-						)}
+						<PreferencesSidebar
+							onViewChange={setCurrentView}
+							currentView={currentView}
+							isAdmin={isAdmin}
+						/>
 					</div>
 				</motion.div>
 			</DrawerContent>
