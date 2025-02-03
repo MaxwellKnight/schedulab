@@ -1,3 +1,5 @@
+import { LucideIcon } from "lucide-react";
+
 export interface PreferenceRange {
 	start_time: string;
 	end_time: string;
@@ -34,4 +36,21 @@ export interface ScheduleData {
 	id: number;
 	name: string;
 	time_slots: DaySchedule[];
+}
+
+
+export type NavigationItemId = 'view' | 'create' | 'settings' | 'history'; // Add more options as needed
+
+export interface NavigationItem {
+	id: NavigationItemId;
+	label: string;
+	icon: LucideIcon;
+	description: string;
+	enabled?: boolean;
+	requiresAdmin?: boolean;
+}
+
+export interface PreferencesNavigationConfig {
+	items: NavigationItem[];
+	defaultView: NavigationItemId;
 }
