@@ -31,7 +31,7 @@ Intelligent shift scheduling system with automated scheduling and preference man
 ```bash
 # Clone repository
 git clone https://github.com/maxwellknight/schedulab.git
-cd schedula
+cd schedulab
 
 # Setup environment
 cp .env.example .env
