@@ -70,4 +70,5 @@ Detailed setup instructions in [backend](./backend/README.md) and [frontend](./f
 
 ## License
 
-Private and proprietary. All rights reserved.
+This project is licensed under the [GNU General Public License](./LICENSE).
+You are free to use, modify, and distribute the code under the terms of the GPL.
