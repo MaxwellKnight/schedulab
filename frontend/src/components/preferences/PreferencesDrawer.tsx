@@ -12,6 +12,7 @@ import PreferencesSidebar from './PreferencesSidebar';
 import AnimatedSubmitButton from '../AnimatedSubmitButton';
 import { DailyPreference, NavigationItemId, PreferenceRange } from './types';
 import type { DateRange } from "react-day-picker";
+import PreferencesHistory from './PreferencesHistory';
 
 export interface PreferencesDrawerProps {
 	onSuccess?: () => void;
@@ -70,7 +71,7 @@ const ViewComponents: Record<NavigationItemId, React.FC<ViewProps>> = {
 		</>
 	),
 	view: () => <PreferenceSelector />,
-	history: () => <div className="text-center text-blue-600">History feature coming soon...</div>,
+	history: () => <PreferencesHistory />,
 	settings: ({ handleSubmit, isSubmitting, error }) => (
 		<div className="text-center">
 			<AnimatedSubmitButton

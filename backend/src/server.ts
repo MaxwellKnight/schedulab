@@ -11,7 +11,8 @@ import {
 	ScheduleRouter,
 	AuthRouter,
 	TemplateRouter,
-	TeamRouter
+	TeamRouter,
+	PreferenceSubmissionRouter
 } from "./routes";
 
 import { configurePassport } from './configs/passport.config';
@@ -46,5 +47,6 @@ app.use('/vacations', VacationRouter);
 app.use('/schedules', ScheduleRouter);
 app.use('/templates', TemplateRouter);
 app.use('/teams', TeamRouter);
+app.use('/preferences-submissions', PreferenceSubmissionRouter);
 
 app.listen(PORT, () => console.log(`server running on ${ip() || 'localhost'}:${PORT}`));

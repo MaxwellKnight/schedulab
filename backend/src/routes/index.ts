@@ -6,6 +6,7 @@ import ScheduleRouter from './schedule.routes';
 import AuthRouter from './auth.routes';
 import TemplateRouter from './template.routes';
 import TeamRouter from './team.routes';
+import PreferenceSubmissionRouter from './preference_submission.routes'
 
 export {
 	UserRouter,
@@ -15,5 +16,6 @@ export {
 	ScheduleRouter,
 	AuthRouter,
 	TemplateRouter,
-	TeamRouter
+	TeamRouter,
+	PreferenceSubmissionRouter
 }

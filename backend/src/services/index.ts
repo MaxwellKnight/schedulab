@@ -5,6 +5,7 @@ import { ScheduleService } from "./schedule.service";
 import { VacationService } from "./vacation.service";
 import { TemplateService } from "./template.service";
 import { TeamService } from "./team.service";
+import { PreferenceSubmissionService } from "./preferences_submission.service";
 
 export {
 	UserService,
@@ -13,5 +14,6 @@ export {
 	ScheduleService,
 	TemplateService,
 	VacationService,
-	TeamService
+	TeamService,
+	PreferenceSubmissionService
 }

@@ -198,6 +198,48 @@ CREATE TABLE preference_selections (
   UNIQUE (member_preference_id, template_time_slot_id)
 );
 
+-- Table: preference_submissions (users submit preferences for a published template)
+CREATE TABLE preference_submissions (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  template_id INT NOT NULL,
+  user_id INT NOT NULL,
+  status ENUM('draft', 'submitted') NOT NULL DEFAULT 'draft',
+  submitted_at TIMESTAMP NULL,
+  notes TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (template_id) REFERENCES preference_templates(id),
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  UNIQUE (template_id, user_id)
+);
+
+-- Table: preference_submission_slots (specific slots selected by users)
+CREATE TABLE preference_submission_slots (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  submission_id INT NOT NULL,
+  template_time_slot_id INT NOT NULL,
+  preference_level INT NOT NULL DEFAULT 3 CHECK (preference_level BETWEEN 1 AND 5),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (submission_id) REFERENCES preference_submissions(id) ON DELETE CASCADE,
+  FOREIGN KEY (template_time_slot_id) REFERENCES template_time_slots(id),
+  UNIQUE (submission_id, template_time_slot_id)
+);
+
+-- Table: schedule_preferences (final assigned preferences after CSP optimization)
+CREATE TABLE schedule_preferences (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  template_id INT NOT NULL,
+  user_id INT NOT NULL,
+  template_time_slot_id INT NOT NULL,
+  assigned_status ENUM('confirmed', 'alternative', 'rejected') NOT NULL DEFAULT 'alternative',
+  assigned_preference_level INT CHECK (assigned_preference_level BETWEEN 1 AND 5),
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (template_id) REFERENCES preference_templates(id),
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (template_time_slot_id) REFERENCES template_time_slots(id),
+  UNIQUE KEY unique_user_slot (user_id, template_time_slot_id)
+);
+
 -- Table: vacations
 CREATE TABLE vacations (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -1050,3 +1092,31 @@ INSERT INTO team_members (team_id, user_id) VALUES
 (10, 14), -- Amanda Lopez
 (10, 17), -- Kevin Chen
 (10, 20); -- Sophie Park
+
+INSERT INTO preference_templates (team_id, name, start_date, end_date, status, creator) VALUES 
+(1, 'Morning Shift Dec', '2024-12-01', '2024-12-31', 'published', 3);
+
+SET @morning_template = LAST_INSERT_ID();
+
+INSERT INTO preference_time_ranges (preference_id, start_time, end_time) VALUES
+(@morning_template, '06:00', '14:00'),
+(@morning_template, '07:00', '15:00');
+
+INSERT INTO template_time_slots (template_id, date, time_range_id)
+SELECT 
+  @morning_template,
+  DATE('2024-12-01') + INTERVAL n DAY,
+  pr.id
+FROM (SELECT 0 as n UNION SELECT 1 UNION SELECT 2) days
+CROSS JOIN preference_time_ranges pr 
+WHERE pr.preference_id = @morning_template;
+
+INSERT INTO preference_submissions (template_id, user_id, status)
+SELECT @morning_template, user_id, 'draft' 
+FROM team_members 
+WHERE team_id = 1;
+
+INSERT INTO preference_submission_slots (submission_id, template_time_slot_id, preference_level)
+SELECT ps.id, ts.id, FLOOR(1 + RAND() * 5)
+FROM preference_submissions ps
+JOIN template_time_slots ts ON ts.template_id = ps.template_id;
