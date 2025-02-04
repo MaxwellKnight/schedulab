@@ -1093,29 +1093,43 @@ INSERT INTO team_members (team_id, user_id) VALUES
 (10, 17), -- Kevin Chen
 (10, 20); -- Sophie Park
 
+-- Create template for one week
 INSERT INTO preference_templates (team_id, name, start_date, end_date, status, creator) VALUES 
-(1, 'Morning Shift Dec', '2024-12-01', '2024-12-31', 'published', 3);
-
+(1, 'Morning Shift Week 49', '2024-12-02', '2024-12-08', 'published', 3);
 SET @morning_template = LAST_INSERT_ID();
 
+-- Four time ranges per day
 INSERT INTO preference_time_ranges (preference_id, start_time, end_time) VALUES
 (@morning_template, '06:00', '14:00'),
-(@morning_template, '07:00', '15:00');
+(@morning_template, '07:00', '15:00'),
+(@morning_template, '08:00', '16:00'),
+(@morning_template, '09:00', '17:00');
 
+-- Time slots for one week
 INSERT INTO template_time_slots (template_id, date, time_range_id)
 SELECT 
   @morning_template,
-  DATE('2024-12-01') + INTERVAL n DAY,
+  DATE('2024-12-02') + INTERVAL n DAY,
   pr.id
-FROM (SELECT 0 as n UNION SELECT 1 UNION SELECT 2) days
+FROM (
+  SELECT 0 as n -- Monday
+  UNION SELECT 1 -- Tuesday
+  UNION SELECT 2 -- Wednesday
+  UNION SELECT 3 -- Thursday
+  UNION SELECT 4 -- Friday
+  UNION SELECT 5 -- Saturday
+  UNION SELECT 6 -- Sunday
+) days
 CROSS JOIN preference_time_ranges pr 
 WHERE pr.preference_id = @morning_template;
 
+-- Create submissions for team members
 INSERT INTO preference_submissions (template_id, user_id, status)
 SELECT @morning_template, user_id, 'draft' 
 FROM team_members 
 WHERE team_id = 1;
 
+-- Generate submission slots
 INSERT INTO preference_submission_slots (submission_id, template_time_slot_id, preference_level)
 SELECT ps.id, ts.id, FLOOR(1 + RAND() * 5)
 FROM preference_submissions ps
