@@ -239,6 +239,7 @@ export class PreferenceSubmissionRepository {
    JOIN team_members tm ON tm.team_id = pt.team_id
    WHERE pt.team_id = ? AND tm.user_id = ?
  `, [teamId, userId]);
+		console.log(rows);
 
 		return rows;
 	}

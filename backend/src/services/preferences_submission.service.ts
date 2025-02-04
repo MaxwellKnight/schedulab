@@ -11,7 +11,6 @@ import {
 } from "../interfaces/dto/preferences.dto";
 import { PreferenceRepository } from "../repositories/preferences.repository";
 import { PreferenceSubmissionRepository } from "../repositories";
-import { subscribe } from "diagnostics_channel";
 
 export class PreferenceSubmissionService {
 	constructor(

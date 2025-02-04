@@ -149,6 +149,7 @@ export class PreferenceSubmissionController {
 		try {
 			const teamId = Number(req.params.teamId);
 			const submissions = await this.service.getSubmissionsByTeam(teamId, req.user!.id);
+			console.log(submissions);
 			res.json(submissions);
 		} catch (error) {
 			this.handleError(res, error);
