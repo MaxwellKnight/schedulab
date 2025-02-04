@@ -11,6 +11,7 @@ import {
 	DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import PreferenceDetail from './PreferenceDetails';
 
 interface APIResponse {
 	submission: {
@@ -86,6 +87,7 @@ const PreferencesHistory: React.FC = () => {
 	} = useAuthenticatedFetch<APIResponse[]>(
 		`preferences-submissions/team/${selectedTeam?.id}`
 	);
+	console.log(apiResponse);
 
 	const submissions: Submission[] = useMemo(() => {
 		if (!apiResponse) return [];
@@ -268,22 +270,25 @@ const PreferencesHistory: React.FC = () => {
 										{formatDateTime(submission.updated_at)}
 									</TableCell>
 									<TableCell className="text-right">
-										<DropdownMenu>
-											<DropdownMenuTrigger asChild>
-												<Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-indigo-100">
-													<span className="sr-only">Open menu</span>
-													<MoreHorizontal className="h-4 w-4" />
-												</Button>
-											</DropdownMenuTrigger>
-											<DropdownMenuContent align="end">
-												{submission.status === 'draft' && (
-													<DropdownMenuItem className="cursor-pointer hover:bg-indigo-50">
-														<Edit className="mr-2 h-4 w-4" />
-														Edit
-													</DropdownMenuItem>
-												)}
-											</DropdownMenuContent>
-										</DropdownMenu>
+										<div className="flex justify-end gap-2">
+											<PreferenceDetail submission={submission} />
+											<DropdownMenu>
+												<DropdownMenuTrigger asChild>
+													<Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-indigo-100">
+														<span className="sr-only">Open menu</span>
+														<MoreHorizontal className="h-4 w-4" />
+													</Button>
+												</DropdownMenuTrigger>
+												<DropdownMenuContent align="end">
+													{submission.status === 'draft' && (
+														<DropdownMenuItem className="cursor-pointer hover:bg-indigo-50">
+															<Edit className="mr-2 h-4 w-4" />
+															Edit
+														</DropdownMenuItem>
+													)}
+												</DropdownMenuContent>
+											</DropdownMenu>
+										</div>
 									</TableCell>
 								</TableRow>
 							))}
