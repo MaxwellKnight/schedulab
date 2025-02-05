@@ -9,6 +9,18 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useTeam } from '@/context';
 import { useAuthenticatedFetch } from '@/hooks';
 
+interface APISchedulePreferences {
+	id: number;
+	team_id: number;
+	name: string;
+	start_date: string;
+	end_date: string;
+	status: string;
+	creator: number;
+	created_at: string;
+	updated_at: string;
+	time_slots: TimeSlot[];
+}
 interface TimeSlotButtonProps {
 	slot: TimeSlot;
 	isSelected: boolean;
