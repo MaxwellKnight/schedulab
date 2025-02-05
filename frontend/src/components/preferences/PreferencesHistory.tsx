@@ -3,19 +3,18 @@ import {
 	Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, CheckCircle, Edit, ArrowUpDown, ArrowUp, ArrowDown, MoreHorizontal, Info } from 'lucide-react';
+import { Calendar, MoreHorizontal, } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	DropdownMenuItem,
 	DropdownMenuTrigger,
-	DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import PreferenceDetail from './PreferenceDetails';
 import { useTeam } from '@/context';
 import { useAuthenticatedFetch } from '@/hooks';
+import { useAuth } from '@/hooks';
 
 export interface Slot {
 	id: number;
@@ -48,36 +47,16 @@ export interface Submission extends SubmissionData {
 	};
 }
 
-// API Response Type
 export interface PreferenceSubmissionResponse {
 	submission: SubmissionData;
 	slots: Slot[];
 }
 
-// Type for sort columns
-type SortColumn = 'template_id' | 'status' | 'slots' | 'submitted_at' | 'created_at' | 'updated_at';
-type SortDirection = 'asc' | 'desc';
-
-const STATUS_CONFIG = {
-	draft: {
-		icon: Clock,
-		color: 'bg-yellow-100 text-yellow-800',
-		label: 'Draft'
-	},
-	submitted: {
-		icon: CheckCircle,
-		color: 'bg-green-100 text-green-800',
-		label: 'Submitted'
-	}
-} as const;
-
 const PreferencesHistory: React.FC = () => {
 	const { selectedTeam } = useTeam();
-	const [sortColumn, setSortColumn] = useState<SortColumn>('created_at');
-	const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+	const { user } = useAuth();
 	const [searchTerm, setSearchTerm] = useState<string>('');
 
-	// Use the authenticated fetch hook
 	const {
 		data: apiResponse,
 		loading,
@@ -85,10 +64,10 @@ const PreferencesHistory: React.FC = () => {
 		fetchData: refreshSubmissions
 	} = useAuthenticatedFetch<PreferenceSubmissionResponse[]>(
 		`/preferences-submissions/team/${selectedTeam?.id}`,
-		{}, // additional options if needed
+		{},
 		{
-			enabled: !!selectedTeam?.id, // only fetch if team is selected
-			ttl: 5 * 60 * 1000 // 5 minute cache
+			enabled: !!selectedTeam?.id,
+			ttl: 5 * 60 * 1000
 		}
 	);
 
@@ -117,13 +96,9 @@ const PreferencesHistory: React.FC = () => {
 		}));
 	};
 
-	// Transform submissions, ensuring consistent structure
 	const submissions = useMemo(() => {
 		if (!apiResponse) return [];
-
-		// Use the transformation function
 		const transformedData = transformApiResponse(apiResponse);
-
 		return transformedData.map(({ submission, slots }) => ({
 			...submission,
 			slots,
@@ -133,18 +108,60 @@ const PreferencesHistory: React.FC = () => {
 			}
 		}));
 	}, [apiResponse]);
-	console.log(submissions.slice(0, 50));
 
-	// Templates mapping
-	const templates = useMemo(() => {
-		const templateMap: Record<number, string> = {};
-		submissions.forEach(sub => {
-			templateMap[sub.template_id] = `Template ${sub.template_id}`;
+	// Aggregation of template data
+	const templateAggregation = useMemo(() => {
+		const aggregatedTemplates: Record<number, {
+			total_submissions: number;
+			submitted_submissions: number;
+			draft_submissions: number;
+			total_slots: number;
+			preference_level_distribution: Record<number, number>;
+			latest_submission_date: string | null;
+		}> = {};
+
+		submissions.forEach(submission => {
+			if (!aggregatedTemplates[submission.template_id]) {
+				aggregatedTemplates[submission.template_id] = {
+					total_submissions: 0,
+					submitted_submissions: 0,
+					draft_submissions: 0,
+					total_slots: 0,
+					preference_level_distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+					latest_submission_date: null
+				};
+			}
+
+			const templateEntry = aggregatedTemplates[submission.template_id];
+
+			// Increment submission counts
+			templateEntry.total_submissions++;
+			if (submission.status === 'submitted') {
+				templateEntry.submitted_submissions++;
+			} else {
+				templateEntry.draft_submissions++;
+			}
+
+			// Count total slots and preference levels
+			if (submission.slots) {
+				templateEntry.total_slots += submission.slots.length;
+
+				submission.slots.forEach(slot => {
+					templateEntry.preference_level_distribution[slot.preference_level]++;
+				});
+			}
+
+			// Track latest submission date
+			if (submission.submitted_at &&
+				(!templateEntry.latest_submission_date ||
+					new Date(submission.submitted_at) > new Date(templateEntry.latest_submission_date))) {
+				templateEntry.latest_submission_date = submission.submitted_at;
+			}
 		});
-		return templateMap;
+
+		return aggregatedTemplates;
 	}, [submissions]);
 
-	// DateTime formatting utility
 	const formatDateTime = (dateString: string | null): string => {
 		if (!dateString) return 'Not submitted';
 		return new Date(dateString).toLocaleString('en-US', {
@@ -156,78 +173,10 @@ const PreferencesHistory: React.FC = () => {
 		});
 	};
 
-	// Status badge rendering
-	const renderStatusBadge = (status: 'draft' | 'submitted') => {
-		const config = STATUS_CONFIG[status];
-		const StatusIcon = config.icon;
-		return (
-			<Badge variant="secondary" className={`${config.color} inline-flex items-center gap-2 py-1`}>
-				<StatusIcon className="h-4 w-4" />
-				{config.label}
-			</Badge>
-		);
-	};
-
-	// Sorting handler
-	const handleSort = (column: SortColumn): void => {
-		if (sortColumn === column) {
-			setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-		} else {
-			setSortColumn(column);
-			setSortDirection('asc');
-		}
-	};
-
-	// Sort icon rendering
-	const renderSortIcon = (column: SortColumn) => {
-		if (sortColumn !== column) return <ArrowUpDown className="h-4 w-4 opacity-50" />;
-		return sortDirection === 'asc'
-			? <ArrowUp className="h-4 w-4" />
-			: <ArrowDown className="h-4 w-4" />;
-	};
-
-	// Filtered and sorted submissions
-	const filteredAndSortedSubmissions = useMemo(() => {
-		const filtered = submissions.filter(submission =>
-			templates[submission.template_id]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			submission.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			submission.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			false
-		);
-
-		return filtered.sort((a, b) => {
-			let comparison = 0;
-			switch (sortColumn) {
-				case 'template_id':
-					comparison = (templates[a.template_id] || '').localeCompare(templates[b.template_id] || '');
-					break;
-				case 'status':
-					comparison = a.status.localeCompare(b.status);
-					break;
-				case 'slots':
-					comparison = (a.slots?.length || 0) - (b.slots?.length || 0);
-					break;
-				case 'submitted_at':
-					comparison = (a.submitted_at ? new Date(a.submitted_at).getTime() : 0) -
-						(b.submitted_at ? new Date(b.submitted_at).getTime() : 0);
-					break;
-				case 'created_at':
-					comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-					break;
-				case 'updated_at':
-					comparison = new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
-					break;
-			}
-			return sortDirection === 'asc' ? comparison : -comparison;
-		});
-	}, [submissions, templates, sortColumn, sortDirection, searchTerm]);
-
-	// Render loading state
 	if (loading) {
 		return <div className="p-4 text-center">Loading submissions...</div>;
 	}
 
-	// Render error state
 	if (error) {
 		return (
 			<div className="p-4 text-red-600">
@@ -239,7 +188,7 @@ const PreferencesHistory: React.FC = () => {
 						<ul className="list-disc list-inside mt-2">
 							<li>Check your network connection</li>
 							<li>Verify the API endpoint is correct</li>
-							<li>Ensure you're authenticated</li>
+							<li>Ensure you`&apos`re authenticated</li>
 							<li>Check with your system administrator</li>
 						</ul>
 					</details>
@@ -257,7 +206,7 @@ const PreferencesHistory: React.FC = () => {
 				</h2>
 				<div className="flex items-center gap-4">
 					<Input
-						placeholder="Search submissions..."
+						placeholder="Search templates..."
 						value={searchTerm}
 						onChange={(e) => setSearchTerm(e.target.value)}
 						className="w-64 border-indigo-200 hover:border-indigo-300"
@@ -273,105 +222,101 @@ const PreferencesHistory: React.FC = () => {
 				</div>
 			</div>
 
-			{filteredAndSortedSubmissions.length === 0 ? (
+			{Object.keys(templateAggregation).length === 0 ? (
 				<div className="text-center text-gray-500 py-4">
-					{searchTerm ? "No submissions match your search" : "No submissions found"}
+					{searchTerm ? "No templates match your search" : "No templates found"}
 				</div>
 			) : (
 				<div className="border border-indigo-100 rounded-lg overflow-hidden">
 					<Table>
 						<TableHeader className="bg-indigo-50">
 							<TableRow>
-								{[
-									{ key: 'template_id', label: 'Template' },
-									{ key: 'status', label: 'Status' },
-									{ key: 'submitted_at', label: 'Submitted At' },
-									{ key: 'created_at', label: 'Created At' },
-									{ key: 'updated_at', label: 'Last Updated' }
-								].map(({ key, label }) => (
-									<TableHead
-										key={key}
-										className="cursor-pointer hover:bg-indigo-100/50 transition-colors"
-										onClick={() => handleSort(key as SortColumn)}
-									>
-										<div className="flex items-center justify-between gap-2">
-											<span>{label}</span>
-											{renderSortIcon(key as SortColumn)}
-										</div>
-									</TableHead>
-								))}
+								<TableHead>Template</TableHead>
+								<TableHead>Submissions</TableHead>
+								<TableHead>Total Slots</TableHead>
+								<TableHead>Preference Distribution</TableHead>
+								<TableHead>Latest Submission</TableHead>
 								<TableHead className="text-right">Actions</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{filteredAndSortedSubmissions.map((submission, index) => (
-								<TableRow
-									key={index}
-									className="hover:bg-indigo-50/50 transition-colors"
-								>
-									<TableCell className="font-medium">
-										{templates[submission.template_id]}
-									</TableCell>
-									<TableCell>
-										{renderStatusBadge(submission.status)}
-									</TableCell>
-									<TableCell className="text-sm text-gray-600">
-										{formatDateTime(submission.submitted_at)}
-									</TableCell>
-									<TableCell className="text-sm text-gray-600">
-										{formatDateTime(submission.created_at)}
-									</TableCell>
-									<TableCell className="text-sm text-gray-600">
-										{formatDateTime(submission.updated_at)}
-									</TableCell>
-									<TableCell className="text-right">
-										<DropdownMenu>
-											<DropdownMenuTrigger asChild>
-												<Button
-													variant="outline"
-													size="sm"
-													className="h-8 w-8 p-0 border-indigo-200 hover:bg-indigo-50 hover:border-indigo-300 group"
-												>
-													<span className="sr-only">Open menu</span>
-													<MoreHorizontal className="h-4 w-4 text-indigo-600 group-hover:text-indigo-800 transition-colors" />
-												</Button>
-											</DropdownMenuTrigger>
-											<DropdownMenuContent
-												align="end"
-												className="border-indigo-100 bg-white shadow-md rounded-lg"
-											>
-												<PreferenceDetail
-													templateId={submission.template_id}
-													submission={submission}
-													render={(dialogTrigger) => (
-														<DropdownMenuItem
-															onSelect={(e) => {
-																e.preventDefault();
-																dialogTrigger.click();
-															}}
-															className="cursor-pointer hover:bg-indigo-50 focus:bg-indigo-50 transition-colors"
+							{Object.entries(templateAggregation)
+								.filter(([templateId]) => {
+									const templateName = `Template ${templateId}`;
+									return templateName.toLowerCase().includes(searchTerm.toLowerCase());
+								})
+								.map(([templateId, templateData]) => {
+									// Find all submissions for this template
+									const templateSubmissions: Submission[] = submissions.filter(
+										submission => submission.template_id === Number(templateId)
+									);
+
+									return (
+										<TableRow key={templateId}>
+											<TableCell className="font-medium">
+												Template {templateId}
+											</TableCell>
+											<TableCell>
+												<div className="flex gap-2">
+													<Badge variant="secondary" className="bg-green-100 text-green-800">
+														Submitted: {templateData.submitted_submissions}
+													</Badge>
+													<Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+														Draft: {templateData.draft_submissions}
+													</Badge>
+												</div>
+											</TableCell>
+											<TableCell>
+												{templateData.total_slots}
+											</TableCell>
+											<TableCell>
+												<div className="flex gap-2">
+													{Object.entries(templateData.preference_level_distribution)
+														.map(([level, count]) => (
+															<Badge
+																key={level}
+																variant="secondary"
+																className="bg-indigo-100 text-indigo-800"
+															>
+																L{level}: {count}
+															</Badge>
+														))}
+												</div>
+											</TableCell>
+											<TableCell className="text-sm text-gray-600">
+												{formatDateTime(templateData.latest_submission_date)}
+											</TableCell>
+											<TableCell className="text-right">
+												<DropdownMenu>
+													<DropdownMenuTrigger asChild>
+														<Button
+															variant="outline"
+															size="sm"
+															className="h-8 w-8 p-0 border-indigo-200 hover:bg-indigo-50 hover:border-indigo-300 group"
 														>
-															<Info className="mr-2 h-4 w-4 text-indigo-600" />
-															View Details
-														</DropdownMenuItem>
-													)}
-												/>
-												{submission.status === 'draft' && (
-													<>
-														<DropdownMenuSeparator className="bg-indigo-100" />
-														<DropdownMenuItem
-															className="cursor-pointer hover:bg-indigo-50 focus:bg-indigo-50 transition-colors"
-														>
-															<Edit className="mr-2 h-4 w-4 text-indigo-600" />
-															Edit
-														</DropdownMenuItem>
-													</>
-												)}
-											</DropdownMenuContent>
-										</DropdownMenu>
-									</TableCell>
-								</TableRow>
-							))}
+															<span className="sr-only">Open menu</span>
+															<MoreHorizontal className="h-4 w-4 text-indigo-600 group-hover:text-indigo-800 transition-colors" />
+														</Button>
+													</DropdownMenuTrigger>
+													<DropdownMenuContent
+														align="end"
+														className="border-indigo-100 bg-white shadow-md rounded-lg"
+													>
+														{user && (
+															<PreferenceDetail
+																templateId={Number(templateId)}
+																submission={templateSubmissions.find(
+																	submission => submission.user_id === user.id
+																)}
+																teamSubmissions={templateSubmissions}
+															/>
+														)}
+													</DropdownMenuContent>
+												</DropdownMenu>
+											</TableCell>
+										</TableRow>
+									);
+								})}
 						</TableBody>
 					</Table>
 				</div>

@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import {
 	Dialog,
 	DialogContent,
-	DialogHeader,
-	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import {
@@ -15,305 +13,255 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Calendar, Clock, ClipboardList, Info, Users } from 'lucide-react';
+import { Eye, Users, User, ClipboardList, Calendar, Clock, Info, ArrowLeft } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
-import { Slot, Submission } from './types';
-import { useAuth, useAuthenticatedFetch, useTeam } from '@/hooks';
+import { useAuth, useTeam } from '@/hooks';
+import { Submission } from './types';
 
 interface PreferenceDetailProps {
-	templateId: number;
+	templateId?: number;
 	submission?: Submission;
-	className?: string;
+	teamSubmissions?: Submission[];
 }
 
+interface PrefConfig {
+	styles: Record<number, string>;
+	labels: string[];
+}
+
+const preferenceConfig: PrefConfig = {
+	styles: {
+		1: 'bg-red-100 text-red-700 border-red-200',
+		2: 'bg-orange-100 text-orange-700 border-orange-200',
+		3: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+		4: 'bg-green-100 text-green-700 border-green-200',
+		5: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+	},
+	labels: ['Very Low', 'Low', 'Neutral', 'High', 'Very High']
+} as const;
+
+const formatDateTime = (dateString: string): string => {
+	return new Date(dateString).toLocaleString('en-US', {
+		year: 'numeric',
+		month: 'short',
+		day: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit',
+	});
+};
+
 const PreferenceDetail: React.FC<PreferenceDetailProps> = ({
-	templateId,
 	submission: initialSubmission,
-	className = ''
+	teamSubmissions = []
 }) => {
 	const { user } = useAuth();
 	const { selectedTeam } = useTeam();
 	const isTeamAdmin = selectedTeam?.creator_id === user?.id;
-	const [isSubmissionListOpen, setIsSubmissionListOpen] = useState(false);
+	const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(initialSubmission || null);
+	const [isListView, setIsListView] = useState(isTeamAdmin);
 
-	const {
-		data: teamSubmissions,
-		loading,
-		error,
-	} = useAuthenticatedFetch<Submission[]>(
-		`/preferences-submissions`,
-		{
-			method: 'GET',
-			params: { templateId }
-		},
-		{
-			enabled: isTeamAdmin,
-			ttl: 5 * 60 * 1000
-		}
+	const handleViewSubmission = (submission: Submission) => {
+		setSelectedSubmission(submission);
+		setIsListView(false);
+	};
+
+	const handleBackToList = () => {
+		setIsListView(true);
+		setSelectedSubmission(null);
+	};
+
+	const SubmissionsList = () => (
+		<div className="bg-white -m-6 p-6 rounded-lg">
+			<Card className="border-slate-200 shadow-sm">
+				<CardHeader className="border-b border-slate-100 bg-slate-50/50">
+					<div className="flex items-center gap-3">
+						<Users className="w-5 h-5 text-slate-600" />
+						<div>
+							<CardTitle className="text-xl text-slate-800">Team Submissions</CardTitle>
+							<CardDescription>View and manage team preferences</CardDescription>
+						</div>
+					</div>
+				</CardHeader>
+				<CardContent className="p-0">
+					<ScrollArea className="h-96">
+						<Table>
+							<TableHeader className="bg-slate-50/50 sticky top-0">
+								<TableRow>
+									<TableHead>Member</TableHead>
+									<TableHead>Status</TableHead>
+									<TableHead>Submitted</TableHead>
+									<TableHead className="text-right">View</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{teamSubmissions.map((submission) => (
+									<TableRow key={submission.id} className="hover:bg-slate-50">
+										<TableCell className="flex items-center gap-2">
+											<User className="w-4 h-4 text-slate-400" />
+											<span className="font-medium text-slate-700">#{submission.user_id}</span>
+										</TableCell>
+										<TableCell>
+											<Badge variant="secondary" className={
+												submission.status === 'submitted'
+													? 'bg-green-50 text-green-700 hover:bg-green-100'
+													: 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+											}>
+												{submission.status}
+											</Badge>
+										</TableCell>
+										<TableCell className="text-slate-600">
+											{submission.submitted_at ? formatDateTime(submission.submitted_at) : '-'}
+										</TableCell>
+										<TableCell className="text-right">
+											<Button
+												variant="ghost"
+												size="sm"
+												onClick={() => handleViewSubmission(submission)}
+												className="text-slate-700 hover:bg-slate-100"
+											>
+												<Eye className="w-4 h-4" />
+											</Button>
+										</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</ScrollArea>
+				</CardContent>
+			</Card>
+		</div>
 	);
 
-	const formatDateTime = (dateString: string): string => {
-		return new Date(dateString).toLocaleString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit',
-		});
-	};
+	const SubmissionDetails = ({ submission }: { submission: Submission }) => (
+		<div className="space-y-6 bg-white -m-6 p-6 rounded-lg">
+			<Card className="border-slate-200 shadow-sm">
+				<CardHeader className="border-b border-slate-100 bg-slate-50/50">
+					<div className="flex items-center justify-between">
+						<div className="flex items-center gap-3">
+							<Info className="w-5 h-5 text-slate-600" />
+							<CardTitle className="text-slate-800">
+								{submission.template?.name || `Template ${submission.template_id}`}
+							</CardTitle>
+						</div>
+					</div>
+					<div className="flex flex-wrap gap-3 mt-4">
+						{isTeamAdmin && (
+							<Badge variant="secondary" className="gap-1">
+								<User className="w-3 h-3" />
+								User #{submission.user_id}
+							</Badge>
+						)}
+						<Badge variant="secondary" className="gap-1">
+							<ClipboardList className="w-3 h-3" />
+							{submission.status}
+						</Badge>
+						{submission.submitted_at && (
+							<Badge variant="secondary" className="gap-1">
+								<Calendar className="w-3 h-3" />
+								{formatDateTime(submission.submitted_at)}
+							</Badge>
+						)}
+					</div>
+				</CardHeader>
+			</Card>
 
-	const formatTime = (timeString: string): string => {
-		return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
-			hour: '2-digit',
-			minute: '2-digit'
-		});
-	};
+			{submission.notes && (
+				<Card className="border-slate-200 shadow-sm">
+					<CardContent className="pt-6">
+						<h3 className="font-semibold mb-2 text-slate-800">Notes</h3>
+						<p className="text-slate-600">{submission.notes}</p>
+					</CardContent>
+				</Card>
+			)}
 
-	const getPreferenceBadge = (level: number) => {
-		const config = {
-			1: { color: 'bg-red-100 border border-red-300 text-red-800', label: 'Very Low' },
-			2: { color: 'bg-orange-100 border border-orange-300 text-orange-800', label: 'Low' },
-			3: { color: 'bg-yellow-100 border border-yellow-300 text-yellow-800', label: 'Neutral' },
-			4: { color: 'bg-green-100 border border-green-300 text-green-800', label: 'High' },
-			5: { color: 'bg-emerald-100 border border-emerald-300 text-emerald-800', label: 'Very High' },
-		};
+			<Card className="border-slate-200 shadow-sm">
+				<CardHeader className="border-b border-slate-100 bg-slate-50/50">
+					<CardTitle className="text-slate-800">Time Preferences</CardTitle>
+				</CardHeader>
+				<CardContent className="p-0">
+					<ScrollArea className="h-96">
+						<Table>
+							<TableHeader className="bg-slate-50/50">
+								<TableRow>
+									<TableHead>Date</TableHead>
+									<TableHead>Time</TableHead>
+									<TableHead>Preference</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{submission.slots?.map((slot) => (
+									<TableRow key={slot.id}>
+										<TableCell className="font-medium text-slate-700">
+											{new Date(slot.date!).toLocaleDateString('en-US', {
+												weekday: 'long',
+												month: 'long',
+												day: 'numeric'
+											})}
+										</TableCell>
+										<TableCell className="text-slate-600">
+											<div className="flex items-center gap-2">
+												<Clock className="w-4 h-4" />
+												{`${new Date(`2000-01-01T${slot.start_time}`).toLocaleTimeString('en-US', {
+													hour: '2-digit',
+													minute: '2-digit'
+												})} - 
+                        ${new Date(`2000-01-01T${slot.end_time}`).toLocaleTimeString('en-US', {
+													hour: '2-digit',
+													minute: '2-digit'
+												})}`}
+											</div>
+										</TableCell>
+										<TableCell>
+											<Badge className={preferenceConfig.styles[slot.preference_level]}>
+												{preferenceConfig.labels[slot.preference_level - 1]}
+											</Badge>
+										</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</ScrollArea>
+				</CardContent>
+			</Card>
+		</div>
+	);
 
-		const preference = config[level as keyof typeof config];
-		return (
-			<Badge
-				variant="outline"
-				className={`${preference.color} py-0.5 px-2 rounded-full font-medium transition-all duration-300 hover:opacity-80 text-xs`}
-			>
-				{preference.label}
-			</Badge>
-		);
-	};
-
-	const getStatusBadge = (status: 'draft' | 'submitted') => {
-		const config = {
-			draft: 'bg-gray-100 text-gray-800 border-gray-300',
-			submitted: 'bg-blue-100 text-blue-800 border-blue-300'
-		};
-
-		return (
-			<Badge
-				variant="outline"
-				className={`${config[status]} py-0.5 px-2 rounded-full font-medium transition-all duration-300 hover:opacity-80 text-xs`}
-			>
-				{status.charAt(0).toUpperCase() + status.slice(1)}
-			</Badge>
-		);
-	};
-
-	const groupSlotsByDate = (slots?: Slot[]) => {
-		const grouped: Record<string, Slot[]> = {};
-		slots?.forEach(slot => {
-			if (slot.date) {
-				if (!grouped[slot.date]) {
-					grouped[slot.date] = [];
-				}
-				grouped[slot.date]?.push(slot);
-			}
-		});
-		return grouped;
-	};
-
-	const SubmissionDetailsDialog = ({ submission }: { submission: Submission }) => (
+	return (
 		<Dialog>
 			<DialogTrigger asChild>
 				<Button
 					variant="outline"
 					size="sm"
-					className="hover:bg-indigo-100 transition-all duration-300 h-8"
+					className="hover:bg-slate-50"
 				>
-					Details
+					<Eye className="w-4 h-4 mr-2" />
+					{isTeamAdmin ? 'View All Submissions' : 'View Details'}
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="max-w-4xl h-[80vh] flex flex-col">
-				<DialogHeader>
-					<div className="flex items-center gap-4">
-						<Info className="w-6 h-6 text-indigo-600" />
-						<DialogTitle>
-							{submission.template?.name || `Template ${submission.template_id}`}
-						</DialogTitle>
-					</div>
-				</DialogHeader>
-
-				<div className="flex-1 overflow-hidden">
-					<ScrollArea className="h-full pr-4">
-						<div className="space-y-4 pr-2">
-							<div className="space-y-4">
-								<div className="flex flex-wrap items-center gap-4 bg-gray-50 rounded-xl p-4 shadow-xs">
-									{isTeamAdmin && (
-										<div className="flex items-center gap-3 bg-indigo-50 px-3 py-1.5 rounded-lg">
-											<span className="text-sm font-medium text-indigo-900">User ID:</span>
-											<span className="text-sm text-indigo-700">#{submission.user_id}</span>
-										</div>
-									)}
-									<div className="flex items-center gap-3 bg-blue-50 px-3 py-1.5 rounded-lg">
-										<ClipboardList className="h-5 w-5 text-blue-600" />
-										<div className="flex items-center gap-2">
-											<span className="text-sm font-medium text-blue-900">Status:</span>
-											{getStatusBadge(submission.status)}
-										</div>
-									</div>
-									{submission.submitted_at && (
-										<div className="flex items-center gap-3 bg-green-50 px-3 py-1.5 rounded-lg">
-											<Calendar className="h-5 w-5 text-green-600" />
-											<div className="flex items-center gap-2">
-												<span className="text-sm font-medium text-green-900">Submitted:</span>
-												<span className="text-sm text-green-700">{formatDateTime(submission.submitted_at)}</span>
-											</div>
-										</div>
-									)}
-								</div>
-
-								<Table>
-									<TableHeader className="bg-gradient-to-r from-indigo-50 to-indigo-100/50 sticky top-0">
-										<TableRow>
-											<TableHead className="w-1/3 text-indigo-900 text-sm font-semibold py-2">Date</TableHead>
-											<TableHead className="w-1/3 text-indigo-900 text-sm font-semibold py-2">Time Slot</TableHead>
-											<TableHead className="w-1/3 text-indigo-900 text-sm font-semibold py-2">Preference Level</TableHead>
-										</TableRow>
-									</TableHeader>
-									<TableBody>
-										{Object.entries(groupSlotsByDate(submission.slots))
-											.sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
-											.map(([date, slots]) => (
-												<React.Fragment key={date}>
-													{slots?.sort((a, b) => (a.start_time || '').localeCompare(b.start_time || ''))
-														.map((slot: Slot, idx: number) => (
-															<TableRow
-																key={slot.id}
-																className="hover:bg-gray-50 transition-colors duration-200"
-															>
-																{idx === 0 && (
-																	<TableCell
-																		rowSpan={slots.length}
-																		className="font-medium align-top border-r border-gray-100 py-2"
-																	>
-																		<div className="flex flex-col">
-																			<span className="text-sm font-bold text-gray-900">
-																				{new Date(date).toLocaleDateString('en-US', {
-																					weekday: 'long',
-																				})}
-																			</span>
-																			<span className="text-xs text-gray-600">
-																				{new Date(date).toLocaleDateString('en-US', {
-																					month: 'short',
-																					day: 'numeric'
-																				})}
-																			</span>
-																		</div>
-																	</TableCell>
-																)}
-																<TableCell className="py-2">
-																	<div className="flex items-center gap-2">
-																		<Clock className="h-4 w-4 text-gray-500" />
-																		<span className="text-xs text-gray-700 font-medium">
-																			{slot.start_time && slot.end_time && (
-																				<>
-																					{formatTime(slot.start_time)} - {formatTime(slot.end_time)}
-																				</>
-																			)}
-																		</span>
-																	</div>
-																</TableCell>
-																<TableCell className="py-2">
-																	{getPreferenceBadge(slot.preference_level)}
-																</TableCell>
-															</TableRow>
-														))}
-												</React.Fragment>
-											))}
-									</TableBody>
-								</Table>
-							</div>
-						</div>
-					</ScrollArea>
-				</div>
-			</DialogContent>
-		</Dialog>
-	);
-
-	const SubmissionListDialog = () => (
-		<Dialog open={isSubmissionListOpen} onOpenChange={setIsSubmissionListOpen}>
-			<DialogContent className="max-w-4xl h-[80vh] flex flex-col">
-				<DialogHeader>
-					<div className="flex items-center gap-4">
-						<Users className="w-6 h-6 text-indigo-600" />
-						<DialogTitle>All Submissions</DialogTitle>
-					</div>
-				</DialogHeader>
-
-				<div className="flex-1 overflow-hidden">
-					<ScrollArea className="h-full pr-4">
-						<Table>
-							<TableHeader className="bg-indigo-50 sticky top-0">
-								<TableRow>
-									<TableHead className="text-indigo-900 text-sm font-semibold w-1/4 py-2">User ID</TableHead>
-									<TableHead className="text-indigo-900 text-sm font-semibold w-1/4 py-2">Status</TableHead>
-									<TableHead className="text-indigo-900 text-sm font-semibold w-1/4 py-2">Submitted At</TableHead>
-									<TableHead className="text-right text-indigo-900 text-sm font-semibold w-1/4 py-2">Actions</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{loading ? (
-									<TableRow>
-										<TableCell colSpan={4} className="text-center py-4 text-gray-500 text-sm">
-											Loading submissions...
-										</TableCell>
-									</TableRow>
-								) : error ? (
-									<TableRow>
-										<TableCell colSpan={4} className="text-center text-red-600 py-4 bg-red-50 text-sm">
-											{error}
-										</TableCell>
-									</TableRow>
-								) : (
-									teamSubmissions?.map((submission) => (
-										<TableRow
-											key={submission.id}
-											className="hover:bg-indigo-50/50 transition-colors duration-200"
-										>
-											<TableCell className="font-medium text-sm py-2">#{submission.user_id}</TableCell>
-											<TableCell className="py-2">{getStatusBadge(submission.status)}</TableCell>
-											<TableCell className="text-sm py-2">{submission.submitted_at ? formatDateTime(submission.submitted_at) : '-'}</TableCell>
-											<TableCell className="text-right py-2">
-												<SubmissionDetailsDialog submission={submission} />
-											</TableCell>
-										</TableRow>
-									))
-								)}
-							</TableBody>
-						</Table>
-					</ScrollArea>
-				</div>
-			</DialogContent>
-		</Dialog>
-	);
-
-	return (
-		<div className={`flex w-full ${className}`}>
-			{initialSubmission && (
-				<div className="p-2 grid space-y-4">
-					{isTeamAdmin && (
+			<DialogContent className="max-w-4xl p-6 bg-white border shadow-xl">
+				<div className="flex justify-between items-center mb-6">
+					{isTeamAdmin && !isListView && (
 						<Button
-							variant="outline"
-							onClick={() => setIsSubmissionListOpen(true)}
-							className="hover:bg-indigo-50"
+							variant="ghost"
+							size="sm"
+							onClick={handleBackToList}
+							className="text-slate-600 hover:bg-slate-100"
 						>
-							<Users className="h-5 w-5 mr-2" />
-							View All Submissions
+							<ArrowLeft className="w-4 h-4 mr-2" />
+							Back to List
 						</Button>
 					)}
-					<SubmissionDetailsDialog submission={initialSubmission} />
 				</div>
-			)}
 
-			{isTeamAdmin && <SubmissionListDialog />}
-		</div>
+				{isTeamAdmin && isListView ? (
+					<SubmissionsList />
+				) : selectedSubmission ? (
+					<SubmissionDetails submission={selectedSubmission} />
+				) : null}
+			</DialogContent>
+		</Dialog>
 	);
 };
 

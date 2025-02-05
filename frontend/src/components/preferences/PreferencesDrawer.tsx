@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PreferencesHeader } from "./PreferencesHeader";
 import { PreferencesContent } from "./PreferencesContent";
 import { usePreferences, usePreferencesState, useTeam } from "@/hooks";
-import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
+import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "../ui/drawer";
 import AnimatedGradientButton from "../AnimatedButton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Settings } from "lucide-react";
@@ -141,7 +141,7 @@ export const PreferencesDrawer: React.FC<PreferencesDrawerProps> = ({ onSuccess 
 					transition={{ duration: 0.3 }}
 				>
 					<div className="flex-shrink-0 border-b">
-						<PreferencesHeader />
+						<DrawerTitle></DrawerTitle>
 					</div>
 					<div className="flex flex-1 min-h-0">
 						<div className="flex-1 min-h-0">
