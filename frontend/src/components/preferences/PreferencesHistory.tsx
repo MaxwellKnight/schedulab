@@ -3,60 +3,58 @@ import {
 	Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, CheckCircle, Edit, ArrowUpDown, ArrowUp, ArrowDown, MoreHorizontal } from 'lucide-react';
-import { useAuthenticatedFetch } from '@/hooks';
-import { useTeam } from '@/context';
+import { Calendar, Clock, CheckCircle, Edit, ArrowUpDown, ArrowUp, ArrowDown, MoreHorizontal, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
-	DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+	DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import PreferenceDetail from './PreferenceDetails';
+import { useTeam } from '@/context';
+import { useAuthenticatedFetch } from '@/hooks';
 
-interface APIResponse {
-	submission: {
-		id: number;
-		template_id: number;
-		template?: Template;
-		user_id: number;
-		status: 'draft' | 'submitted';
-		submitted_at: string | null;
-		notes: string | null;
-		created_at: string;
-		updated_at: string;
-	};
-	slots: Slot[];
-}
-
-interface Template {
+export interface Slot {
 	id: number;
-	name: string;
-}
-
-interface Slot {
-	id: number;
-	member_preference_id: number;
+	submission_id?: number;
+	member_preference_id?: number;
 	template_time_slot_id: number;
 	preference_level: number;
 	created_at: string;
-	date?: string;
-	start_time?: string;
-	end_time?: string;
+	date: string;
+	start_time: string;
+	end_time: string;
 }
 
-interface Submission {
+export interface SubmissionData {
 	id: number;
 	template_id: number;
-	template?: Template;
 	user_id: number;
 	status: 'draft' | 'submitted';
 	submitted_at: string | null;
 	notes: string | null;
 	created_at: string;
 	updated_at: string;
-	slots?: Slot[];
 }
 
+export interface Submission extends SubmissionData {
+	slots?: Slot[];
+	template?: {
+		id: number;
+		name: string;
+	};
+}
+
+// API Response Type
+export interface PreferenceSubmissionResponse {
+	submission: SubmissionData;
+	slots: Slot[];
+}
+
+// Type for sort columns
 type SortColumn = 'template_id' | 'status' | 'slots' | 'submitted_at' | 'created_at' | 'updated_at';
 type SortDirection = 'asc' | 'desc';
 
@@ -79,32 +77,74 @@ const PreferencesHistory: React.FC = () => {
 	const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 	const [searchTerm, setSearchTerm] = useState<string>('');
 
+	// Use the authenticated fetch hook
 	const {
 		data: apiResponse,
-		loading: submissionsLoading,
-		error: submissionsError,
+		loading,
+		error,
 		fetchData: refreshSubmissions
-	} = useAuthenticatedFetch<APIResponse[]>(
-		`preferences-submissions/team/${selectedTeam?.id}`
+	} = useAuthenticatedFetch<PreferenceSubmissionResponse[]>(
+		`/preferences-submissions/team/${selectedTeam?.id}`,
+		{}, // additional options if needed
+		{
+			enabled: !!selectedTeam?.id, // only fetch if team is selected
+			ttl: 5 * 60 * 1000 // 5 minute cache
+		}
 	);
-	console.log(apiResponse);
 
-	const submissions: Submission[] = useMemo(() => {
+	const transformApiResponse = (apiResponse: PreferenceSubmissionResponse[]): PreferenceSubmissionResponse[] => {
+		return apiResponse.map(submission => ({
+			submission: {
+				id: submission.submission.id,
+				template_id: submission.submission.template_id,
+				user_id: submission.submission.user_id,
+				status: submission.submission.status,
+				submitted_at: submission.submission.submitted_at,
+				notes: submission.submission.notes,
+				created_at: submission.submission.created_at,
+				updated_at: submission.submission.updated_at
+			},
+			slots: submission.slots.map(slot => ({
+				id: slot.id,
+				submission_id: slot.submission_id,
+				template_time_slot_id: slot.template_time_slot_id,
+				preference_level: slot.preference_level,
+				created_at: slot.created_at,
+				date: slot.date,
+				start_time: slot.start_time,
+				end_time: slot.end_time
+			}))
+		}));
+	};
+
+	// Transform submissions, ensuring consistent structure
+	const submissions = useMemo(() => {
 		if (!apiResponse) return [];
-		return apiResponse.map(({ submission, slots }) => ({
+
+		// Use the transformation function
+		const transformedData = transformApiResponse(apiResponse);
+
+		return transformedData.map(({ submission, slots }) => ({
 			...submission,
-			slots
+			slots,
+			template: {
+				id: submission.template_id,
+				name: `Template ${submission.template_id}`
+			}
 		}));
 	}, [apiResponse]);
+	console.log(submissions.slice(0, 50));
 
-	const templates: Record<number, string> = useMemo(() => {
-		if (!submissions) return {};
-		return submissions.reduce<Record<number, string>>((acc, sub) => ({
-			...acc,
-			[sub.template_id]: sub.template?.name || `Template ${sub.template_id}`
-		}), {});
+	// Templates mapping
+	const templates = useMemo(() => {
+		const templateMap: Record<number, string> = {};
+		submissions.forEach(sub => {
+			templateMap[sub.template_id] = `Template ${sub.template_id}`;
+		});
+		return templateMap;
 	}, [submissions]);
 
+	// DateTime formatting utility
 	const formatDateTime = (dateString: string | null): string => {
 		if (!dateString) return 'Not submitted';
 		return new Date(dateString).toLocaleString('en-US', {
@@ -116,7 +156,8 @@ const PreferencesHistory: React.FC = () => {
 		});
 	};
 
-	const renderStatusBadge = (status: 'draft' | 'submitted'): JSX.Element => {
+	// Status badge rendering
+	const renderStatusBadge = (status: 'draft' | 'submitted') => {
 		const config = STATUS_CONFIG[status];
 		const StatusIcon = config.icon;
 		return (
@@ -127,6 +168,7 @@ const PreferencesHistory: React.FC = () => {
 		);
 	};
 
+	// Sorting handler
 	const handleSort = (column: SortColumn): void => {
 		if (sortColumn === column) {
 			setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -136,20 +178,21 @@ const PreferencesHistory: React.FC = () => {
 		}
 	};
 
-	const renderSortIcon = (column: SortColumn): JSX.Element => {
+	// Sort icon rendering
+	const renderSortIcon = (column: SortColumn) => {
 		if (sortColumn !== column) return <ArrowUpDown className="h-4 w-4 opacity-50" />;
 		return sortDirection === 'asc'
 			? <ArrowUp className="h-4 w-4" />
 			: <ArrowDown className="h-4 w-4" />;
 	};
 
+	// Filtered and sorted submissions
 	const filteredAndSortedSubmissions = useMemo(() => {
-		if (!submissions) return [];
-
 		const filtered = submissions.filter(submission =>
 			templates[submission.template_id]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			submission.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			submission.notes?.toLowerCase().includes(searchTerm.toLowerCase())
+			submission.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			false
 		);
 
 		return filtered.sort((a, b) => {
@@ -179,12 +222,30 @@ const PreferencesHistory: React.FC = () => {
 		});
 	}, [submissions, templates, sortColumn, sortDirection, searchTerm]);
 
-	if (submissionsLoading) {
+	// Render loading state
+	if (loading) {
 		return <div className="p-4 text-center">Loading submissions...</div>;
 	}
 
-	if (submissionsError) {
-		return <div className="p-4 text-red-600">Error loading submissions: {submissionsError}</div>;
+	// Render error state
+	if (error) {
+		return (
+			<div className="p-4 text-red-600">
+				<div className="bg-red-50 border border-red-200 rounded-lg p-4">
+					<h3 className="text-lg font-semibold mb-2">Error Loading Submissions</h3>
+					<p className="mb-2">{error}</p>
+					<details className="text-sm text-gray-600">
+						<summary>Troubleshooting Tips</summary>
+						<ul className="list-disc list-inside mt-2">
+							<li>Check your network connection</li>
+							<li>Verify the API endpoint is correct</li>
+							<li>Ensure you're authenticated</li>
+							<li>Check with your system administrator</li>
+						</ul>
+					</details>
+				</div>
+			</div>
+		);
 	}
 
 	return (
@@ -224,7 +285,6 @@ const PreferencesHistory: React.FC = () => {
 								{[
 									{ key: 'template_id', label: 'Template' },
 									{ key: 'status', label: 'Status' },
-									{ key: 'slots', label: 'Selected Slots' },
 									{ key: 'submitted_at', label: 'Submitted At' },
 									{ key: 'created_at', label: 'Created At' },
 									{ key: 'updated_at', label: 'Last Updated' }
@@ -244,9 +304,9 @@ const PreferencesHistory: React.FC = () => {
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{filteredAndSortedSubmissions.map((submission) => (
+							{filteredAndSortedSubmissions.map((submission, index) => (
 								<TableRow
-									key={submission.id}
+									key={index}
 									className="hover:bg-indigo-50/50 transition-colors"
 								>
 									<TableCell className="font-medium">
@@ -254,11 +314,6 @@ const PreferencesHistory: React.FC = () => {
 									</TableCell>
 									<TableCell>
 										{renderStatusBadge(submission.status)}
-									</TableCell>
-									<TableCell>
-										<Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">
-											{submission.slots?.length || 0} slots
-										</Badge>
 									</TableCell>
 									<TableCell className="text-sm text-gray-600">
 										{formatDateTime(submission.submitted_at)}
@@ -270,25 +325,50 @@ const PreferencesHistory: React.FC = () => {
 										{formatDateTime(submission.updated_at)}
 									</TableCell>
 									<TableCell className="text-right">
-										<div className="flex justify-end gap-2">
-											<PreferenceDetail submission={submission} />
-											<DropdownMenu>
-												<DropdownMenuTrigger asChild>
-													<Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-indigo-100">
-														<span className="sr-only">Open menu</span>
-														<MoreHorizontal className="h-4 w-4" />
-													</Button>
-												</DropdownMenuTrigger>
-												<DropdownMenuContent align="end">
-													{submission.status === 'draft' && (
-														<DropdownMenuItem className="cursor-pointer hover:bg-indigo-50">
-															<Edit className="mr-2 h-4 w-4" />
-															Edit
+										<DropdownMenu>
+											<DropdownMenuTrigger asChild>
+												<Button
+													variant="outline"
+													size="sm"
+													className="h-8 w-8 p-0 border-indigo-200 hover:bg-indigo-50 hover:border-indigo-300 group"
+												>
+													<span className="sr-only">Open menu</span>
+													<MoreHorizontal className="h-4 w-4 text-indigo-600 group-hover:text-indigo-800 transition-colors" />
+												</Button>
+											</DropdownMenuTrigger>
+											<DropdownMenuContent
+												align="end"
+												className="border-indigo-100 bg-white shadow-md rounded-lg"
+											>
+												<PreferenceDetail
+													templateId={submission.template_id}
+													submission={submission}
+													render={(dialogTrigger) => (
+														<DropdownMenuItem
+															onSelect={(e) => {
+																e.preventDefault();
+																dialogTrigger.click();
+															}}
+															className="cursor-pointer hover:bg-indigo-50 focus:bg-indigo-50 transition-colors"
+														>
+															<Info className="mr-2 h-4 w-4 text-indigo-600" />
+															View Details
 														</DropdownMenuItem>
 													)}
-												</DropdownMenuContent>
-											</DropdownMenu>
-										</div>
+												/>
+												{submission.status === 'draft' && (
+													<>
+														<DropdownMenuSeparator className="bg-indigo-100" />
+														<DropdownMenuItem
+															className="cursor-pointer hover:bg-indigo-50 focus:bg-indigo-50 transition-colors"
+														>
+															<Edit className="mr-2 h-4 w-4 text-indigo-600" />
+															Edit
+														</DropdownMenuItem>
+													</>
+												)}
+											</DropdownMenuContent>
+										</DropdownMenu>
 									</TableCell>
 								</TableRow>
 							))}
