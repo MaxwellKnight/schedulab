@@ -1,11 +1,14 @@
 import { Response, Request } from "express";
-import { PreferenceSubmissionService } from "../services";
+import { PreferenceSubmissionService, TeamService } from "../services";
+import { PreferenceSubmissionWithSlots } from "../models";
 
 export class PreferenceSubmissionController {
 	private service: PreferenceSubmissionService;
+	private teamService: TeamService;
 
-	constructor(service: PreferenceSubmissionService) {
+	constructor(service: PreferenceSubmissionService, teamService: TeamService) {
 		this.service = service;
+		this.teamService = teamService;
 	}
 
 	private handleError(res: Response, error: Error | unknown) {
@@ -120,7 +123,7 @@ export class PreferenceSubmissionController {
 	// Get submissions for a specific template
 	public getByTemplate = async (req: Request, res: Response): Promise<void> => {
 		try {
-			const templateId = Number(req.body.templateId);
+			const templateId = Number(req.query.templateId);
 			const submissions = await this.service.getSubmissionsByTemplate(templateId, req.user!.id);
 			res.json(submissions);
 		} catch (error) {
@@ -148,8 +151,13 @@ export class PreferenceSubmissionController {
 	public getByTeam = async (req: Request, res: Response): Promise<void> => {
 		try {
 			const teamId = Number(req.params.teamId);
-			const submissions = await this.service.getSubmissionsByTeam(teamId, req.user!.id);
-			console.log(submissions);
+			let submissions: PreferenceSubmissionWithSlots[] | undefined;
+			const role = await this.teamService.getMemberRole(teamId, req.user!.id);
+			console.log(role);
+			if (role && role === 'admin')
+				submissions = await this.service.getAllByTeam(teamId);
+			else
+				submissions = await this.service.getSubmissionsByTeam(teamId, req.user!.id);
 			res.json(submissions);
 		} catch (error) {
 			this.handleError(res, error);
