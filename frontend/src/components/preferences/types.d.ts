@@ -54,3 +54,36 @@ export interface PreferencesNavigationConfig {
 	items: NavigationItem[];
 	defaultView: NavigationItemId;
 }
+
+export interface Template {
+	id: number;
+	name: string;
+}
+
+export interface Slot {
+	id: number;
+	member_preference_id: number;
+	template_time_slot_id: number;
+	preference_level: number;
+	created_at: string;
+	date?: string;
+	start_time?: string;
+	end_time?: string;
+}
+
+export interface Submission {
+	id: number;
+	template_id: number;
+	template?: Template;
+	user_id: number;
+	status: 'draft' | 'submitted';
+	submitted_at: string | null;
+	notes: string | null;
+	created_at: string;
+	updated_at: string;
+	slots?: Slot[];
+}
+
+export type SortColumn = 'template_id' | 'status' | 'slots' | 'submitted_at' | 'created_at' | 'updated_at';
+export type SortDirection = 'asc' | 'desc';
+
