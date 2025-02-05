@@ -62,7 +62,7 @@ export interface Template {
 
 export interface Slot {
 	id: number;
-	member_preference_id: number;
+	member_preference_id?: number;
 	template_time_slot_id: number;
 	preference_level: number;
 	created_at: string;
