@@ -210,6 +210,7 @@ export class PreferenceSubmissionRepository {
 			start_time: slot.start_time,
 			end_time: slot.end_time
 		}));
+		console.log(submissions, formattedSlots);
 
 		return {
 			submission: submissions[0],
@@ -217,6 +218,52 @@ export class PreferenceSubmissionRepository {
 		};
 	}
 
+	public async getAllDetailsByTeam(id: number, userId: number): Promise<{
+		submission: PreferenceSubmission,
+		slots: PreferenceSubmissionSlot[]
+	} | null> {
+		// Verify submission ownership
+		const [submissions] = await this.db.execute<SubmissionRow[]>(
+			"SELECT * FROM preference_submissions WHERE id = ? AND user_id = ?",
+			[id, userId]
+		);
+
+		if (!submissions.length) return null;
+
+		// Get associated slots with additional time slot details
+		const [slots] = await this.db.execute<SubmissionSlotRow[]>(`
+        SELECT 
+            pss.*,
+            ts.date as slot_date,
+            ptr.start_time,
+            ptr.end_time
+        FROM 
+            preference_submission_slots pss
+        JOIN 
+            template_time_slots ts ON pss.template_time_slot_id = ts.id
+        JOIN 
+            preference_time_ranges ptr ON ts.time_range_id = ptr.id
+        WHERE 
+            pss.submission_id = ?
+    `, [id]);
+
+		const formattedSlots = slots.map(slot => ({
+			id: slot.id,
+			submission_id: slot.submission_id,
+			member_preference_id: slot.submission_id,
+			template_time_slot_id: slot.template_time_slot_id,
+			preference_level: slot.preference_level,
+			created_at: slot.created_at,
+			date: slot.slot_date ? new Date(slot.slot_date) : undefined,
+			start_time: slot.start_time,
+			end_time: slot.end_time
+		}));
+
+		return {
+			submission: submissions[0],
+			slots: formattedSlots
+		};
+	}
 	public async getUserSubmissionsForTemplate(templateId: number, userId: number): Promise<{
 		submission: PreferenceSubmission,
 		slots: PreferenceSubmissionSlot[]
@@ -239,8 +286,19 @@ export class PreferenceSubmissionRepository {
    JOIN team_members tm ON tm.team_id = pt.team_id
    WHERE pt.team_id = ? AND tm.user_id = ?
  `, [teamId, userId]);
-		console.log(rows);
 
+		return rows;
+	}
+
+	public async getAllByTeam(teamId: number): Promise<PreferenceSubmission[]> {
+		const [rows] = await this.db.execute<SubmissionRow[]>(`
+        SELECT ps.* 
+        FROM preference_submissions ps
+        JOIN preference_templates pt ON ps.template_id = pt.id 
+        JOIN team_members tm ON tm.team_id = pt.team_id
+        WHERE pt.team_id = ?
+        GROUP BY ps.id
+    `, [teamId]);
 		return rows;
 	}
 

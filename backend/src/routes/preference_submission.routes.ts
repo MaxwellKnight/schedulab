@@ -4,6 +4,7 @@ import { makeValidator } from "../middlewares/middlewares";
 import {
 	PreferenceService,
 	PreferenceSubmissionService,
+	TeamService,
 	UserService
 } from "../services";
 import {
@@ -13,6 +14,7 @@ import {
 import {
 	PreferenceRepository,
 	PreferenceSubmissionRepository,
+	TeamRepository,
 	UserRepository
 } from "../repositories";
 import {
@@ -24,6 +26,7 @@ import {
 const preferenceRepository = new PreferenceRepository(makeSQL());
 const preferenceSubmissionRepository = new PreferenceSubmissionRepository(makeSQL());
 const userRepository = new UserRepository(makeSQL());
+const teamRepository = new TeamRepository(makeSQL());
 
 // Initialize services
 const preferenceSubmissionService = new PreferenceSubmissionService(
@@ -31,10 +34,11 @@ const preferenceSubmissionService = new PreferenceSubmissionService(
 	preferenceRepository
 );
 const userService = new UserService(userRepository);
+const teamService = new TeamService(teamRepository);
 
 // Initialize controllers
 const authController = new AuthController(userService);
-const preferenceSubmissionController = new PreferenceSubmissionController(preferenceSubmissionService);
+const preferenceSubmissionController = new PreferenceSubmissionController(preferenceSubmissionService, teamService);
 
 // Initialize validators
 const memberPreferenceValidator = makeValidator(memberPreferenceSchema);

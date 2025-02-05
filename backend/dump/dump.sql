@@ -510,6 +510,17 @@ VALUES (10, 'HOSP700', '700');
 INSERT INTO team_members (team_id, user_id) 
 SELECT 1, id FROM users WHERE id > 2 AND id <= 20;
 
+INSERT IGNORE INTO team_roles (team_id, name) 
+VALUES (1, 'admin');
+
+-- Insert the user into team members
+INSERT IGNORE INTO team_members (team_id, user_id) 
+VALUES (1, 10);
+
+-- Assign the admin role to the user
+INSERT IGNORE INTO member_roles (team_id, user_id, role_id)
+VALUES (1, 10, (SELECT id FROM team_roles WHERE team_id = 1 AND name = 'admin'));
+
 -- Start transaction to ensure data consistency
 START TRANSACTION;
 
@@ -1098,14 +1109,15 @@ INSERT INTO preference_templates (team_id, name, start_date, end_date, status, c
 (1, 'Morning Shift Week 49', '2024-12-02', '2024-12-08', 'published', 3);
 SET @morning_template = LAST_INSERT_ID();
 
--- Four time ranges per day
+-- Time ranges with more options
 INSERT INTO preference_time_ranges (preference_id, start_time, end_time) VALUES
 (@morning_template, '06:00', '14:00'),
+(@morning_template, '06:30', '14:30'),
 (@morning_template, '07:00', '15:00'),
-(@morning_template, '08:00', '16:00'),
-(@morning_template, '09:00', '17:00');
+(@morning_template, '07:30', '15:30'),
+(@morning_template, '08:00', '16:00');
 
--- Time slots for one week
+-- Generate time slots for one week (Monday to Sunday)
 INSERT INTO template_time_slots (template_id, date, time_range_id)
 SELECT 
   @morning_template,
@@ -1123,14 +1135,93 @@ FROM (
 CROSS JOIN preference_time_ranges pr 
 WHERE pr.preference_id = @morning_template;
 
--- Create submissions for team members
-INSERT INTO preference_submissions (template_id, user_id, status)
-SELECT @morning_template, user_id, 'draft' 
+-- Create member preferences for team members
+INSERT INTO member_preferences (template_id, user_id, status, submitted_at, notes)
+SELECT 
+    @morning_template, 
+    user_id, 
+    CASE 
+        WHEN RAND() < 0.8 THEN 'submitted'
+        ELSE 'draft'
+    END,
+    CASE 
+        WHEN RAND() < 0.8 THEN DATE_ADD('2024-11-25', INTERVAL FLOOR(RAND() * 5) DAY)
+        ELSE NULL
+    END,
+    CASE 
+        WHEN RAND() < 0.25 THEN 'Prefer early morning shifts'
+        WHEN RAND() < 0.50 THEN 'Available for weekend coverage'
+        WHEN RAND() < 0.75 THEN 'Flexible with start times'
+        ELSE NULL
+    END
 FROM team_members 
 WHERE team_id = 1;
 
--- Generate submission slots
-INSERT INTO preference_submission_slots (submission_id, template_time_slot_id, preference_level)
-SELECT ps.id, ts.id, FLOOR(1 + RAND() * 5)
+-- Generate preference selections with day-specific patterns
+INSERT INTO preference_selections (member_preference_id, template_time_slot_id, preference_level)
+SELECT 
+    mp.id, 
+    ts.id,
+    CASE
+        -- Monday preferences (higher for early starts)
+        WHEN DAYOFWEEK(ts.date) = 2 AND ptr.start_time <= '07:00' THEN FLOOR(4 + RAND() * 2)
+        -- Friday preferences (later starts preferred)
+        WHEN DAYOFWEEK(ts.date) = 6 AND ptr.start_time >= '07:30' THEN FLOOR(4 + RAND() * 2)
+        -- Weekend preferences (lower overall)
+        WHEN DAYOFWEEK(ts.date) IN (1, 7) THEN FLOOR(1 + RAND() * 3)
+        -- Mid-week preferences (balanced)
+        WHEN DAYOFWEEK(ts.date) IN (3,4,5) THEN FLOOR(2 + RAND() * 4)
+        -- Default case
+        ELSE FLOOR(1 + RAND() * 5)
+    END as preference_level
+FROM member_preferences mp
+JOIN template_time_slots ts ON ts.template_id = mp.template_id
+JOIN preference_time_ranges ptr ON ptr.id = ts.time_range_id
+WHERE mp.status = 'submitted';
+
+-- Insert preference submissions based on member preferences
+INSERT INTO preference_submissions (
+    template_id, 
+    user_id, 
+    status, 
+    submitted_at, 
+    notes
+)
+SELECT 
+    template_id, 
+    user_id, 
+    status,
+    submitted_at,
+    notes
+FROM member_preferences
+WHERE status = 'submitted';
+
+-- Optional: Ensure data consistency by linking preference submissions to their selections
+-- This query is just to verify the relationship
+SELECT 
+    ps.id as submission_id,
+    ps.template_id,
+    ps.user_id,
+    ps.status,
+    COUNT(pss.id) as slot_count
 FROM preference_submissions ps
-JOIN template_time_slots ts ON ts.template_id = ps.template_id;
+JOIN preference_selections pss ON pss.member_preference_id = 
+    (SELECT id FROM member_preferences 
+     WHERE template_id = ps.template_id 
+     AND user_id = ps.user_id)
+GROUP BY ps.id, ps.template_id, ps.user_id, ps.status
+LIMIT 10;
+
+-- Insert corresponding submission slots
+INSERT INTO preference_submission_slots (
+    submission_id, 
+    template_time_slot_id, 
+    preference_level
+)
+SELECT 
+    ps.id,
+    ps2.template_time_slot_id,
+    ps2.preference_level
+FROM preference_submissions ps
+JOIN member_preferences mp ON mp.template_id = ps.template_id AND mp.user_id = ps.user_id
+JOIN preference_selections ps2 ON ps2.member_preference_id = mp.id;
