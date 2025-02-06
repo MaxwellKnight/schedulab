@@ -62,7 +62,6 @@ const PreferenceDetail: React.FC<PreferenceDetailProps> = ({
 	const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(initialSubmission || null);
 	const [isListView, setIsListView] = useState(isTeamAdmin);
 
-
 	const handleViewSubmission = (submission: Submission) => {
 		setSelectedSubmission(submission);
 		setIsListView(false);

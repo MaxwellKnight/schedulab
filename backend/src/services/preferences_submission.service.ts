@@ -218,6 +218,16 @@ export class PreferenceSubmissionService {
 		return d;
 	}
 
+	public async getAllByTeam(teamId: number): Promise<PreferenceSubmissionWithSlots[]> {
+		const submissions = await this.submissionRepo.getAllByTeam(teamId);
+		const details = await Promise.all(submissions.map(async sub => {
+			const subDetails = await this.submissionRepo.getAllDetailsByTeam(sub.id, sub.user_id);
+			return subDetails;
+		}));
+		const d = details.filter((d): d is NonNullable<typeof d> => d !== null);
+		return d;
+	}
+
 }
 
 export default PreferenceSubmissionService;

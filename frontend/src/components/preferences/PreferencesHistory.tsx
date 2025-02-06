@@ -15,7 +15,6 @@ import PreferenceDetail from './PreferenceDetails';
 import { useTeam } from '@/context';
 import { useAuthenticatedFetch } from '@/hooks';
 import { useAuth } from '@/hooks';
-import { Slot, Submission, SubmissionData } from './types';
 
 export interface PreferenceSubmissionResponse {
 	submission: SubmissionData;

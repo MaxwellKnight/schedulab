@@ -89,6 +89,7 @@ export interface Submission extends SubmissionData {
 		id: number;
 		name: string;
 	};
+	slots?: Slot[];
 }
 
 export type SortColumn = 'template_id' | 'status' | 'slots' | 'submitted_at' | 'created_at' | 'updated_at';
