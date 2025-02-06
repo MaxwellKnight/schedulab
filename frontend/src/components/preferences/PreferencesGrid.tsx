@@ -125,22 +125,21 @@ const PreferencesGrid: React.FC<PreferencesGridProps> = ({
 			</div>
 
 			{/* Submit Button */}
-			<div className="flex place-content-center">
-				<AnimatedSubmitButton
-					onClick={handleSubmit}
-					isSubmitting={isSubmitting}
-					text={
-						activeMode === 'edit'
-							? 'Update Preferences'
-							: activeMode === 'schedule'
-								? 'Confirm Schedule'
+			{activeMode !== 'schedule' ?
+				<div className="flex place-content-center">
+					<AnimatedSubmitButton
+						onClick={handleSubmit}
+						isSubmitting={isSubmitting}
+						text={
+							activeMode === 'edit'
+								? 'Update Preferences'
 								: 'Save Preferences'
-					}
-					error={error}
-					disabled={!hasTimeRanges}
-					className="w-full sm:w-auto"
-				/>
-			</div>
+						}
+						error={error}
+						disabled={!hasTimeRanges}
+						className="w-full sm:w-auto"
+					/>
+				</div> : null}
 		</div>
 	)
 }
