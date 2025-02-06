@@ -220,16 +220,15 @@ NotesSummary.displayName = 'NotesSummary';
 const PreferenceSelector: React.FC = () => {
 	const [selectedSlots, setSelectedSlots] = useState<Set<number>>(new Set());
 	const [notes, setNotes] = useState<Record<number, string>>({});
-	const { selectedTeam } = useTeam();
 	const {
 		data: apiPreferences,
 		loading
-	} = useAuthenticatedFetch<APISchedulePreferences[]>(`preferences/team/${selectedTeam?.id}`);
+	} = useAuthenticatedFetch<APISchedulePreferences>(`preferences/published`);
 
 	const preferences = useMemo(() => {
-		if (!apiPreferences?.length) return null;
+		if (!apiPreferences) return null;
 
-		const groupedSlots = apiPreferences[0].time_slots.reduce((acc, slot) => {
+		const groupedSlots = apiPreferences.time_slots.reduce((acc, slot) => {
 			const date = slot.date.split('T')[0];
 			if (!acc[date]) acc[date] = [];
 			acc[date].push(slot);
@@ -245,8 +244,8 @@ const PreferenceSelector: React.FC = () => {
 			.sort((a, b) => a.date.localeCompare(b.date));
 
 		return {
-			id: apiPreferences[0].id,
-			name: apiPreferences[0].name,
+			id: apiPreferences.id,
+			name: apiPreferences.name,
 			time_slots: daySchedules
 		} as SchedulePreferences;
 	}, [apiPreferences]);

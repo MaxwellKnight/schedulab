@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { PreferencesHeader } from "./PreferencesHeader";
 import { PreferencesContent } from "./PreferencesContent";
 import { usePreferences, usePreferencesState, useTeam } from "@/hooks";
 import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "../ui/drawer";
