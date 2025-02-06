@@ -1,7 +1,6 @@
 services:
   mysqldb:
     image: mysql:8.0.40
-    platform: linux/arm64/v8
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: $DATABASE_PASSWORD
@@ -51,7 +50,6 @@ services:
     build:
       context: ./frontend/
       dockerfile: Dockerfile
-    platform: linux/arm64 
     ports:
       - 5173:5173
     volumes:
