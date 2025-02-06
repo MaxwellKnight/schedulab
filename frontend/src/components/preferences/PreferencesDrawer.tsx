@@ -9,66 +9,16 @@ import PreferenceSelector from "./PreferenceSelector";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PreferencesSidebar from './PreferencesSidebar';
 import AnimatedSubmitButton from '../AnimatedSubmitButton';
-import { DailyPreference, NavigationItemId, PreferenceRange } from './types';
-import type { DateRange } from "react-day-picker";
+import { NavigationItemId } from './types';
 import PreferencesHistory from './PreferencesHistory';
+import PreferencesGrid, { PreferencesGridProps } from './PreferencesBuilder';
 
 export interface PreferencesDrawerProps {
 	onSuccess?: () => void;
 }
 
-type SetRangeFunction = React.Dispatch<React.SetStateAction<DateRange | undefined>>;
-
-interface ViewProps {
-	range: DateRange | undefined;
-	setRange: SetRangeFunction;
-	timeRanges: DailyPreference[];
-	onAddTimeRange: (date: Date) => void;
-	onRemoveTimeRange: (date: Date, index: number) => void;
-	onUpdateTimeRange: (date: Date, index: number, field: 'start_time' | 'end_time', value: string) => void;
-	onApplyToAll: (ranges: PreferenceRange[]) => void;
-	handleSubmit: () => Promise<void>;
-	isSubmitting: boolean;
-	error: string | null;
-	hasTimeRanges: boolean;
-}
-
-const ViewComponents: Record<NavigationItemId, React.FC<ViewProps>> = {
-	create: ({
-		range,
-		setRange,
-		timeRanges,
-		onAddTimeRange,
-		onRemoveTimeRange,
-		onUpdateTimeRange,
-		onApplyToAll,
-		handleSubmit,
-		isSubmitting,
-		error,
-		hasTimeRanges
-	}) => (
-		<>
-			<PreferencesContent
-				range={range}
-				setRange={setRange}
-				timeRanges={timeRanges}
-				onAddTimeRange={onAddTimeRange}
-				onRemoveTimeRange={onRemoveTimeRange}
-				onUpdateTimeRange={onUpdateTimeRange}
-				onApplyToAll={onApplyToAll}
-			/>
-			<div className="flex place-content-center">
-				<AnimatedSubmitButton
-					onClick={handleSubmit}
-					isSubmitting={isSubmitting}
-					text='Save Preferences'
-					error={error}
-					disabled={!hasTimeRanges}
-					className="w-full sm:w-auto"
-				/>
-			</div>
-		</>
-	),
+const ViewComponents: Record<NavigationItemId, React.FC<PreferencesGridProps>> = {
+	create: (props) => <PreferencesGrid {...props} />,
 	view: () => <PreferenceSelector />,
 	history: () => <PreferencesHistory />,
 	settings: ({ handleSubmit, isSubmitting, error }) => (
