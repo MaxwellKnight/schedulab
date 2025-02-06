@@ -68,18 +68,24 @@ export class PreferenceService {
 		return await this.repo.createTemplate(template, userId);
 	}
 
-	public async getTemplate(id: number, userId: number): Promise<PreferenceTemplateData | null> {
+	public async getOne(id: number, userId: number): Promise<PreferenceTemplateData | null> {
 		const template = await this.repo.getTemplatesByTeam(id, userId);
 		if (!template.length) return null;
 		return this.transformTemplate(template[0]);
 	}
 
-	public async getTemplates(userId: number): Promise<PreferenceTemplateData[]> {
+	public async getPublished(userId: number): Promise<PreferenceTemplateData | null> {
+		const template = await this.repo.getPublished(userId);
+		if (!template) return null;
+		return this.transformTemplate(template);
+	}
+
+	public async getMany(userId: number): Promise<PreferenceTemplateData[]> {
 		const templates: PreferenceTemplate[] = await this.repo.getMany(userId);
 		return Promise.all(templates.map(template => this.transformTemplate(template)));
 	}
 
-	public async getTemplatesByDateRange(
+	public async getByDateRange(
 		start_date: Date,
 		end_date: Date,
 		userId: number
@@ -88,12 +94,12 @@ export class PreferenceService {
 		return Promise.all(templates.map(template => this.transformTemplate(template)));
 	}
 
-	public async getTemplatesByTeam(teamId: number, userId: number): Promise<PreferenceTemplateData[]> {
+	public async getByTeam(teamId: number, userId: number): Promise<PreferenceTemplateData[]> {
 		const templates = await this.repo.getTemplatesByTeam(teamId, userId);
 		return Promise.all(templates.map(template => this.transformTemplate(template)));
 	}
 
-	public async updateTemplate(
+	public async update(
 		data: Partial<PreferenceTemplateData> & { id: number },
 		userId: number
 	): Promise<void> {
@@ -108,7 +114,7 @@ export class PreferenceService {
 		await this.repo.updateTemplate(updateData, userId);
 	}
 
-	public async deleteTemplate(id: number, userId: number): Promise<void> {
+	public async delete(id: number, userId: number): Promise<void> {
 		await this.repo.deleteTemplate(id, userId);
 	}
 
@@ -216,7 +222,7 @@ export class PreferenceService {
 
 	// Template status management
 	public async publishTemplate(id: number, userId: number): Promise<void> {
-		const template = await this.getTemplate(id, userId);
+		const template = await this.getOne(id, userId);
 		if (!template) {
 			throw new Error('Template not found or access denied');
 		}
@@ -224,14 +230,14 @@ export class PreferenceService {
 			throw new Error('Only draft templates can be published');
 		}
 
-		await this.updateTemplate({
+		await this.update({
 			id,
 			status: 'published'
 		}, userId);
 	}
 
 	public async closeTemplate(id: number, userId: number): Promise<void> {
-		const template = await this.getTemplate(id, userId);
+		const template = await this.getOne(id, userId);
 		if (!template) {
 			throw new Error('Template not found or access denied');
 		}
@@ -239,7 +245,7 @@ export class PreferenceService {
 			throw new Error('Only published templates can be closed');
 		}
 
-		await this.updateTemplate({
+		await this.update({
 			id,
 			status: 'closed'
 		}, userId);
@@ -247,7 +253,7 @@ export class PreferenceService {
 
 	// Utility methods
 	public async validateTimeSlots(templateId: number, userId: number): Promise<boolean> {
-		const template = await this.getTemplate(templateId, userId);
+		const template = await this.getOne(templateId, userId);
 		if (!template) return false;
 
 		if (!template.time_slots.length) {

@@ -64,7 +64,7 @@ export class PreferenceController {
 
 	public getOne = async (req: Request, res: Response): Promise<void> => {
 		try {
-			const template = await this.service.getTemplate(Number(req.params.teamId), req.user!.id);
+			const template = await this.service.getOne(Number(req.params.teamId), req.user!.id);
 			if (!template) {
 				res.status(404).json({ error: "Template not found" });
 				return;
@@ -75,9 +75,22 @@ export class PreferenceController {
 		}
 	}
 
+	public getPublished = async (req: Request, res: Response): Promise<void> => {
+		try {
+			const template = await this.service.getPublished(req.user!.id);
+			if (!template) {
+				res.status(404).json({ error: "Published template not found" });
+				return;
+			}
+			res.json(template);
+		} catch (error) {
+			this.handleError(res, error);
+		}
+	}
+
 	public getMany = async (req: Request, res: Response): Promise<void> => {
 		try {
-			const templates = await this.service.getTemplates(req.user!.id);
+			const templates = await this.service.getMany(req.user!.id);
 			res.json(templates);
 		} catch (error) {
 			this.handleError(res, error);
@@ -106,7 +119,7 @@ export class PreferenceController {
 				return;
 			}
 
-			const templates = await this.service.getTemplatesByDateRange(
+			const templates = await this.service.getByDateRange(
 				new Date(startDate),
 				new Date(endDate),
 				req.user!.id
@@ -119,7 +132,7 @@ export class PreferenceController {
 
 	public getByTeamId = async (req: Request, res: Response): Promise<void> => {
 		try {
-			const templates = await this.service.getTemplatesByTeam(
+			const templates = await this.service.getByTeam(
 				Number(req.params.teamId),
 				req.user!.id
 			);
@@ -132,7 +145,7 @@ export class PreferenceController {
 	public update = async (req: Request, res: Response): Promise<void> => {
 		try {
 			const templateId = Number(req.params.id);
-			await this.service.updateTemplate({
+			await this.service.update({
 				id: templateId,
 				...req.body
 			}, req.user!.id);
@@ -144,7 +157,7 @@ export class PreferenceController {
 
 	public delete = async (req: Request, res: Response): Promise<void> => {
 		try {
-			await this.service.deleteTemplate(Number(req.params.id), req.user!.id);
+			await this.service.delete(Number(req.params.id), req.user!.id);
 			res.json({ message: "Template deleted successfully" });
 		} catch (error) {
 			this.handleError(res, error);

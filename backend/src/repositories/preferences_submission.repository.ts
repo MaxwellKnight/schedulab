@@ -36,7 +36,7 @@ export class PreferenceSubmissionRepository {
 	}
 
 	// Create a new preference submission
-	public async createSubmission(
+	public async create(
 		submission: Omit<PreferenceSubmission, 'id' | 'created_at' | 'updated_at' | 'submitted_at'>,
 		slots: Omit<PreferenceSubmissionSlot, 'id' | 'submission_id' | 'created_at'>[]
 	): Promise<number> {
@@ -71,7 +71,7 @@ export class PreferenceSubmissionRepository {
 	}
 
 	// Update an existing preference submission
-	public async updateSubmission(
+	public async update(
 		submission: Partial<PreferenceSubmission> & { id: number },
 		slots?: Omit<PreferenceSubmissionSlot, 'id' | 'submission_id' | 'created_at'>[]
 	): Promise<void> {
@@ -122,7 +122,7 @@ export class PreferenceSubmissionRepository {
 		}
 	}
 
-	public async deleteSubmission(id: number, userId: number): Promise<void> {
+	public async delete(id: number, userId: number): Promise<void> {
 		// First, check if submission exists and belongs to user
 		const [submission] = await this.db.execute<SubmissionRow[]>(
 			"SELECT * FROM member_preferences WHERE id = ? AND user_id = ?",
@@ -146,7 +146,7 @@ export class PreferenceSubmissionRepository {
 		);
 	}
 
-	public async getSubmissionById(id: number, userId: number): Promise<PreferenceSubmission | null> {
+	public async getById(id: number, userId: number): Promise<PreferenceSubmission | null> {
 		const [submissions] = await this.db.execute<SubmissionRow[]>(
 			"SELECT * FROM member_preferences WHERE id = ? AND user_id = ?",
 			[id, userId]
@@ -155,7 +155,7 @@ export class PreferenceSubmissionRepository {
 		return submissions.length ? submissions[0] : null;
 	}
 
-	public async getSubmissionsByTemplate(templateId: number, userId: number): Promise<PreferenceSubmission[]> {
+	public async getByTemplate(templateId: number, userId: number): Promise<PreferenceSubmission[]> {
 		// Validate access to template
 		const hasAccess = await this.validateTemplateAccess(templateId, userId);
 		if (!hasAccess) {
@@ -170,7 +170,7 @@ export class PreferenceSubmissionRepository {
 		return submissions;
 	}
 
-	public async getSubmissionDetails(id: number, userId: number): Promise<{
+	public async getDetails(id: number, userId: number): Promise<{
 		submission: PreferenceSubmission,
 		slots: PreferenceSubmissionSlot[]
 	} | null> {
@@ -275,7 +275,7 @@ export class PreferenceSubmissionRepository {
 
 		if (!submissions.length) return null;
 
-		return this.getSubmissionDetails(submissions[0].id, userId);
+		return this.getDetails(submissions[0].id, userId);
 	}
 
 	public async getPreferencesByTeam(teamId: number, userId: number): Promise<PreferenceSubmission[]> {

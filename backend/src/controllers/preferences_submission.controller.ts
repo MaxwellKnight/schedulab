@@ -57,7 +57,7 @@ export class PreferenceSubmissionController {
 	public create = async (req: Request, res: Response): Promise<void> => {
 		try {
 			const templateId = Number(req.params.templateId);
-			const id = await this.service.createSubmission(
+			const id = await this.service.create(
 				{
 					...req.body,
 					template_id: templateId
@@ -78,7 +78,7 @@ export class PreferenceSubmissionController {
 	public update = async (req: Request, res: Response): Promise<void> => {
 		try {
 			const submissionId = Number(req.params.id);
-			await this.service.updateSubmission(
+			await this.service.update(
 				{
 					id: submissionId,
 					...req.body
