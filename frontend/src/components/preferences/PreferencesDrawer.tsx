@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { PreferencesContent } from "./PreferencesContent";
 import { usePreferences, usePreferencesState, useTeam } from "@/hooks";
 import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "../ui/drawer";
 import AnimatedGradientButton from "../AnimatedButton";
@@ -11,14 +10,14 @@ import PreferencesSidebar from './PreferencesSidebar';
 import AnimatedSubmitButton from '../AnimatedSubmitButton';
 import { NavigationItemId } from './types';
 import PreferencesHistory from './PreferencesHistory';
-import PreferencesGrid, { PreferencesGridProps } from './PreferencesBuilder';
+import PreferencesGrid, { PreferencesGridProps } from './PreferencesGrid';
 
 export interface PreferencesDrawerProps {
 	onSuccess?: () => void;
 }
 
 const ViewComponents: Record<NavigationItemId, React.FC<PreferencesGridProps>> = {
-	create: (props) => <PreferencesGrid {...props} />,
+	playground: (props) => <PreferencesGrid {...props} />,
 	view: () => <PreferenceSelector />,
 	history: () => <PreferencesHistory />,
 	settings: ({ handleSubmit, isSubmitting, error }) => (
@@ -55,7 +54,7 @@ export const PreferencesDrawer: React.FC<PreferencesDrawerProps> = ({ onSuccess 
 		handleSubmit
 	} = usePreferences(timeRanges, range, onSuccess);
 
-	const viewProps: ViewProps = {
+	const viewProps: PreferencesGridProps = {
 		range,
 		setRange,
 		timeRanges,
@@ -69,9 +68,8 @@ export const PreferencesDrawer: React.FC<PreferencesDrawerProps> = ({ onSuccess 
 		hasTimeRanges
 	};
 
-	const Component = isAdmin
-		? ViewComponents[currentView] ?? ViewComponents.view
-		: ViewComponents.view;
+	const Component =
+		ViewComponents[currentView] ? ViewComponents[currentView] : ViewComponents.view;
 
 	return (
 		<Drawer>

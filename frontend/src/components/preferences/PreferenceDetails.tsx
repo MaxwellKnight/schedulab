@@ -62,6 +62,7 @@ const PreferenceDetail: React.FC<PreferenceDetailProps> = ({
 	const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(initialSubmission || null);
 	const [isListView, setIsListView] = useState(isTeamAdmin);
 
+
 	const handleViewSubmission = (submission: Submission) => {
 		setSelectedSubmission(submission);
 		setIsListView(false);
@@ -242,7 +243,7 @@ const PreferenceDetail: React.FC<PreferenceDetailProps> = ({
 			</DialogTrigger>
 			<DialogContent className="max-w-4xl p-6 bg-white border shadow-xl">
 				<div className="flex justify-between items-center mb-6">
-					{isTeamAdmin && !isListView && (
+					{isTeamAdmin && !isListView ? (
 						<Button
 							variant="ghost"
 							size="sm"
@@ -252,7 +253,7 @@ const PreferenceDetail: React.FC<PreferenceDetailProps> = ({
 							<ArrowLeft className="w-4 h-4 mr-2" />
 							Back to List
 						</Button>
-					)}
+					) : null}
 				</div>
 
 				{isTeamAdmin && isListView ? (

@@ -39,7 +39,7 @@ export interface ScheduleData {
 }
 
 
-export type NavigationItemId = 'view' | 'create' | 'settings' | 'history'; // Add more options as needed
+export type NavigationItemId = 'view' | 'playground' | 'settings' | 'history'; // Add more options as needed
 
 export interface NavigationItem {
 	id: NavigationItemId;
@@ -62,26 +62,33 @@ export interface Template {
 
 export interface Slot {
 	id: number;
+	submission_id?: number;
 	member_preference_id?: number;
 	template_time_slot_id: number;
 	preference_level: number;
 	created_at: string;
-	date?: string;
-	start_time?: string;
-	end_time?: string;
+	date: string;
+	start_time: string;
+	end_time: string;
 }
 
-export interface Submission {
+export interface SubmissionData {
 	id: number;
 	template_id: number;
-	template?: Template;
 	user_id: number;
 	status: 'draft' | 'submitted';
 	submitted_at: string | null;
 	notes: string | null;
 	created_at: string;
 	updated_at: string;
+}
+
+export interface Submission extends SubmissionData {
 	slots?: Slot[];
+	template?: {
+		id: number;
+		name: string;
+	};
 }
 
 export type SortColumn = 'template_id' | 'status' | 'slots' | 'submitted_at' | 'created_at' | 'updated_at';
