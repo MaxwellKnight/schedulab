@@ -15,37 +15,7 @@ import PreferenceDetail from './PreferenceDetails';
 import { useTeam } from '@/context';
 import { useAuthenticatedFetch } from '@/hooks';
 import { useAuth } from '@/hooks';
-
-export interface Slot {
-	id: number;
-	submission_id?: number;
-	member_preference_id?: number;
-	template_time_slot_id: number;
-	preference_level: number;
-	created_at: string;
-	date: string;
-	start_time: string;
-	end_time: string;
-}
-
-export interface SubmissionData {
-	id: number;
-	template_id: number;
-	user_id: number;
-	status: 'draft' | 'submitted';
-	submitted_at: string | null;
-	notes: string | null;
-	created_at: string;
-	updated_at: string;
-}
-
-export interface Submission extends SubmissionData {
-	slots?: Slot[];
-	template?: {
-		id: number;
-		name: string;
-	};
-}
+import { Slot, Submission, SubmissionData } from './types';
 
 export interface PreferenceSubmissionResponse {
 	submission: SubmissionData;

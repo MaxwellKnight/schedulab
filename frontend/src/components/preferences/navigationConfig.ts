@@ -12,10 +12,10 @@ export const preferencesNavigationConfig: PreferencesNavigationConfig = {
 			enabled: true,
 		},
 		{
-			id: 'create',
-			label: 'Create New',
+			id: 'playground',
+			label: 'Playground',
 			icon: Plus,
-			description: 'Create a new preference setting',
+			description: 'Manage you team\'s preferences',
 			enabled: true,
 			requiresAdmin: true,
 		},

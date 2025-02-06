@@ -17,14 +17,14 @@ import {
 import { format } from "date-fns";
 import { Plus, X, ChevronLeft, ChevronRight, Copy, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { DailyPreference } from './types';
+import { DailyPreference, PreferenceRange } from './types';
 
 interface PreferencesApplyProps {
 	timeRanges: DailyPreference[];
 	onAddTimeRange: (date: Date) => void;
 	onRemoveTimeRange: (date: Date, index: number) => void;
 	onUpdateTimeRange: (date: Date, index: number, field: 'start_time' | 'end_time', value: string) => void;
-	onApplyToAll: (ranges: Array<{ start_time: string; end_time: string }>) => void;
+	onApplyToAll: (ranges: PreferenceRange[]) => void;
 }
 
 const TIME_OPTIONS = [
