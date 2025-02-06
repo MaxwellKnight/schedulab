@@ -37,6 +37,12 @@ router.route("/")
 		controller.create
 	);
 
+router.route("/published")
+	.get(
+		authController.authenticate,
+		controller.getPublished
+	)
+
 router.route("/team/:teamId")
 	.get(
 		authController.authenticate,

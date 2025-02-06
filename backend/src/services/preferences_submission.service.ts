@@ -31,7 +31,7 @@ export class PreferenceSubmissionService {
 		};
 	}
 
-	private transformSubmissionSlot(slot: PreferenceSubmissionSlot & {
+	private transform(slot: PreferenceSubmissionSlot & {
 		date?: Date,
 		start_time?: string,
 		end_time?: string
@@ -48,7 +48,7 @@ export class PreferenceSubmissionService {
 		};
 	}
 
-	private async validateTemplate(templateId: number, userId: number): Promise<PreferenceTemplate> {
+	private async validate(templateId: number, userId: number): Promise<PreferenceTemplate> {
 		const template = await this.preferenceRepo.getOne(templateId, userId);
 		if (!template) {
 			throw new Error('Template not found or access denied');
@@ -80,7 +80,7 @@ export class PreferenceSubmissionService {
 			}));
 	}
 
-	public async createSubmission(
+	public async create(
 		data: CreatePreferenceSubmissionData,
 		slots: Array<{
 			template_time_slot_id: number;
@@ -88,7 +88,7 @@ export class PreferenceSubmissionService {
 		}> = [],
 		userId: number
 	): Promise<number> {
-		await this.validateTemplate(data.template_id, userId);
+		await this.validate(data.template_id, userId);
 
 		const templateTimeSlots = await this.preferenceRepo.getTimeSlotsForTemplate(data.template_id, userId);
 		const validSlotIds = new Set(templateTimeSlots.map(slot => slot.id));
@@ -102,12 +102,12 @@ export class PreferenceSubmissionService {
 		};
 
 		// Create submission with empty slots first
-		const submissionId = await this.submissionRepo.createSubmission(submissionData, []);
+		const submissionId = await this.submissionRepo.create(submissionData, []);
 
 		// If we have valid slots, update the submission with them
 		if (slots.length > 0) {
 			const validatedSlots = this.validateSlots(slots, validSlotIds, submissionId);
-			await this.submissionRepo.updateSubmission(
+			await this.submissionRepo.update(
 				{ id: submissionId },
 				validatedSlots
 			);
@@ -116,7 +116,7 @@ export class PreferenceSubmissionService {
 		return submissionId;
 	}
 
-	public async updateSubmission(
+	public async update(
 		data: Partial<MemberPreferenceData> & { id: number },
 		slots: Array<{
 			template_time_slot_id: number;
@@ -124,12 +124,12 @@ export class PreferenceSubmissionService {
 		}> | undefined,
 		userId: number
 	): Promise<void> {
-		const existingSubmission = await this.submissionRepo.getSubmissionById(data.id, userId);
+		const existingSubmission = await this.submissionRepo.getById(data.id, userId);
 		if (!existingSubmission) {
 			throw new Error('Submission not found or unauthorized');
 		}
 
-		await this.validateTemplate(existingSubmission.template_id, userId);
+		await this.validate(existingSubmission.template_id, userId);
 
 		const updateData: Partial<PreferenceSubmission> & { id: number } = {
 			id: data.id,
@@ -147,28 +147,28 @@ export class PreferenceSubmissionService {
 			validatedSlots = this.validateSlots(slots, validSlotIds, data.id);
 		}
 
-		await this.submissionRepo.updateSubmission(updateData, validatedSlots);
+		await this.submissionRepo.update(updateData, validatedSlots);
 	}
 
 	public async deleteSubmission(id: number, userId: number): Promise<void> {
-		const submission = await this.submissionRepo.getSubmissionById(id, userId);
+		const submission = await this.submissionRepo.getById(id, userId);
 		if (!submission) {
 			throw new Error('Submission not found or unauthorized');
 		}
 
-		await this.validateTemplate(submission.template_id, userId);
-		await this.submissionRepo.deleteSubmission(id, userId);
+		await this.validate(submission.template_id, userId);
+		await this.submissionRepo.delete(id, userId);
 	}
 
 	public async getSubmissionById(id: number, userId: number): Promise<MemberPreferenceData | null> {
-		const submission = await this.submissionRepo.getSubmissionById(id, userId);
+		const submission = await this.submissionRepo.getById(id, userId);
 		return submission ? this.transformSubmission(submission) : null;
 	}
 
 	public async getSubmissionsByTemplate(templateId: number, userId: number): Promise<MemberPreferenceData[]> {
-		await this.validateTemplate(templateId, userId);
+		await this.validate(templateId, userId);
 
-		const submissions = await this.submissionRepo.getSubmissionsByTemplate(templateId, userId);
+		const submissions = await this.submissionRepo.getByTemplate(templateId, userId);
 		return submissions.map(submission => this.transformSubmission(submission));
 	}
 
@@ -176,12 +176,12 @@ export class PreferenceSubmissionService {
 		submission: MemberPreferenceData;
 		slots: PreferenceSubmissionSlotData[];
 	} | null> {
-		const details = await this.submissionRepo.getSubmissionDetails(id, userId);
+		const details = await this.submissionRepo.getDetails(id, userId);
 		if (!details) return null;
 
 		return {
 			submission: this.transformSubmission(details.submission),
-			slots: details.slots.map(slot => this.transformSubmissionSlot(slot))
+			slots: details.slots.map(slot => this.transform(slot))
 		};
 	}
 
@@ -194,14 +194,14 @@ export class PreferenceSubmissionService {
 
 		return {
 			submission: this.transformSubmission(submission.submission),
-			slots: submission.slots.map(slot => this.transformSubmissionSlot(slot))
+			slots: submission.slots.map(slot => this.transform(slot))
 		};
 	}
 
 	public async getSubmissionsByTeam(teamId: number, userId: number): Promise<PreferenceSubmissionWithSlots[]> {
 		const submissions = await this.submissionRepo.getPreferencesByTeam(teamId, userId);
 		const details = await Promise.all(submissions.map(async sub => {
-			const subDetails = await this.submissionRepo.getSubmissionDetails(sub.id, userId);
+			const subDetails = await this.submissionRepo.getDetails(sub.id, userId);
 			return subDetails;
 		}));
 		const d = details.filter((d): d is NonNullable<typeof d> => d !== null);

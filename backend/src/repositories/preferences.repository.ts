@@ -175,6 +175,32 @@ export class PreferenceRepository {
         }));
     }
 
+    public async getPublished(userId: number): Promise<PreferenceTemplate | null> {
+        const [rows] = await this.db.execute<TimeSlotRow[]>(`
+                SELECT 
+                    pt.*,
+                    ts.id as slot_id,
+                    ts.date,
+                    ts.time_range_id,
+                    ts.created_at as slot_created_at,
+                    ptr.start_time,
+                    ptr.end_time
+                FROM 
+                    preference_templates pt
+                LEFT JOIN 
+                    template_time_slots ts ON ts.template_id = pt.id
+                LEFT JOIN
+                    preference_time_ranges ptr ON ptr.id = ts.time_range_id
+                LEFT JOIN
+                    team_members tm ON tm.team_id = pt.team_id
+                WHERE 
+                    pt.status = "published" AND tm.user_id = ?
+                ORDER BY ts.date, ptr.start_time`, [userId]);
+
+        if (!rows.length) return null;
+        return this.mapToPreferenceTemplate(rows);
+    }
+
     public async getTimeRangesByTeam(teamId: number, userId: number): Promise<PreferenceTimeRange[]> {
         const hasAccess = await this.validateUserTeamMembership(userId, teamId);
         if (!hasAccess) throw new Error('User does not have access to this team');
