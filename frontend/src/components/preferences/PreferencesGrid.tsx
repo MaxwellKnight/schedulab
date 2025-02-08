@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { usePreferences, usePreferencesState } from "@/hooks"
 import { PreferencesEdit } from "./PreferencesEdit"
+import { PreferenceTemplate } from "./types.d.ts";
+import { useAuthenticatedFetch } from "@/hooks/useAuthFetch";
 
 type PreferenceMode = 'create' | 'edit' | 'schedule'
 
@@ -30,7 +32,7 @@ const modeOptions: ModeOption[] = [
     id: 'edit',
     label: 'Edit Existing',
     icon: <Edit2 className="w-4 h-4" />,
-    badge: '2'
+    badge: true
   },
   {
     id: 'schedule',
@@ -45,13 +47,19 @@ const PreferencesGrid: React.FC<PreferencesGridProps> = ({
   const [activeMode, setActiveMode] = useState<PreferenceMode>('create')
   const { timeRanges, range, hasTimeRanges } = usePreferencesState();
   const { isSubmitting, error, handleSubmit } = usePreferences(timeRanges, range, onSuccess);
+  const { 
+    data: templates,
+    loading: templateLoading,
+    error: templateError
+  } = useAuthenticatedFetch<PreferenceTemplate[]>('/preferences');
+
 
   const renderContent = () => {
     switch(activeMode) {
       case "create":
         return <PreferencesContent />;
       case "edit":
-        return <PreferencesEdit />
+        return <PreferencesEdit templates={templates} loading={templateLoading} error={templateError} />
       default:
         return null;
     }
@@ -92,7 +100,7 @@ const PreferencesGrid: React.FC<PreferencesGridProps> = ({
                       }
                     `}
                   >
-                    {mode.badge}
+                    {templates && templates.length}
                   </Badge>
                 )}
               </span>

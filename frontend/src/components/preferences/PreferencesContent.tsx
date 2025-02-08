@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
 import { DateRangePicker } from "../DateRangePicker";
 import PreferencesApply from "./PreferencesApply";
-import { usePreferencesState } from "@/hooks";
+import { usePref } from "@/context/PreferencesContext";
 
 export interface PreferencesContentProps { }
 
 export const PreferencesContent: React.FC<PreferencesContentProps> = () => {
-	const { range, setRange } = usePreferencesState();
+	const { range, setRange } = usePref();
 
 	return (
 		<motion.div

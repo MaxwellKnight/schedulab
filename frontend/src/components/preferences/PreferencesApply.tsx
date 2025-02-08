@@ -17,7 +17,7 @@ import {
 import { format } from "date-fns";
 import { Plus, X, ChevronLeft, ChevronRight, Copy, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePreferencesState } from '@/hooks';
+import { usePref } from '@/context/PreferencesContext';
 
 interface PreferencesApplyProps { }
 
@@ -40,7 +40,7 @@ export const PreferencesApply: React.FC<PreferencesApplyProps> = () => {
 		handleRemoveTimeRange,
 		handleUpdateTimeRange,
 		handleApplyAll
-	} = usePreferencesState();
+	} = usePref();
 	const currentDay = timeRanges[currentDayIndex];
 
 	const goToPreviousDay = () => {

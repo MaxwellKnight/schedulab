@@ -1,5 +1,22 @@
 import { LucideIcon } from "lucide-react";
 
+export interface PreferenceTemplate {
+	id: number;
+	team_id: number;
+	name: string;
+	start_date: string;
+	end_date: string;
+	status: string;
+	time_slots: Array<{
+		id: number;
+		date: string;
+		time_range: {
+			start_time: string;
+			end_time: string;
+		};
+	}>;
+}
+
 export interface PreferenceRange {
 	start_time: string;
 	end_time: string;
