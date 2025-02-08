@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
 	Dialog,
 	DialogContent,
@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth, useTeam } from '@/hooks';
 import { Submission } from './types';
 import { DialogTitle } from '@radix-ui/react-dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
 
 interface PreferenceDetailProps {
 	templateId?: number;
@@ -59,11 +60,32 @@ const PreferenceDetail: React.FC<PreferenceDetailProps> = ({
 	teamSubmissions = []
 }) => {
 	const { user } = useAuth();
-	const { selectedTeam } = useTeam();
+	const { selectedTeam, members } = useTeam();
 	const isTeamAdmin = selectedTeam?.creator_id === user?.id;
 	const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(initialSubmission || null);
 	const [isListView, setIsListView] = useState(isTeamAdmin);
 
+	// Create a map of user IDs to member info for efficient lookup
+	const memberMap = useMemo(() => {
+		return members.reduce((acc, member) => {
+			acc[member.id] = member;
+			return acc;
+		}, {} as Record<number, typeof members[0]>);
+	}, [members]);
+
+	// Helper function to get member display name
+	const getMemberDisplayName = (userId: number) => {
+		const member = memberMap[userId];
+		if (!member) return 'Unknown User';
+		return member.display_name || `${member.first_name} ${member.last_name}`;
+	};
+
+	// Helper function to get member initials for avatar fallback
+	const getMemberInitials = (userId: number) => {
+		const member = memberMap[userId];
+		if (!member) return 'U';
+		return `${member.first_name[0]}${member.last_name[0]}`;
+	};
 
 	const handleViewSubmission = (submission: Submission) => {
 		setSelectedSubmission(submission);
@@ -101,9 +123,23 @@ const PreferenceDetail: React.FC<PreferenceDetailProps> = ({
 							<TableBody>
 								{teamSubmissions.map((submission) => (
 									<TableRow key={submission.id} className="hover:bg-slate-50">
-										<TableCell className="flex items-center gap-2">
-											<User className="w-4 h-4 text-slate-400" />
-											<span className="font-medium text-slate-700">#{submission.user_id}</span>
+										<TableCell>
+											<div className="flex items-center gap-3">
+												<Avatar className="h-8 w-8">
+													{memberMap[submission.user_id]?.picture && (
+														<AvatarImage
+															src={memberMap[submission.user_id].picture}
+															alt={getMemberDisplayName(submission.user_id)}
+														/>
+													)}
+													<AvatarFallback className="bg-slate-100 text-slate-600">
+														{getMemberInitials(submission.user_id)}
+													</AvatarFallback>
+												</Avatar>
+												<span className="font-medium text-slate-700">
+													{getMemberDisplayName(submission.user_id)}
+												</span>
+											</div>
 										</TableCell>
 										<TableCell>
 											<Badge variant="secondary" className={
@@ -151,10 +187,22 @@ const PreferenceDetail: React.FC<PreferenceDetailProps> = ({
 					</div>
 					<div className="flex flex-wrap gap-3 mt-4">
 						{isTeamAdmin && (
-							<Badge variant="secondary" className="gap-1">
-								<User className="w-3 h-3" />
-								User #{submission.user_id}
-							</Badge>
+							<div className="flex items-center gap-2">
+								<Avatar className="h-6 w-6">
+									{memberMap[submission.user_id]?.picture && (
+										<AvatarImage
+											src={memberMap[submission.user_id].picture}
+											alt={getMemberDisplayName(submission.user_id)}
+										/>
+									)}
+									<AvatarFallback className="bg-slate-100 text-slate-600 text-xs">
+										{getMemberInitials(submission.user_id)}
+									</AvatarFallback>
+								</Avatar>
+								<Badge variant="secondary" className="gap-1">
+									{getMemberDisplayName(submission.user_id)}
+								</Badge>
+							</div>
 						)}
 						<Badge variant="secondary" className="gap-1">
 							<ClipboardList className="w-3 h-3" />
