@@ -35,8 +35,8 @@ const modeOptions: ModeOption[] = [
     badge: true
   },
   {
-    id: 'schedule',
-    label: 'Schedule View',
+    id: 'publish',
+    label: 'Publish',
     icon: <Calendar className="w-4 h-4" />,
   }
 ]
@@ -47,7 +47,7 @@ const PreferencesGrid: React.FC<PreferencesGridProps> = ({
   const [activeMode, setActiveMode] = useState<PreferenceMode>('create')
   const { timeRanges, range, hasTimeRanges } = usePreferencesState();
   const { isSubmitting, error, handleSubmit } = usePreferences(timeRanges, range, onSuccess);
-  const { 
+  const {
     data: templates,
     loading: templateLoading,
     error: templateError
@@ -130,20 +130,18 @@ const PreferencesGrid: React.FC<PreferencesGridProps> = ({
       </div>
 
       {/* Submit Button */}
-      {activeMode !== 'schedule' && (
         <div className="flex justify-center px-4 md:px-0">
           <AnimatedSubmitButton
             onClick={handleSubmit}
             isSubmitting={isSubmitting}
-            text={activeMode === 'edit' ? 'Update Preferences' : 'Save Preferences'}
+            text={activeMode === 'publish' ? 'Publish' : 'Create Preference'}
             error={error}
             disabled={!hasTimeRanges}
             className="w-full sm:w-auto"
           />
         </div>
-      )}
     </div>
   )
 }
 
-export default PreferencesGrid
+export default PreferencesGrid;

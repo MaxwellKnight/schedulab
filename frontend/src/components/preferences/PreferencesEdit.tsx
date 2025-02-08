@@ -74,7 +74,7 @@ export const PreferencesEdit = ({ templates, loading, error }) => {
 	return (
 		<AnimatePresence mode="wait">
 			<motion.div
-				initial={{ opacity: 0, y: 100 }}
+				initial={{ opacity: 0, y: 10 }}
 				animate={{ opacity: 1, y: 0 }}
 				exit={{ opacity: 0, y: -20 }}
 				className="space-y-8"
