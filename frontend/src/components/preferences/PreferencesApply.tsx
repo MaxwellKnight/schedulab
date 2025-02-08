@@ -17,15 +17,9 @@ import {
 import { format } from "date-fns";
 import { Plus, X, ChevronLeft, ChevronRight, Copy, Clock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { DailyPreference, PreferenceRange } from './types';
+import { usePreferencesState } from '@/hooks';
 
-interface PreferencesApplyProps {
-	timeRanges: DailyPreference[];
-	onAddTimeRange: (date: Date) => void;
-	onRemoveTimeRange: (date: Date, index: number) => void;
-	onUpdateTimeRange: (date: Date, index: number, field: 'start_time' | 'end_time', value: string) => void;
-	onApplyToAll: (ranges: PreferenceRange[]) => void;
-}
+interface PreferencesApplyProps { }
 
 const TIME_OPTIONS = [
 	"00:00", "01:00", "02:00", "03:00", "04:00", "05:00",
@@ -37,15 +31,16 @@ const TIME_OPTIONS = [
 const MotionCard = motion(Card);
 const MotionCardTitle = motion(CardTitle);
 
-export const PreferencesApply: React.FC<PreferencesApplyProps> = ({
-	timeRanges,
-	onAddTimeRange,
-	onRemoveTimeRange,
-	onUpdateTimeRange,
-	onApplyToAll,
-}) => {
+export const PreferencesApply: React.FC<PreferencesApplyProps> = () => {
 	const [currentDayIndex, setCurrentDayIndex] = React.useState(0);
 	const [direction, setDirection] = React.useState(0);
+	const {
+		timeRanges,
+		handleAddTimeRange,
+		handleRemoveTimeRange,
+		handleUpdateTimeRange,
+		handleApplyAll
+	} = usePreferencesState();
 	const currentDay = timeRanges[currentDayIndex];
 
 	const goToPreviousDay = () => {
@@ -63,7 +58,7 @@ export const PreferencesApply: React.FC<PreferencesApplyProps> = ({
 	};
 
 	const handleApplyToAll = () => {
-		onApplyToAll(currentDay.ranges);
+		handleApplyAll(currentDay?.ranges);
 	};
 
 	return (
@@ -80,7 +75,7 @@ export const PreferencesApply: React.FC<PreferencesApplyProps> = ({
 						variant="ghost"
 						size="sm"
 						onClick={goToPreviousDay}
-						disabled={currentDayIndex === 0}
+						disabled={!currentDay || currentDayIndex === 0}
 						className="hover:bg-blue-100 text-blue-700"
 					>
 						<ChevronLeft className="h-4 w-4" />
@@ -96,10 +91,10 @@ export const PreferencesApply: React.FC<PreferencesApplyProps> = ({
 							transition={{ duration: 0.2 }}
 						>
 							<span className="text-2xl font-bold text-blue-900">
-								{format(currentDay.column, 'EEEE')}
+								{currentDay && format(currentDay?.column, 'EEEE')}
 							</span>
 							<span className="text-sm text-blue-600">
-								{format(currentDay.column, 'MMMM d, yyyy')}
+								{currentDay && format(currentDay?.column, 'MMMM d, yyyy')}
 							</span>
 						</MotionCardTitle>
 					</AnimatePresence>
@@ -125,7 +120,7 @@ export const PreferencesApply: React.FC<PreferencesApplyProps> = ({
 							<Button
 								variant="outline"
 								size="sm"
-								onClick={() => onAddTimeRange(currentDay.column)}
+								onClick={() => handleAddTimeRange(currentDay?.column)}
 								className="bg-blue-600 hover:text-white text-white hover:bg-blue-900 border-blue-600 "
 							>
 								<Plus className="h-4 w-4 mr-1" />
@@ -133,7 +128,7 @@ export const PreferencesApply: React.FC<PreferencesApplyProps> = ({
 							</Button>
 						</motion.div>
 
-						{currentDay.ranges.length > 0 && (
+						{currentDay?.ranges.length > 0 && (
 							<motion.div
 								whileHover={{ scale: 1.02 }}
 								whileTap={{ scale: 0.98 }}
@@ -177,7 +172,7 @@ export const PreferencesApply: React.FC<PreferencesApplyProps> = ({
 					layout
 				>
 					<AnimatePresence mode="popLayout">
-						{currentDay.ranges.length === 0 ? (
+						{currentDay?.ranges.length === 0 ? (
 							<motion.div
 								key="empty"
 								initial={{ opacity: 0, scale: 0.8 }}
@@ -190,14 +185,14 @@ export const PreferencesApply: React.FC<PreferencesApplyProps> = ({
 								<Button
 									variant="link"
 									size="sm"
-									onClick={() => onAddTimeRange(currentDay.column)}
+									onClick={() => handleAddTimeRange(currentDay?.column)}
 									className="mt-2 text-blue-600 hover:text-blue-700"
 								>
 									Add your first time slot
 								</Button>
 							</motion.div>
 						) : (
-							currentDay.ranges.map((range, index) => (
+							currentDay?.ranges.map((range, index) => (
 								<motion.div
 									key={index}
 									layout
@@ -211,7 +206,7 @@ export const PreferencesApply: React.FC<PreferencesApplyProps> = ({
 										<Select
 											value={range.start_time.toString()}
 											onValueChange={(value) =>
-												onUpdateTimeRange(currentDay.column, index, 'start_time', value)
+												handleUpdateTimeRange(currentDay?.column, index, 'start_time', value)
 											}
 										>
 											<SelectTrigger className="border-blue-200 hover:border-blue-300">
@@ -229,7 +224,7 @@ export const PreferencesApply: React.FC<PreferencesApplyProps> = ({
 										<Select
 											value={range.end_time.toString()}
 											onValueChange={(value) =>
-												onUpdateTimeRange(currentDay.column, index, 'end_time', value)
+												handleUpdateTimeRange(currentDay?.column, index, 'end_time', value)
 											}
 										>
 											<SelectTrigger className="border-blue-200 hover:border-blue-300">
@@ -252,7 +247,7 @@ export const PreferencesApply: React.FC<PreferencesApplyProps> = ({
 										<Button
 											variant="ghost"
 											size="icon"
-											onClick={() => onRemoveTimeRange(currentDay.column, index)}
+											onClick={() => handleRemoveTimeRange(currentDay?.column, index)}
 											className="group-hover:opacity-100 transition-opacity text-blue-600 hover:text-blue-700 hover:bg-blue-100"
 										>
 											<X className="h-4 w-4" />

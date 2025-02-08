@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { usePreferences, usePreferencesState, useTeam } from "@/hooks";
+import { useTeam } from "@/hooks";
 import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "../ui/drawer";
 import AnimatedGradientButton from "../AnimatedButton";
 import { motion, AnimatePresence } from "framer-motion";
@@ -7,66 +7,26 @@ import { Settings } from "lucide-react";
 import PreferenceSelector from "./PreferenceSelector";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PreferencesSidebar from './PreferencesSidebar';
-import AnimatedSubmitButton from '../AnimatedSubmitButton';
 import { NavigationItemId } from './types';
 import PreferencesHistory from './PreferencesHistory';
 import PreferencesGrid, { PreferencesGridProps } from './PreferencesGrid';
 
 export interface PreferencesDrawerProps {
-	onSuccess?: () => void;
 }
 
 const ViewComponents: Record<NavigationItemId, React.FC<PreferencesGridProps>> = {
-	playground: (props) => <PreferencesGrid {...props} />,
+	playground: () => <PreferencesGrid />,
 	view: () => <PreferenceSelector />,
 	history: () => <PreferencesHistory />,
-	settings: ({ handleSubmit, isSubmitting, error }) => (
+	settings: () => (
 		<div className="text-center">
-			<AnimatedSubmitButton
-				onClick={handleSubmit}
-				isSubmitting={isSubmitting}
-				text='Save Settings'
-				error={error}
-				className="w-full sm:w-auto"
-			/>
 		</div>
 	)
 };
 
-export const PreferencesDrawer: React.FC<PreferencesDrawerProps> = ({ onSuccess }) => {
+export const PreferencesDrawer: React.FC<PreferencesDrawerProps> = () => {
 	const { isAdmin } = useTeam();
 	const [currentView, setCurrentView] = useState<NavigationItemId>('view');
-
-	const {
-		timeRanges,
-		range,
-		setRange,
-		handleAddTimeRange,
-		handleRemoveTimeRange,
-		handleUpdateTimeRange,
-		handleApplyAll,
-		hasTimeRanges
-	} = usePreferencesState();
-
-	const {
-		isSubmitting,
-		error,
-		handleSubmit
-	} = usePreferences(timeRanges, range, onSuccess);
-
-	const viewProps: PreferencesGridProps = {
-		range,
-		setRange,
-		timeRanges,
-		onAddTimeRange: handleAddTimeRange,
-		onRemoveTimeRange: handleRemoveTimeRange,
-		onUpdateTimeRange: handleUpdateTimeRange,
-		onApplyToAll: handleApplyAll,
-		handleSubmit,
-		isSubmitting,
-		error,
-		hasTimeRanges
-	};
 
 	const Component =
 		ViewComponents[currentView] ? ViewComponents[currentView] : ViewComponents.view;
@@ -103,7 +63,7 @@ export const PreferencesDrawer: React.FC<PreferencesDrawerProps> = ({ onSuccess 
 											transition={{ duration: 0.2 }}
 											className="space-y-6"
 										>
-											<Component {...viewProps} />
+											<Component />
 										</motion.div>
 									</AnimatePresence>
 								</div>
