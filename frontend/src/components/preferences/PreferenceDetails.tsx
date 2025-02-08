@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
 	Dialog,
 	DialogContent,
+	DialogHeader,
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import {
@@ -19,6 +20,7 @@ import { Eye, Users, User, ClipboardList, Calendar, Clock, Info, ArrowLeft } fro
 import { Badge } from "@/components/ui/badge";
 import { useAuth, useTeam } from '@/hooks';
 import { Submission } from './types';
+import { DialogTitle } from '@radix-ui/react-dialog';
 
 interface PreferenceDetailProps {
 	templateId?: number;
@@ -241,6 +243,9 @@ const PreferenceDetail: React.FC<PreferenceDetailProps> = ({
 					{isTeamAdmin ? 'View All Submissions' : 'View Details'}
 				</Button>
 			</DialogTrigger>
+			<DialogHeader>
+				<DialogTitle></DialogTitle>
+			</DialogHeader>
 			<DialogContent className="max-w-4xl p-6 bg-white border shadow-xl">
 				<div className="flex justify-between items-center mb-6">
 					{isTeamAdmin && !isListView ? (

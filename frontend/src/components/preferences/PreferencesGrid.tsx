@@ -1,13 +1,10 @@
-import { DateRange } from "react-day-picker"
-import { DailyPreference, PreferenceRange } from "./types"
 import { PreferencesContent } from "./PreferencesContent"
 import AnimatedSubmitButton from "../AnimatedSubmitButton"
 import { useState } from "react"
 import { Calendar, Edit2, Clock } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
-type SetRangeFunction = React.Dispatch<React.SetStateAction<DateRange | undefined>>
+import { usePreferences, usePreferencesState } from "@/hooks"
 
 type PreferenceMode = 'create' | 'edit' | 'schedule'
 
@@ -19,17 +16,7 @@ interface ModeOption {
 }
 
 export interface PreferencesGridProps {
-	range: DateRange | undefined
-	setRange: SetRangeFunction
-	timeRanges: DailyPreference[]
-	onAddTimeRange: (date: Date) => void
-	onRemoveTimeRange: (date: Date, index: number) => void
-	onUpdateTimeRange: (date: Date, index: number, field: 'start_time' | 'end_time', value: string) => void
-	onApplyToAll: (ranges: PreferenceRange[]) => void
-	handleSubmit: () => Promise<void>
-	isSubmitting: boolean
-	error: string | null
-	hasTimeRanges: boolean
+	onSuccess?: () => void;
 }
 
 const modeOptions: ModeOption[] = [
@@ -52,32 +39,16 @@ const modeOptions: ModeOption[] = [
 ]
 
 const PreferencesGrid: React.FC<PreferencesGridProps> = ({
-	range,
-	setRange,
-	timeRanges,
-	onUpdateTimeRange,
-	onApplyToAll,
-	onRemoveTimeRange,
-	onAddTimeRange,
-	isSubmitting,
-	hasTimeRanges,
-	error,
-	handleSubmit
+	onSuccess
 }) => {
 	const [activeMode, setActiveMode] = useState<PreferenceMode>('create')
+	const { timeRanges, range, hasTimeRanges } = usePreferencesState();
+	const { isSubmitting, error, handleSubmit } = usePreferences(timeRanges, range, onSuccess);
 
 	const renderContent = () => {
 		return (
 			activeMode === 'create' &&
-			<PreferencesContent
-				range={range}
-				setRange={setRange}
-				timeRanges={timeRanges}
-				onAddTimeRange={onAddTimeRange}
-				onRemoveTimeRange={onRemoveTimeRange}
-				onUpdateTimeRange={onUpdateTimeRange}
-				onApplyToAll={onApplyToAll}
-			/>
+			<PreferencesContent />
 		)
 	}
 
@@ -104,12 +75,12 @@ const PreferencesGrid: React.FC<PreferencesGridProps> = ({
 								<Badge
 									variant="secondary"
 									className={`
-                    absolute -top-2 -right-2
-                    ${activeMode === mode.id
+absolute -top-2 -right-2
+${activeMode === mode.id
 											? 'bg-slate-900 text-white'
 											: 'bg-slate-200 text-slate-600'
 										}
-                  `}
+`}
 								>
 									{mode.badge}
 								</Badge>
