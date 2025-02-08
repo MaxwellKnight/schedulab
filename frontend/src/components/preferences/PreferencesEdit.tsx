@@ -8,25 +8,14 @@ import { usePref } from '@/context/PreferencesContext';
 import { DateRangePicker } from '../DateRangePicker';
 import { WeekViewEditor } from './WeekViewEdit';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PreferenceTemplate } from "./types.d.ts";
 
-interface PreferenceTemplate {
-	id: number;
-	team_id: number;
-	name: string;
-	start_date: string;
-	end_date: string;
-	status: string;
-	time_slots: Array<{
-		id: number;
-		date: string;
-		time_range: {
-			start_time: string;
-			end_time: string;
-		};
-	}>;
+interface PreferencesEditProps {
+	templates: PreferenceTemplate | null;
+	loading: boolean;
+	error: string | null;
 }
-
-export const PreferencesEdit = () => {
+export const PreferencesEdit = ({ templates, loading, error }) => {
 	const [selectedTemplate, setSelectedTemplate] = useState<PreferenceTemplate | null>(null);
 	const {
 		range,
@@ -36,8 +25,6 @@ export const PreferencesEdit = () => {
 		handleRemoveTimeRange,
 		handleUpdateTimeRange
 	} = usePref();
-
-	const { data: templates, loading, error } = useAuthenticatedFetch<PreferenceTemplate[]>('/preferences');
 
 	useEffect(() => {
 		if (selectedTemplate) {
