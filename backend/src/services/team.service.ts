@@ -1,9 +1,10 @@
-import { Team, TeamRole } from "../models";
+import { Team, TeamRole, User } from "../models";
 import { TeamData } from "../interfaces";
 import { TeamRepository } from "../repositories";
 
 type CreateTeamData = Omit<TeamData, 'id' | 'created_at'>;
 type UpdateTeamData = Partial<TeamData> & { id: number };
+type TeamMemberData = Omit<User, "password">
 
 export class TeamService {
 	private readonly repo: TeamRepository;
@@ -208,5 +209,58 @@ export class TeamService {
 
 	private async getAdminCount(teamId: number): Promise<number> {
 		return this.repo.getAdminCount(teamId);
+	}
+
+	public async getTeamMembers(teamId: number, requesterId: number): Promise<TeamMemberData[]> {
+		// Check if requester is a member of the team
+		const requesterRole = await this.repo.getMemberRole(teamId, requesterId);
+		if (!requesterRole) {
+			throw new Error('User does not have access to this team');
+		}
+
+		// Get the team to verify it exists
+		const team = await this.repo.getOne(teamId);
+		if (!team) {
+			throw new Error('Team not found');
+		}
+
+		return await this.repo.getTeamUsers(teamId);
+	}
+
+	/**
+	 * Get all members of all teams that the requesting user belongs to
+	 */
+	public async getAllTeamMembers(userId: number): Promise<{
+		teamId: number;
+		teamName: string;
+		members: TeamMemberData[];
+	}[]> {
+		// Get user's teams to verify they exist
+		const userTeams = await this.repo.getMany(userId);
+		if (!userTeams.length) {
+			throw new Error('User is not a member of any teams');
+		}
+
+		return await this.repo.getAllTeamMembers(userId);
+	}
+
+	/**
+	 * Check if a user is a member of a team
+	 */
+	public async isTeamMember(teamId: number, userId: number): Promise<boolean> {
+		const role = await this.repo.getMemberRole(teamId, userId);
+		return role !== null;
+	}
+
+	/**
+	 * Get the total number of members in a team
+	 */
+	public async getTeamMemberCount(teamId: number, requesterId: number): Promise<number> {
+		// Verify requester has access
+		if (!await this.isTeamMember(teamId, requesterId)) {
+			throw new Error('User does not have access to this team');
+		}
+
+		return await this.repo.getMemberCount(teamId);
 	}
 } 

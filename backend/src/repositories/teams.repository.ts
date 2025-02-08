@@ -1,6 +1,6 @@
 import { Database } from "../configs/db.config";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
-import { Team, TeamRole } from "../models/user.model";
+import { Team, TeamRole, User } from "../models/user.model";
 
 interface TeamRow extends RowDataPacket, Omit<Team, 'created_at'> {
 	created_at: string;
@@ -8,6 +8,25 @@ interface TeamRow extends RowDataPacket, Omit<Team, 'created_at'> {
 
 interface TeamRoleRow extends RowDataPacket, Omit<TeamRole, 'created_at'> {
 	created_at: string;
+}
+
+type UserWithoutPassword = Omit<User, 'password'>;
+
+interface TeamMemberRow extends RowDataPacket {
+	id: number;
+	google_id: string | null;
+	picture: string | null;
+	display_name: string | null;
+	user_role: string;
+	first_name: string;
+	middle_name: string | null;
+	last_name: string;
+	email: string | null;
+	last_active: string | null;
+	created_at: string;
+	team_id: number;
+	team_name: string;
+	role_name: string;
 }
 
 export class TeamRepository {
@@ -250,5 +269,66 @@ export class TeamRepository {
 			[teamId]
 		);
 		return rows[0].count;
+	}
+
+	public async getTeamUsers(teamId: number): Promise<UserWithoutPassword[]> {
+		const [rows] = await this.db.execute<TeamMemberRow[]>(`
+            SELECT 
+                u.id,
+                u.google_id,
+                u.picture,
+                u.display_name,
+                u.user_role,
+                u.first_name,
+                u.middle_name,
+                u.last_name,
+                u.email,
+                u.last_active,
+                u.created_at,
+                tr.name as role_name
+            FROM users u
+            INNER JOIN team_members tm ON u.id = tm.user_id
+            LEFT JOIN member_roles mr ON tm.team_id = mr.team_id AND tm.user_id = mr.user_id
+            LEFT JOIN team_roles tr ON mr.role_id = tr.id
+            WHERE tm.team_id = ?
+            ORDER BY u.first_name, u.last_name
+        `, [teamId]);
+
+		return rows.map(row => ({
+			id: row.id,
+			google_id: row.google_id || undefined,
+			picture: row.picture || undefined,
+			display_name: row.display_name || undefined,
+			user_role: row.user_role,
+			first_name: row.first_name,
+			middle_name: row.middle_name || undefined,
+			last_name: row.last_name,
+			email: row.email || "",
+			last_active: row.last_active ? new Date(row.last_active) : null,
+			created_at: new Date(row.created_at)
+		}));
+	}
+
+	public async getAllTeamMembers(userId: number): Promise<{
+		teamId: number;
+		teamName: string;
+		members: UserWithoutPassword[];
+	}[]> {
+		const [teamRows] = await this.db.execute<TeamMemberRow[]>(`
+            SELECT DISTINCT t.id as team_id, t.name as team_name
+            FROM teams t
+            INNER JOIN team_members tm ON t.id = tm.team_id
+            WHERE tm.user_id = ?
+        `, [userId]);
+		const result = await Promise.all(teamRows.map(async (team) => {
+			const members = await this.getTeamUsers(team.team_id);
+			return {
+				teamId: team.team_id,
+				teamName: team.team_name,
+				members
+			};
+		}));
+
+		return result;
 	}
 }
