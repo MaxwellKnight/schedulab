@@ -1,5 +1,5 @@
 import { ShiftData, TimeRange } from "./shifts.dto";
-import { ScheduleData, RemarkData } from "./schedules.dto";
+import { RemarkData } from "./schedules.dto";
 import { UserData } from "./users.dto";
 import { VacationData } from "./vacations.dto";
 import { TimeRangePreferences, TimeSlot, DaySchedule, SchedulePreferences } from "./preferences.dto";
