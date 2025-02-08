@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { SchedulePreferences, TimeSlot } from '@/types';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, MessageSquare } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, MessageSquare } from 'lucide-react';
 import { Card, } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useTeam } from '@/context';
@@ -41,11 +41,12 @@ function formatDate(dateStr: string): string {
 const PreferenceSelector: React.FC = () => {
 	const [selectedSlots, setSelectedSlots] = useState<Set<number>>(new Set());
 	const [notes, setNotes] = useState<Record<number, string>>({});
+	const [activeDayIndex, setActiveDayIndex] = useState(0);
 	const { selectedTeam } = useTeam();
 	const {
 		data: apiPreferences,
 		loading
-	} = useAuthenticatedFetch<APISchedulePreferences>(`preferences/published`);
+	} = useAuthenticatedFetch<APISchedulePreferences>('preferences/published');
 
 	const preferences = useMemo(() => {
 		if (!apiPreferences) return null;
@@ -126,6 +127,14 @@ const PreferenceSelector: React.FC = () => {
 		});
 	}, []);
 
+	const handlePrevDay = () => {
+		setActiveDayIndex(prev => Math.max(0, prev - 1));
+	};
+
+	const handleNextDay = () => {
+		setActiveDayIndex(prev => Math.min((preferences?.time_slots.length || 1) - 1, prev + 1));
+	};
+
 	if (loading) {
 		return <div className="p-4">Loading...</div>;
 	}
@@ -136,12 +145,113 @@ const PreferenceSelector: React.FC = () => {
 
 	const notesCount = Object.values(notes).filter(note => note.trim()).length;
 
+	const DesktopView = (
+		<Card className="border-blue-100 overflow-x-auto hidden lg:block">
+			<Table>
+				<TableHeader className="bg-blue-50/50 sticky top-0 z-10">
+					<TableRow>
+						<TableHead className="w-40 text-blue-900">Time</TableHead>
+						{preferences.time_slots.map(day => (
+							<TableHead key={day.date} className="text-center text-blue-900">
+								{formatDate(day.date)}
+							</TableHead>
+						))}
+					</TableRow>
+				</TableHeader>
+				<TableBody>
+					{timeRanges.map((timeRange, index) => (
+						<TableRow key={index}>
+							<TableCell className="font-medium text-blue-700">
+								{formatTime(timeRange.start_time)} - {formatTime(timeRange.end_time)}
+							</TableCell>
+							{preferences.time_slots.map(day => {
+								const slot = day.slots.find(
+									s => s.time_range.start_time === timeRange.start_time &&
+										s.time_range.end_time === timeRange.end_time
+								);
+
+								return (
+									<TableCell key={day.date} className="p-2">
+										{slot && (
+											<TimeSlotButton
+												slot={slot}
+												isSelected={selectedSlots.has(slot.id)}
+												note={notes[slot.id]}
+												onSelect={toggleSlot}
+												onNoteChange={handleNoteChange}
+											/>
+										)}
+									</TableCell>
+								);
+							})}
+						</TableRow>
+					))}
+				</TableBody>
+			</Table>
+		</Card>
+	);
+
+	const MobileView = (
+		<Card className="border-blue-100 lg:hidden">
+			<div className="p-4 bg-blue-50/50 border-b border-blue-100">
+				<div className="flex items-center justify-between mb-2">
+					<button
+						onClick={handlePrevDay}
+						disabled={activeDayIndex === 0}
+						className="p-1 rounded-lg hover:bg-blue-100 disabled:opacity-50"
+					>
+						<ChevronLeft className="h-5 w-5 text-blue-600" />
+					</button>
+					<h2 className="text-base font-medium text-blue-900">
+						{formatDate(preferences.time_slots[activeDayIndex].date)}
+					</h2>
+					<button
+						onClick={handleNextDay}
+						disabled={activeDayIndex === preferences.time_slots.length - 1}
+						className="p-1 rounded-lg hover:bg-blue-100 disabled:opacity-50"
+					>
+						<ChevronRight className="h-5 w-5 text-blue-600" />
+					</button>
+				</div>
+				<div className="flex justify-center gap-1">
+					{preferences.time_slots.map((_, index) => (
+						<button
+							key={index}
+							onClick={() => setActiveDayIndex(index)}
+							className={`w-2 h-2 rounded-full transition-colors ${index === activeDayIndex ? 'bg-blue-600' : 'bg-blue-200'
+								}`}
+						/>
+					))}
+				</div>
+			</div>
+			<div className="p-4 space-y-2">
+				{timeRanges.map((timeRange, index) => {
+					const slot = preferences.time_slots[activeDayIndex].slots.find(
+						s => s.time_range.start_time === timeRange.start_time &&
+							s.time_range.end_time === timeRange.end_time
+					);
+
+					return slot ? (
+						<TimeSlotButton
+							key={index}
+							slot={slot}
+							isSelected={selectedSlots.has(slot.id)}
+							note={notes[slot.id]}
+							onSelect={toggleSlot}
+							onNoteChange={handleNoteChange}
+						/>
+					) : null;
+				})}
+			</div>
+		</Card>
+	);
+
 	return (
-		<div className="flex flex-col">
-			<div className="flex items-center justify-between p-4 border-b border-blue-100 bg-white sticky top-0 z-20">
-				<div className="flex items-center gap-2">
+		<div className="flex flex-col w-full">
+			<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b border-blue-100 bg-white sticky top-0 z-20">
+				<div className="flex items-center gap-2 mb-2 sm:mb-0">
 					<Calendar className="h-5 w-5 text-blue-600" />
-					<h1 className="text-lg font-semibold text-blue-900">
+					<h1 className="text-lg font-semibold text-blue-900 break-words">
 						{preferences.name}
 					</h1>
 				</div>
@@ -159,49 +269,8 @@ const PreferenceSelector: React.FC = () => {
 			</div>
 
 			<div className="p-4 space-y-6">
-				<Card className="border-blue-100">
-					<Table>
-						<TableHeader className="bg-blue-50/50 sticky top-0 z-10">
-							<TableRow>
-								<TableHead className="w-40 text-blue-900">Time</TableHead>
-								{preferences.time_slots.map(day => (
-									<TableHead key={day.date} className="text-center text-blue-900">
-										{formatDate(day.date)}
-									</TableHead>
-								))}
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{timeRanges.map((timeRange, index) => (
-								<TableRow key={index}>
-									<TableCell className="font-medium text-blue-700">
-										{formatTime(timeRange.start_time)} - {formatTime(timeRange.end_time)}
-									</TableCell>
-									{preferences.time_slots.map(day => {
-										const slot = day.slots.find(
-											s => s.time_range.start_time === timeRange.start_time &&
-												s.time_range.end_time === timeRange.end_time
-										);
-
-										return (
-											<TableCell key={day.date} className="p-2">
-												{slot && (
-													<TimeSlotButton
-														slot={slot}
-														isSelected={selectedSlots.has(slot.id)}
-														note={notes[slot.id]}
-														onSelect={toggleSlot}
-														onNoteChange={handleNoteChange}
-													/>
-												)}
-											</TableCell>
-										);
-									})}
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				</Card>
+				{MobileView}
+				{DesktopView}
 
 				<NotesSummary
 					notes={notes}
