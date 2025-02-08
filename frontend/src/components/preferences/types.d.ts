@@ -111,3 +111,23 @@ export interface Submission extends SubmissionData {
 export type SortColumn = 'template_id' | 'status' | 'slots' | 'submitted_at' | 'created_at' | 'updated_at';
 export type SortDirection = 'asc' | 'desc';
 
+function formatTime(timeStr: string): string {
+	return new Date(`2024-01-01T${timeStr}`).toLocaleTimeString('en-US', {
+		hour: 'numeric',
+		minute: '2-digit',
+		hour12: true
+	});
+}
+
+function formatDate(dateStr: string): string {
+	return new Date(dateStr).toLocaleDateString('en-US', {
+		weekday: 'long',
+		month: 'long',
+		day: 'numeric'
+	});
+}
+
+export {
+	formatDate,
+	formatTime
+};
