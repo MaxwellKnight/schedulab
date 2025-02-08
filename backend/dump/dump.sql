@@ -1104,124 +1104,290 @@ INSERT INTO team_members (team_id, user_id) VALUES
 (10, 17), -- Kevin Chen
 (10, 20); -- Sophie Park
 
--- Create template for one week
+-- Current Week Templates (Week 49, 2024)
 INSERT INTO preference_templates (team_id, name, start_date, end_date, status, creator) VALUES 
-(1, 'Morning Shift Week 49', '2024-12-02', '2024-12-08', 'published', 3);
-SET @morning_template = LAST_INSERT_ID();
+(1, 'Regular Week 49', '2024-12-02', '2024-12-08', 'published', 3),
+(2, 'Support Team Week 49', '2024-12-02', '2024-12-08', 'published', 4),
+(3, 'Operations Week 49', '2024-12-02', '2024-12-08', 'draft', 5),
+(4, 'Maintenance Week 49', '2024-12-02', '2024-12-08', 'draft', 6);
 
--- Time ranges with more options
-INSERT INTO preference_time_ranges (preference_id, start_time, end_time) VALUES
-(@morning_template, '06:00', '14:00'),
-(@morning_template, '06:30', '14:30'),
-(@morning_template, '07:00', '15:00'),
-(@morning_template, '07:30', '15:30'),
-(@morning_template, '08:00', '16:00');
+-- Store template IDs
+SET @regular_w49 = (SELECT LAST_INSERT_ID());
+SET @support_w49 = @regular_w49 + 1;
+SET @ops_w49 = @regular_w49 + 2;
+SET @maint_w49 = @regular_w49 + 3;
 
--- Generate time slots for one week (Monday to Sunday)
-INSERT INTO template_time_slots (template_id, date, time_range_id)
-SELECT 
-  @morning_template,
-  DATE('2024-12-02') + INTERVAL n DAY,
-  pr.id
-FROM (
-  SELECT 0 as n -- Monday
-  UNION SELECT 1 -- Tuesday
-  UNION SELECT 2 -- Wednesday
-  UNION SELECT 3 -- Thursday
-  UNION SELECT 4 -- Friday
-  UNION SELECT 5 -- Saturday
-  UNION SELECT 6 -- Sunday
-) days
-CROSS JOIN preference_time_ranges pr 
-WHERE pr.preference_id = @morning_template;
+-- Pre-Holiday Templates (Week 50-51, 2024)
+INSERT INTO preference_templates (team_id, name, start_date, end_date, status, creator) VALUES 
+(1, 'Pre-Holiday Week 50', '2024-12-09', '2024-12-15', 'draft', 3),
+(2, 'Pre-Holiday Week 51', '2024-12-16', '2024-12-22', 'draft', 4),
+(3, 'Extended Support Week 50-51', '2024-12-09', '2024-12-22', 'draft', 5);
 
--- Create member preferences for team members
+SET @pre_holiday_w50 = (SELECT LAST_INSERT_ID());
+SET @pre_holiday_w51 = @pre_holiday_w50 + 1;
+SET @extended_support = @pre_holiday_w50 + 2;
+
+-- Holiday Season Templates (Week 52, 2024 - Week 1, 2025)
+INSERT INTO preference_templates (team_id, name, start_date, end_date, status, creator) VALUES 
+(1, 'Christmas Week Schedule', '2024-12-23', '2024-12-29', 'draft', 3),
+(2, 'New Year Week Schedule', '2024-12-30', '2025-01-05', 'draft', 4),
+(3, 'Holiday Support Coverage', '2024-12-23', '2025-01-05', 'draft', 5),
+(4, 'Holiday Maintenance', '2024-12-23', '2025-01-05', 'draft', 6);
+
+SET @christmas_week = (SELECT LAST_INSERT_ID());
+SET @new_year_week = @christmas_week + 1;
+SET @holiday_support = @christmas_week + 2;
+SET @holiday_maint = @christmas_week + 3;
+
+-- Future Templates (January - March 2025)
+INSERT INTO preference_templates (team_id, name, start_date, end_date, status, creator) VALUES 
+(1, 'January First Week', '2025-01-06', '2025-01-12', 'draft', 3),
+(2, 'January Second Week', '2025-01-13', '2025-01-19', 'draft', 4),
+(1, 'February Special Project', '2025-02-03', '2025-02-16', 'draft', 3),
+(3, 'March Planning Week', '2025-03-03', '2025-03-09', 'draft', 5),
+(4, 'Spring Maintenance', '2025-03-17', '2025-03-30', 'draft', 6);
+
+SET @jan_w1 = (SELECT LAST_INSERT_ID());
+SET @jan_w2 = @jan_w1 + 1;
+SET @feb_special = @jan_w1 + 2;
+SET @march_planning = @jan_w1 + 3;
+SET @spring_maint = @jan_w1 + 4;
+
+-- Now let's create time ranges for each template type
+
+-- Regular working hours (8-hour shifts)
+DELIMITER //
+CREATE PROCEDURE insert_regular_time_ranges(IN template_id INT)
+BEGIN
+    INSERT INTO preference_time_ranges (preference_id, start_time, end_time) VALUES
+    (template_id, '07:00', '15:00'),
+    (template_id, '08:00', '16:00'),
+    (template_id, '09:00', '17:00'),
+    (template_id, '15:00', '23:00'),
+    (template_id, '23:00', '07:00');
+END //
+DELIMITER ;
+
+-- Extended working hours (10-hour shifts)
+DELIMITER //
+CREATE PROCEDURE insert_extended_time_ranges(IN template_id INT)
+BEGIN
+    INSERT INTO preference_time_ranges (preference_id, start_time, end_time) VALUES
+    (template_id, '06:00', '16:00'),
+    (template_id, '08:00', '18:00'),
+    (template_id, '10:00', '20:00'),
+    (template_id, '14:00', '00:00'),
+    (template_id, '20:00', '06:00');
+END //
+DELIMITER ;
+
+-- Flexible working hours (6-hour shifts)
+DELIMITER //
+CREATE PROCEDURE insert_flexible_time_ranges(IN template_id INT)
+BEGIN
+    INSERT INTO preference_time_ranges (preference_id, start_time, end_time) VALUES
+    (template_id, '08:00', '14:00'),
+    (template_id, '10:00', '16:00'),
+    (template_id, '12:00', '18:00'),
+    (template_id, '14:00', '20:00'),
+    (template_id, '16:00', '22:00');
+END //
+DELIMITER ;
+
+-- Insert time ranges for all templates
+CALL insert_regular_time_ranges(@regular_w49);
+CALL insert_extended_time_ranges(@support_w49);
+CALL insert_flexible_time_ranges(@ops_w49);
+CALL insert_regular_time_ranges(@maint_w49);
+
+CALL insert_regular_time_ranges(@pre_holiday_w50);
+CALL insert_extended_time_ranges(@pre_holiday_w51);
+CALL insert_flexible_time_ranges(@extended_support);
+
+CALL insert_flexible_time_ranges(@christmas_week);
+CALL insert_extended_time_ranges(@new_year_week);
+CALL insert_regular_time_ranges(@holiday_support);
+CALL insert_flexible_time_ranges(@holiday_maint);
+
+CALL insert_regular_time_ranges(@jan_w1);
+CALL insert_regular_time_ranges(@jan_w2);
+CALL insert_extended_time_ranges(@feb_special);
+CALL insert_flexible_time_ranges(@march_planning);
+CALL insert_regular_time_ranges(@spring_maint);
+
+-- Create a procedure to generate time slots
+DELIMITER //
+CREATE PROCEDURE generate_time_slots(IN template_id INT, IN start_date DATE, IN end_date DATE)
+BEGIN
+    DECLARE curr_date DATE;
+    SET curr_date = start_date;
+    
+    WHILE curr_date <= end_date DO
+        INSERT INTO template_time_slots (template_id, date, time_range_id)
+        SELECT 
+            template_id,
+            curr_date,
+            pr.id
+        FROM preference_time_ranges pr 
+        WHERE pr.preference_id = template_id;
+        
+        SET curr_date = DATE_ADD(curr_date, INTERVAL 1 DAY);
+    END WHILE;
+END //
+DELIMITER ;
+
+-- Generate time slots for all templates
+CALL generate_time_slots(@regular_w49, '2024-12-02', '2024-12-08');
+CALL generate_time_slots(@support_w49, '2024-12-02', '2024-12-08');
+CALL generate_time_slots(@ops_w49, '2024-12-02', '2024-12-08');
+CALL generate_time_slots(@maint_w49, '2024-12-02', '2024-12-08');
+
+CALL generate_time_slots(@pre_holiday_w50, '2024-12-09', '2024-12-15');
+CALL generate_time_slots(@pre_holiday_w51, '2024-12-16', '2024-12-22');
+CALL generate_time_slots(@extended_support, '2024-12-09', '2024-12-22');
+
+CALL generate_time_slots(@christmas_week, '2024-12-23', '2024-12-29');
+CALL generate_time_slots(@new_year_week, '2024-12-30', '2025-01-05');
+CALL generate_time_slots(@holiday_support, '2024-12-23', '2025-01-05');
+CALL generate_time_slots(@holiday_maint, '2024-12-23', '2025-01-05');
+
+CALL generate_time_slots(@jan_w1, '2025-01-06', '2025-01-12');
+CALL generate_time_slots(@jan_w2, '2025-01-13', '2025-01-19');
+CALL generate_time_slots(@feb_special, '2025-02-03', '2025-02-16');
+CALL generate_time_slots(@march_planning, '2025-03-03', '2025-03-09');
+CALL generate_time_slots(@spring_maint, '2025-03-17', '2025-03-30');
+
+-- Generate member preferences for each template
 INSERT INTO member_preferences (template_id, user_id, status, submitted_at, notes)
 SELECT 
-    @morning_template, 
-    user_id, 
+    t.id as template_id,
+    tm.user_id,
     CASE 
-        WHEN RAND() < 0.8 THEN 'submitted'
+        WHEN t.status = 'published' AND RAND() < 0.8 THEN 'submitted'
+        WHEN t.status = 'published' THEN 'draft'
         ELSE 'draft'
-    END,
+    END as status,
     CASE 
-        WHEN RAND() < 0.8 THEN DATE_ADD('2024-11-25', INTERVAL FLOOR(RAND() * 5) DAY)
+        WHEN t.status = 'published' AND RAND() < 0.8 
+        THEN DATE_SUB(t.start_date, INTERVAL FLOOR(RAND() * 14) DAY)
         ELSE NULL
-    END,
+    END as submitted_at,
     CASE 
-        WHEN RAND() < 0.25 THEN 'Prefer early morning shifts'
-        WHEN RAND() < 0.50 THEN 'Available for weekend coverage'
-        WHEN RAND() < 0.75 THEN 'Flexible with start times'
+        WHEN RAND() < 0.2 THEN 'Prefer morning shifts'
+        WHEN RAND() < 0.4 THEN 'Available for night shifts'
+        WHEN RAND() < 0.6 THEN 'Flexible with timings'
+        WHEN RAND() < 0.8 THEN 'Weekend availability limited'
         ELSE NULL
-    END
-FROM team_members 
-WHERE team_id = 1;
+    END as notes
+FROM preference_templates t
+JOIN team_members tm ON t.team_id = tm.team_id;
 
--- Generate preference selections with day-specific patterns
+-- Generate preference selections
 INSERT INTO preference_selections (member_preference_id, template_time_slot_id, preference_level)
 SELECT 
-    mp.id, 
+    mp.id,
     ts.id,
     CASE
-        -- Monday preferences (higher for early starts)
-        WHEN DAYOFWEEK(ts.date) = 2 AND ptr.start_time <= '07:00' THEN FLOOR(4 + RAND() * 2)
-        -- Friday preferences (later starts preferred)
-        WHEN DAYOFWEEK(ts.date) = 6 AND ptr.start_time >= '07:30' THEN FLOOR(4 + RAND() * 2)
-        -- Weekend preferences (lower overall)
-        WHEN DAYOFWEEK(ts.date) IN (1, 7) THEN FLOOR(1 + RAND() * 3)
-        -- Mid-week preferences (balanced)
-        WHEN DAYOFWEEK(ts.date) IN (3,4,5) THEN FLOOR(2 + RAND() * 4)
-        -- Default case
+        WHEN HOUR(ptr.start_time) BETWEEN 7 AND 11 THEN FLOOR(3 + RAND() * 3)
+        WHEN HOUR(ptr.start_time) BETWEEN 12 AND 17 THEN FLOOR(2 + RAND() * 4)
+        WHEN HOUR(ptr.start_time) >= 18 OR HOUR(ptr.start_time) <= 5 THEN FLOOR(1 + RAND() * 3)
         ELSE FLOOR(1 + RAND() * 5)
-    END as preference_level
+    END
 FROM member_preferences mp
 JOIN template_time_slots ts ON ts.template_id = mp.template_id
 JOIN preference_time_ranges ptr ON ptr.id = ts.time_range_id
 WHERE mp.status = 'submitted';
 
--- Insert preference submissions based on member preferences
+-- Clean up procedures
+DROP PROCEDURE IF EXISTS insert_regular_time_ranges;
+DROP PROCEDURE IF EXISTS insert_extended_time_ranges;
+DROP PROCEDURE IF EXISTS insert_flexible_time_ranges;
+DROP PROCEDURE IF EXISTS generate_time_slots;
+
+-- Insert preference submissions based on submitted member preferences
 INSERT INTO preference_submissions (
     template_id, 
     user_id, 
     status, 
     submitted_at, 
-    notes
+    notes,
+    created_at,
+    updated_at
 )
 SELECT 
     template_id, 
     user_id, 
     status,
     submitted_at,
-    notes
+    notes,
+    CASE 
+        WHEN submitted_at IS NOT NULL THEN submitted_at
+        ELSE DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 30) DAY)
+    END as created_at,
+    CASE 
+        WHEN submitted_at IS NOT NULL THEN submitted_at
+        ELSE DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 30) DAY)
+    END as updated_at
 FROM member_preferences
 WHERE status = 'submitted';
 
--- Optional: Ensure data consistency by linking preference submissions to their selections
--- This query is just to verify the relationship
-SELECT 
-    ps.id as submission_id,
-    ps.template_id,
-    ps.user_id,
-    ps.status,
-    COUNT(pss.id) as slot_count
-FROM preference_submissions ps
-JOIN preference_selections pss ON pss.member_preference_id = 
-    (SELECT id FROM member_preferences 
-     WHERE template_id = ps.template_id 
-     AND user_id = ps.user_id)
-GROUP BY ps.id, ps.template_id, ps.user_id, ps.status
-LIMIT 10;
-
--- Insert corresponding submission slots
+-- Insert corresponding submission slots based on the preference selections
 INSERT INTO preference_submission_slots (
     submission_id, 
     template_time_slot_id, 
-    preference_level
+    preference_level,
+    created_at
 )
 SELECT 
     ps.id,
     ps2.template_time_slot_id,
-    ps2.preference_level
+    ps2.preference_level,
+    ps.created_at
 FROM preference_submissions ps
 JOIN member_preferences mp ON mp.template_id = ps.template_id AND mp.user_id = ps.user_id
 JOIN preference_selections ps2 ON ps2.member_preference_id = mp.id;
+
+-- Update submission status for some templates to simulate progress
+UPDATE preference_submissions 
+SET status = 'draft',
+    submitted_at = NULL
+WHERE RAND() < 0.2;  -- 20% will be drafts
+
+-- Update some submissions with notes
+UPDATE preference_submissions 
+SET notes = CASE 
+    WHEN RAND() < 0.2 THEN 'Prefer morning shifts due to childcare'
+    WHEN RAND() < 0.4 THEN 'Available for overtime if needed'
+    WHEN RAND() < 0.6 THEN 'Can cover weekend shifts this month'
+    WHEN RAND() < 0.8 THEN 'Flexible with start times'
+    ELSE NULL
+END
+WHERE RAND() < 0.4;  -- 40% will have notes
+
+-- Add some variation in preference levels for submission slots
+UPDATE preference_submission_slots pss
+JOIN template_time_slots tts ON pss.template_time_slot_id = tts.id
+JOIN preference_time_ranges ptr ON tts.time_range_id = ptr.id
+SET pss.preference_level = 
+    CASE
+        -- Higher preference for standard business hours
+        WHEN HOUR(ptr.start_time) BETWEEN 8 AND 17 THEN FLOOR(3 + RAND() * 3)
+        -- Lower preference for very early or late hours
+        WHEN HOUR(ptr.start_time) < 6 OR HOUR(ptr.start_time) >= 22 THEN FLOOR(1 + RAND() * 3)
+        -- Medium preference for other times
+        ELSE FLOOR(2 + RAND() * 3)
+    END
+WHERE RAND() < 0.7;  -- Adjust 70% of the preferences
+
+-- Update some submission timestamps to create a more realistic pattern
+UPDATE preference_submissions
+SET submitted_at = 
+    CASE 
+        WHEN status = 'submitted' THEN 
+            DATE_SUB(
+                (SELECT start_date FROM preference_templates WHERE id = template_id), 
+                INTERVAL FLOOR(RAND() * 14) DAY
+            )
+        ELSE NULL
+    END
+WHERE status = 'submitted';

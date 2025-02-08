@@ -75,7 +75,7 @@ export const PreferencesApply: React.FC<PreferencesApplyProps> = () => {
 						variant="ghost"
 						size="sm"
 						onClick={goToPreviousDay}
-						disabled={!currentDay || currentDayIndex === 0}
+						disabled={currentDayIndex === 0}
 						className="hover:bg-blue-100 text-blue-700"
 					>
 						<ChevronLeft className="h-4 w-4" />

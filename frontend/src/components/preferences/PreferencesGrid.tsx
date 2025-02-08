@@ -8,6 +8,7 @@ import { usePreferences, usePreferencesState } from "@/hooks"
 import { PreferencesEdit } from "./PreferencesEdit"
 import { useAuthenticatedFetch } from "@/hooks/useAuthFetch";
 import { PreferenceTemplate } from "./types"
+import PreferencesPublish from "./PreferencesPublish"
 
 type PreferenceMode = 'create' | 'edit' | 'publish'
 
@@ -60,6 +61,8 @@ const PreferencesGrid: React.FC<PreferencesGridProps> = ({
         return <PreferencesContent />;
       case "edit":
         return <PreferencesEdit templates={templates} loading={templateLoading} error={templateError} />
+      case "publish":
+        return <PreferencesPublish />
       default:
         return null;
     }
@@ -136,7 +139,7 @@ const PreferencesGrid: React.FC<PreferencesGridProps> = ({
           isSubmitting={isSubmitting}
           text={activeMode === 'publish' ? 'Publish' : 'Create Preference'}
           error={error}
-          disabled={!hasTimeRanges}
+          disabled={false}
           className="w-full sm:w-auto"
         />
       </div>

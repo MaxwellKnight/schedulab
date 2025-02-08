@@ -17,6 +17,20 @@ export interface PreferenceTemplate {
 	}>;
 }
 
+export interface APISchedulePreferences {
+	id: number;
+	team_id: number;
+	name: string;
+	start_date: string;
+	end_date: string;
+	status: string;
+	creator: number;
+	created_at: string;
+	updated_at: string;
+	time_slots: TimeSlot[];
+}
+
+
 export interface PreferenceRange {
 	start_time: string;
 	end_time: string;
