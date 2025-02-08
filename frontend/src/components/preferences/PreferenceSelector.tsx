@@ -74,9 +74,9 @@ const TimeSlotButton = React.memo(({ slot, isSelected, note, onSelect, onNoteCha
 				className={`
 w-full p-3 rounded-lg transition-colors duration-150 ease-in-out
 ${isSelected
-? 'bg-blue-50/90 border-2 border-blue-500 shadow-sm'
-: 'bg-white/95 border border-blue-100 hover:border-blue-300 hover:bg-blue-50/50'
-}
+						? 'bg-blue-50/90 border-2 border-blue-500 shadow-sm'
+						: 'bg-white/95 border border-blue-100 hover:border-blue-300 hover:bg-blue-50/50'
+					}
 group-hover:shadow-md group-hover:shadow-blue-100/50
 `}
 			>
@@ -92,9 +92,9 @@ group-hover:shadow-md group-hover:shadow-blue-100/50
 						className={`
 w-full py-1.5 transition-colors duration-150 flex items-center justify-center gap-2 font-medium
 ${isSelected
-? 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm'
-: 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'
-}
+								? 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm'
+								: 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'
+							}
 `}
 					>
 						{isSelected && <Check className="w-4 h-4" />}
@@ -143,8 +143,8 @@ hover:bg-blue-600 hover:text-white
 									className={`
 px-3 py-1.5 text-sm text-white rounded-md transition-colors
 ${localNote.trim()
-? 'bg-blue-600 hover:bg-blue-700'
-: 'bg-blue-300 cursor-not-allowed'}
+											? 'bg-blue-600 hover:bg-blue-700'
+											: 'bg-blue-300 cursor-not-allowed'}
 `}
 								>
 									Save Note
@@ -224,6 +224,7 @@ const PreferenceSelector: React.FC = () => {
 		data: apiPreferences,
 		loading
 	} = useAuthenticatedFetch<APISchedulePreferences>(`preferences/published`);
+	const { selectedTeam } = useTeam();
 
 	const preferences = useMemo(() => {
 		if (!apiPreferences) return null;
@@ -236,12 +237,12 @@ const PreferenceSelector: React.FC = () => {
 		}, {} as Record<string, TimeSlot[]>);
 
 		const daySchedules = Object.entries(groupedSlots)
-		.map(([date, slots]) => ({
-			date,
-			slots: slots.sort((a, b) =>
-				a.time_range.start_time.localeCompare(b.time_range.start_time))
-		}))
-		.sort((a, b) => a.date.localeCompare(b.date));
+			.map(([date, slots]) => ({
+				date,
+				slots: slots.sort((a, b) =>
+					a.time_range.start_time.localeCompare(b.time_range.start_time))
+			}))
+			.sort((a, b) => a.date.localeCompare(b.date));
 
 		return {
 			id: apiPreferences.id,
@@ -308,7 +309,7 @@ const PreferenceSelector: React.FC = () => {
 		return <div className="p-4">Loading...</div>;
 	}
 
-	if (!preferences) {
+	if (!preferences || apiPreferences?.team_id !== selectedTeam?.id) {
 		return <div className="p-4">No preferences found.</div>;
 	}
 

@@ -14,7 +14,7 @@ import { motion } from "framer-motion"
 
 export interface DateRangePickerProps {
 	range: DateRange | undefined;
-	setRange: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
+	setRange: (range: DateRange | undefined) => void;
 }
 
 export const DateRangePicker: React.FC<DateRangePickerProps & React.HTMLAttributes<HTMLDivElement>> = ({
