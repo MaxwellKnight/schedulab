@@ -72,13 +72,13 @@ const TimeSlotButton = React.memo(({ slot, isSelected, note, onSelect, onNoteCha
 			<button
 				onClick={handleClick}
 				className={`
-          w-full p-3 rounded-lg transition-colors duration-150 ease-in-out
-          ${isSelected
-						? 'bg-blue-50/90 border-2 border-blue-500 shadow-sm'
-						: 'bg-white/95 border border-blue-100 hover:border-blue-300 hover:bg-blue-50/50'
-					}
-          group-hover:shadow-md group-hover:shadow-blue-100/50
-        `}
+w-full p-3 rounded-lg transition-colors duration-150 ease-in-out
+${isSelected
+? 'bg-blue-50/90 border-2 border-blue-500 shadow-sm'
+: 'bg-white/95 border border-blue-100 hover:border-blue-300 hover:bg-blue-50/50'
+}
+group-hover:shadow-md group-hover:shadow-blue-100/50
+`}
 			>
 				<div className="flex flex-col space-y-2">
 					<div className="flex items-center justify-between px-1 text-sm font-medium text-blue-800">
@@ -90,12 +90,12 @@ const TimeSlotButton = React.memo(({ slot, isSelected, note, onSelect, onNoteCha
 					<Badge
 						variant={isSelected ? "default" : "secondary"}
 						className={`
-              w-full py-1.5 transition-colors duration-150 flex items-center justify-center gap-2 font-medium
-              ${isSelected
-								? 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm'
-								: 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'
-							}
-            `}
+w-full py-1.5 transition-colors duration-150 flex items-center justify-center gap-2 font-medium
+${isSelected
+? 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm'
+: 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200'
+}
+`}
 					>
 						{isSelected && <Check className="w-4 h-4" />}
 						{isSelected ? 'Selected' : 'Available'}
@@ -108,10 +108,10 @@ const TimeSlotButton = React.memo(({ slot, isSelected, note, onSelect, onNoteCha
 					<PopoverTrigger asChild>
 						<button
 							className={`
-                absolute -top-2 -right-2 p-1.5 rounded-full transition-colors shadow-sm
-                ${note ? 'bg-blue-500 text-white' : 'bg-blue-100 text-blue-600'}
-                hover:bg-blue-600 hover:text-white
-              `}
+absolute -top-2 -right-2 p-1.5 rounded-full transition-colors shadow-sm
+${note ? 'bg-blue-500 text-white' : 'bg-blue-100 text-blue-600'}
+hover:bg-blue-600 hover:text-white
+`}
 						>
 							<MessageSquare className="h-4 w-4" />
 						</button>
@@ -141,11 +141,11 @@ const TimeSlotButton = React.memo(({ slot, isSelected, note, onSelect, onNoteCha
 									onClick={handleNoteSave}
 									disabled={!localNote.trim()}
 									className={`
-                    px-3 py-1.5 text-sm text-white rounded-md transition-colors
-                    ${localNote.trim()
-											? 'bg-blue-600 hover:bg-blue-700'
-											: 'bg-blue-300 cursor-not-allowed'}
-                  `}
+px-3 py-1.5 text-sm text-white rounded-md transition-colors
+${localNote.trim()
+? 'bg-blue-600 hover:bg-blue-700'
+: 'bg-blue-300 cursor-not-allowed'}
+`}
 								>
 									Save Note
 								</button>
@@ -236,12 +236,12 @@ const PreferenceSelector: React.FC = () => {
 		}, {} as Record<string, TimeSlot[]>);
 
 		const daySchedules = Object.entries(groupedSlots)
-			.map(([date, slots]) => ({
-				date,
-				slots: slots.sort((a, b) =>
-					a.time_range.start_time.localeCompare(b.time_range.start_time))
-			}))
-			.sort((a, b) => a.date.localeCompare(b.date));
+		.map(([date, slots]) => ({
+			date,
+			slots: slots.sort((a, b) =>
+				a.time_range.start_time.localeCompare(b.time_range.start_time))
+		}))
+		.sort((a, b) => a.date.localeCompare(b.date));
 
 		return {
 			id: apiPreferences.id,
