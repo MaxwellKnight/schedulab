@@ -304,4 +304,88 @@ export class TeamController {
 			res.status(400).json({ message: "Failed to fetch roles" });
 		}
 	}
+
+	public getTeamMembers = async (req: Request, res: Response): Promise<void> => {
+		if (!req.user?.id) {
+			res.status(400).json({ message: "User is missing from request" });
+			return;
+		}
+
+		const teamId = Number(req.params.id);
+		if (isNaN(teamId)) {
+			res.status(400).json({ message: "Invalid team ID" });
+			return;
+		}
+
+		try {
+			const members = await this.service.getTeamMembers(teamId, req.user.id);
+			if (members.length > 0) {
+				res.json(members);
+			} else {
+				res.status(404).json({ error: "No team members found" });
+			}
+		} catch (error) {
+			if (error instanceof Error) {
+				if (error.message === 'User does not have access to this team') {
+					res.status(403).json({ message: error.message });
+				} else if (error.message === 'Team not found') {
+					res.status(404).json({ message: error.message });
+				} else {
+					res.status(400).json({ message: "Failed to fetch team members" });
+				}
+			} else {
+				res.status(500).json({ message: "Internal server error" });
+			}
+		}
+	}
+
+	public getAllTeamMembers = async (req: Request, res: Response): Promise<void> => {
+		if (!req.user?.id) {
+			res.status(400).json({ message: "User is missing from request" });
+			return;
+		}
+
+		try {
+			const teamsWithMembers = await this.service.getAllTeamMembers(req.user.id);
+			res.json(teamsWithMembers);
+		} catch (error) {
+			if (error instanceof Error) {
+				if (error.message === 'User is not a member of any teams') {
+					res.status(404).json({ message: error.message });
+				} else {
+					res.status(400).json({ message: "Failed to fetch team members" });
+				}
+			} else {
+				res.status(500).json({ message: "Internal server error" });
+			}
+		}
+	}
+
+	public getTeamMemberCount = async (req: Request, res: Response): Promise<void> => {
+		if (!req.user?.id) {
+			res.status(400).json({ message: "User is missing from request" });
+			return;
+		}
+
+		const teamId = Number(req.params.id);
+		if (isNaN(teamId)) {
+			res.status(400).json({ message: "Invalid team ID" });
+			return;
+		}
+
+		try {
+			const count = await this.service.getTeamMemberCount(teamId, req.user.id);
+			res.json({ count });
+		} catch (error) {
+			if (error instanceof Error) {
+				if (error.message === 'User does not have access to this team') {
+					res.status(403).json({ message: error.message });
+				} else {
+					res.status(400).json({ message: "Failed to fetch member count" });
+				}
+			} else {
+				res.status(500).json({ message: "Internal server error" });
+			}
+		}
+	}
 }

@@ -55,8 +55,12 @@ router.route("/:id")
 		controller.delete
 	);
 
-// Member management routes
+// Team membership routes
 router.route("/:id/members")
+	.get(
+		authController.authenticate,
+		controller.getTeamMembers
+	)
 	.post(
 		authController.authenticate,
 		controller.addMember
@@ -66,6 +70,19 @@ router.route("/:id/members/:userId")
 	.delete(
 		authController.authenticate,
 		controller.removeMember
+	);
+
+router.route("/:id/members/count")
+	.get(
+		authController.authenticate,
+		controller.getTeamMemberCount
+	);
+
+// Get all team members for all user's teams
+router.route("/members/all")
+	.get(
+		authController.authenticate,
+		controller.getAllTeamMembers
 	);
 
 // Role management routes

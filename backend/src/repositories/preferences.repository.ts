@@ -516,4 +516,5 @@ export class PreferenceRepository {
         return Array.from(templateMap.values())
             .map(templateRows => this.mapToPreferenceTemplate(templateRows));
     }
+
 }
