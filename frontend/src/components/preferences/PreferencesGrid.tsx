@@ -6,16 +6,16 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { usePreferences, usePreferencesState } from "@/hooks"
 import { PreferencesEdit } from "./PreferencesEdit"
-import { PreferenceTemplate } from "./types.d.ts";
 import { useAuthenticatedFetch } from "@/hooks/useAuthFetch";
+import { PreferenceTemplate } from "./types"
 
-type PreferenceMode = 'create' | 'edit' | 'schedule'
+type PreferenceMode = 'create' | 'edit' | 'publish'
 
 interface ModeOption {
   id: PreferenceMode
   label: string
   icon: React.ReactNode
-  badge?: string
+  badge?: boolean
 }
 
 export interface PreferencesGridProps {
@@ -55,7 +55,7 @@ const PreferencesGrid: React.FC<PreferencesGridProps> = ({
 
 
   const renderContent = () => {
-    switch(activeMode) {
+    switch (activeMode) {
       case "create":
         return <PreferencesContent />;
       case "edit":
@@ -130,16 +130,16 @@ const PreferencesGrid: React.FC<PreferencesGridProps> = ({
       </div>
 
       {/* Submit Button */}
-        <div className="flex justify-center px-4 md:px-0">
-          <AnimatedSubmitButton
-            onClick={handleSubmit}
-            isSubmitting={isSubmitting}
-            text={activeMode === 'publish' ? 'Publish' : 'Create Preference'}
-            error={error}
-            disabled={!hasTimeRanges}
-            className="w-full sm:w-auto"
-          />
-        </div>
+      <div className="flex justify-center px-4 md:px-0">
+        <AnimatedSubmitButton
+          onClick={handleSubmit}
+          isSubmitting={isSubmitting}
+          text={activeMode === 'publish' ? 'Publish' : 'Create Preference'}
+          error={error}
+          disabled={!hasTimeRanges}
+          className="w-full sm:w-auto"
+        />
+      </div>
     </div>
   )
 }

@@ -105,7 +105,7 @@ const PreferenceDetail: React.FC<PreferenceDetailProps> = ({
 						<Users className="w-5 h-5 text-slate-600" />
 						<div>
 							<CardTitle className="text-xl text-slate-800">Team Submissions</CardTitle>
-							<CardDescription>View and manage team preferences</CardDescription>
+							<CardDescription>View team preferences</CardDescription>
 						</div>
 					</div>
 				</CardHeader>
