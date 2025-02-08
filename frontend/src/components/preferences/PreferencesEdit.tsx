@@ -1,24 +1,21 @@
 import { useEffect, useState } from 'react';
 import { Card } from "@/components/ui/card";
-import { useAuthenticatedFetch } from '@/hooks';
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, Calendar } from "lucide-react";
 import { usePref } from '@/context/PreferencesContext';
-import { DateRangePicker } from '../DateRangePicker';
 import { WeekViewEditor } from './WeekViewEdit';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PreferenceTemplate } from "./types.d.ts";
+import { PreferenceTemplate } from './types';
 
 interface PreferencesEditProps {
-	templates: PreferenceTemplate | null;
+	templates: PreferenceTemplate[] | null;
 	loading: boolean;
 	error: string | null;
 }
-export const PreferencesEdit = ({ templates, loading, error }) => {
+export const PreferencesEdit: React.FC<PreferencesEditProps> = ({ templates, loading, error }) => {
 	const [selectedTemplate, setSelectedTemplate] = useState<PreferenceTemplate | null>(null);
 	const {
-		range,
 		setRange,
 		timeRanges,
 		handleAddTimeRange,
@@ -113,7 +110,7 @@ export const PreferencesEdit = ({ templates, loading, error }) => {
 
 				{selectedTemplate && timeRanges.length > 0 && (
 					<motion.div
-						initial={{ opacity: 0, y: 20 }}
+						initial={{ opacity: 0, y: 5 }}
 						animate={{ opacity: 1, y: 0 }}
 						className="bg-blue-50/30 rounded-lg p-6 border border-blue-100"
 					>
