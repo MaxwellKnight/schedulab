@@ -88,13 +88,13 @@ const PreferencesSidebar: React.FC<PreferencesSidebarProps> = ({
 			{/* Mobile Toggle Button */}
 			<button
 				onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-				className="lg:hidden fixed bottom-4 right-4 z-50 bg-blue-500 text-white p-3 rounded-full shadow-lg"
+				className="xl:hidden fixed bottom-4 right-4 z-50 bg-blue-500 text-white p-3 rounded-full shadow-lg"
 			>
 				{isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
 			</button>
 
 			{/* Desktop Sidebar */}
-			<div className="hidden lg:block w-80 border-l border-blue-100 bg-white">
+			<div className="hidden xl:block w-80 border-l border-blue-100 bg-white">
 				<div className="p-6">
 					<h3 className="text-xs font-semibold tracking-wider text-blue-600 uppercase mb-6">
 						Navigation
@@ -111,7 +111,7 @@ const PreferencesSidebar: React.FC<PreferencesSidebarProps> = ({
 						animate={{ opacity: 1 }}
 						exit={{ opacity: 0 }}
 						transition={{ duration: 0.2 }}
-						className="fixed inset-0 z-50 lg:hidden pointer-events-none"
+						className="fixed inset-0 z-50 xl:hidden pointer-events-none"
 					>
 						<motion.div
 							initial={{ x: '100%' }}
