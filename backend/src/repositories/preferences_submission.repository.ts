@@ -179,6 +179,7 @@ export class PreferenceSubmissionRepository {
 			"SELECT * FROM preference_submissions WHERE id = ? AND user_id = ?",
 			[id, userId]
 		);
+		console.log(id, userId);
 
 		if (!submissions.length) return null;
 
@@ -210,12 +211,12 @@ export class PreferenceSubmissionRepository {
 			start_time: slot.start_time,
 			end_time: slot.end_time
 		}));
-		console.log(submissions, formattedSlots);
 
-		return {
+		const result = {
 			submission: submissions[0],
 			slots: formattedSlots
 		};
+		return result;
 	}
 
 	public async getAllDetailsByTeam(id: number, userId: number): Promise<{
