@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useTeam } from "@/hooks";
 import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "../ui/drawer";
 import AnimatedGradientButton from "../AnimatedButton";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,6 +10,7 @@ import { NavigationItemId } from './types';
 import PreferencesHistory from './PreferencesHistory';
 import PreferencesGrid, { PreferencesGridProps } from './PreferencesGrid';
 import { PreferencesProvider } from '@/context/PreferencesContext';
+import { useTeam } from '@/context';
 
 export interface PreferencesDrawerProps {
 }
