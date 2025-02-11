@@ -102,7 +102,7 @@ export const PreferencesEdit: React.FC<PreferencesEditProps> = ({ templates, loa
 										value={template.id.toString()}
 										className="text-blue-900 hover:bg-blue-50 focus:bg-blue-50"
 									>
-										{template.name} ({new Date(template.start_date).toLocaleDateString()} - {new Date(template.end_date).toLocaleDateString()})
+										{template.name}
 									</SelectItem>
 								))}
 							</SelectContent>
