@@ -81,6 +81,6 @@ export const usePreferencesState = () => {
 		handleRemoveTimeRange,
 		handleUpdateTimeRange,
 		handleApplyAll,
-		hasTimeRanges: timeRanges.some(day => day.ranges.length > 0)
+		isEmpty: timeRanges.some(day => day.ranges.length > 0)
 	};
 };

@@ -19,14 +19,19 @@ export const usePreferences = (
 	range: DateRange | undefined,
 	onSuccess?: () => void
 ) => {
-	const [isSubmitting, setIsSubmitting] = useState(false)
-	const [isSuccess, setIsSuccess] = useState(false)
-	const [error, setError] = useState<string | null>(null)
-	const { selectedTeam } = useTeam()
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isSuccess, setIsSuccess] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [name, setName] = useState<string>("");
+	const { selectedTeam } = useTeam();
 
 	const clearError = useCallback(() => {
 		setError(null);
 	}, []);
+
+	const handleName = (name: string) => {
+		setName(name);
+	}
 
 	const handleSubmit = async () => {
 		if (!range?.from || !range?.to) {
@@ -45,7 +50,7 @@ export const usePreferences = (
 		try {
 			// 1. Create template
 			const { data: templateData } = await axios.post<TemplateResponse>('/preferences', {
-				name: `Preferences ${format(range.from, 'MMM d')} - ${format(range.to, 'MMM d, yyyy')}`,
+				name,
 				team_id: selectedTeam.id,
 				status: 'draft',
 				start_date: format(range.from, 'yyyy-MM-dd'),
@@ -146,6 +151,8 @@ export const usePreferences = (
 		isSuccess,
 		error,
 		handleSubmit,
-		clearError
+		clearError,
+		handleName,
+		name
 	};
 };
