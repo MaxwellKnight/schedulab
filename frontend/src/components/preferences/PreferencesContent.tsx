@@ -5,14 +5,34 @@ import { usePref } from "@/context/PreferencesContext";
 import AnimatedSubmitButton from "../AnimatedSubmitButton";
 import { usePreferences } from "@/hooks/usePreferences";
 import { Input } from "../ui/input";
+import { useState } from "react";
 
 export interface PreferencesContentProps {
 	onSuccess?: () => void;
+	refetch: () => void;
 }
 
-export const PreferencesContent: React.FC<PreferencesContentProps> = ({ onSuccess }) => {
+export const PreferencesContent: React.FC<PreferencesContentProps> = ({ onSuccess, refetch }) => {
 	const { range, setRange, timeRanges } = usePref();
-	const { isSubmitting, error, handleSubmit, name, handleName } = usePreferences(timeRanges, range, onSuccess);
+	const [success, setSuccess] = useState(false);
+	const { isSubmitting, error, handleSubmit, name, handleName } = usePreferences(timeRanges, range, () => {
+		setSuccess(true);
+		onSuccess?.();
+		// Reset success state after animation
+		setTimeout(() => {
+			setSuccess(false);
+		}, 2000);
+	});
+
+	const handleFormSubmit = async () => {
+		try {
+			await handleSubmit();
+			// Only refetch if submission was successful
+			refetch();
+		} catch (err) {
+			console.error('Error submitting form:', err);
+		}
+	};
 
 	return (
 		<motion.div
@@ -21,7 +41,7 @@ export const PreferencesContent: React.FC<PreferencesContentProps> = ({ onSucces
 			animate={{ opacity: 1 }}
 			transition={{ delay: 0.3 }}
 		>
-			<div className="w-[50%] grid place-items-center space-y-2.5 py-4">
+			<div className="max-w-[300px] grid place-items-center space-y-2.5 py-4">
 				<Input
 					id="templateName"
 					placeholder="Enter template name"
@@ -41,17 +61,17 @@ export const PreferencesContent: React.FC<PreferencesContentProps> = ({ onSucces
 				setRange={setRange}
 			/>
 			<PreferencesApply />
-
 			<div className="mt-10 flex justify-center px-4 md:px-0">
 				<AnimatedSubmitButton
-					onClick={handleSubmit}
+					onClick={handleFormSubmit}
 					isSubmitting={isSubmitting}
 					text='Create Template'
 					error={error}
-					disabled={false}
+					onSuccess={success}
+					disabled={!name.trim()}
 					className="w-full sm:w-auto"
 				/>
 			</div>
 		</motion.div>
-	)
+	);
 };
