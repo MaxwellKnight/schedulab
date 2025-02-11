@@ -94,7 +94,7 @@ const PreferencesPublish = () => {
 					<p className="text-gray-600 mt-1">Manage and publish your preference templates</p>
 				</div>
 				<Badge variant="secondary" className="px-3 py-1 bg-blue-100 text-blue-800">
-					{templates?.length} Templates
+					{templates?.filter(template => template.team_id === selectedTeam?.id).length} Templates
 				</Badge>
 			</div>
 
