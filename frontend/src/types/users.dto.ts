@@ -4,6 +4,7 @@ export interface UserData {
 	id: number;
 	user_role: string;
 	team_id: number;
+	display_name?: string;
 	picture?: string;
 	first_name: string;
 	middle_name?: string,

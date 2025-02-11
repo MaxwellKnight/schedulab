@@ -50,14 +50,15 @@ const PreferencesGrid: React.FC<PreferencesGridProps> = ({
   const {
     data: templates,
     loading: templateLoading,
-    error: templateError
+    error: templateError,
+    fetchData: refetchPrefs,
   } = useAuthenticatedFetch<PreferenceTemplate[]>('/preferences');
 
 
   const renderContent = () => {
     switch (activeMode) {
       case "create":
-        return <PreferencesContent onSuccess={onSuccess} />;
+        return <PreferencesContent onSuccess={onSuccess} refetch={() => refetchPrefs()} />;
       case "edit":
         return <PreferencesEdit templates={templates} loading={templateLoading} error={templateError} />
       case "publish":

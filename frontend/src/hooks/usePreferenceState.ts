@@ -12,13 +12,25 @@ export const usePreferencesState = () => {
 
 	useEffect(() => {
 		if (!(range && range.from && range.to)) return;
+		if (timeRanges.length > 0) return; // Skip if we already have ranges
+
 		const dates = eachDayOfInterval({ start: range.from, end: range.to });
 		const ranges: DailyPreference[] = dates.map(date => ({
 			column: date,
 			ranges: []
 		}));
 		setTimeRanges(ranges);
-	}, [range]);
+	}, [range, timeRanges.length]);
+
+	const updateDateRange = (newRange: DateRange) => {
+		setRange(newRange);
+		const dates = eachDayOfInterval({ start: newRange.from || new Date(), end: newRange.to || new Date() });
+		const ranges: DailyPreference[] = dates.map(date => ({
+			column: date,
+			ranges: []
+		}));
+		setTimeRanges(ranges);
+	};
 
 	const handleAddTimeRange = (date: Date) => {
 		setTimeRanges(prev => prev.map(day => {
@@ -76,7 +88,7 @@ export const usePreferencesState = () => {
 	return {
 		timeRanges,
 		range,
-		setRange,
+		setRange: updateDateRange,
 		handleAddTimeRange,
 		handleRemoveTimeRange,
 		handleUpdateTimeRange,
