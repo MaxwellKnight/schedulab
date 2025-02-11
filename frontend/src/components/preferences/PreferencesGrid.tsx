@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Calendar, Edit2, Clock } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { usePreferences, usePreferencesState } from "@/hooks"
+import { usePreferences, usePreferencesState, useTeam } from "@/hooks"
 import { PreferencesEdit } from "./PreferencesEdit"
 import { useAuthenticatedFetch } from "@/hooks/useAuthFetch";
 import { PreferenceTemplate } from "./types"
@@ -46,8 +46,7 @@ const PreferencesGrid: React.FC<PreferencesGridProps> = ({
   onSuccess
 }) => {
   const [activeMode, setActiveMode] = useState<PreferenceMode>('create')
-  const { timeRanges, range, hasTimeRanges } = usePreferencesState();
-  const { isSubmitting, error, handleSubmit } = usePreferences(timeRanges, range, onSuccess);
+  const { selectedTeam } = useTeam();
   const {
     data: templates,
     loading: templateLoading,
@@ -58,7 +57,7 @@ const PreferencesGrid: React.FC<PreferencesGridProps> = ({
   const renderContent = () => {
     switch (activeMode) {
       case "create":
-        return <PreferencesContent />;
+        return <PreferencesContent onSuccess={onSuccess} />;
       case "edit":
         return <PreferencesEdit templates={templates} loading={templateLoading} error={templateError} />
       case "publish":
@@ -103,7 +102,7 @@ const PreferencesGrid: React.FC<PreferencesGridProps> = ({
                       }
                     `}
                   >
-                    {templates && templates.length}
+                    {templates && templates.filter(template => template.team_id === selectedTeam?.id).length}
                   </Badge>
                 )}
               </span>
@@ -132,17 +131,6 @@ const PreferencesGrid: React.FC<PreferencesGridProps> = ({
         {renderContent()}
       </div>
 
-      {/* Submit Button */}
-      <div className="flex justify-center px-4 md:px-0">
-        <AnimatedSubmitButton
-          onClick={handleSubmit}
-          isSubmitting={isSubmitting}
-          text={activeMode === 'publish' ? 'Publish' : 'Create Preference'}
-          error={error}
-          disabled={false}
-          className="w-full sm:w-auto"
-        />
-      </div>
     </div>
   )
 }

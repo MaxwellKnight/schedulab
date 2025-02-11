@@ -7,6 +7,7 @@ import { usePref } from '@/context/PreferencesContext';
 import { WeekViewEditor } from './WeekViewEdit';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PreferenceTemplate } from './types';
+import { useTeam } from '@/context';
 
 interface PreferencesEditProps {
 	templates: PreferenceTemplate[] | null;
@@ -15,6 +16,7 @@ interface PreferencesEditProps {
 }
 export const PreferencesEdit: React.FC<PreferencesEditProps> = ({ templates, loading, error }) => {
 	const [selectedTemplate, setSelectedTemplate] = useState<PreferenceTemplate | null>(null);
+	const { selectedTeam } = useTeam();
 	const {
 		setRange,
 		timeRanges,
@@ -94,7 +96,7 @@ export const PreferencesEdit: React.FC<PreferencesEditProps> = ({ templates, loa
 								<SelectValue placeholder="Choose a template to edit" />
 							</SelectTrigger>
 							<SelectContent>
-								{templates.map((template) => (
+								{templates.filter(template => template.team_id === selectedTeam?.id).map((template) => (
 									<SelectItem
 										key={template.id}
 										value={template.id.toString()}

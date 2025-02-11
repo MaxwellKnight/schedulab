@@ -192,7 +192,7 @@ export const useAuthenticatedFetch = <T,>(
 					'Authorization': `Bearer ${token}`,
 					...optionsRef.current.headers
 				},
-				...optionsRef.current
+				params: { ...optionsRef.current.params }
 			});
 
 			if (response.data) {

@@ -2,11 +2,16 @@ import { motion } from "framer-motion";
 import { DateRangePicker } from "../DateRangePicker";
 import PreferencesApply from "./PreferencesApply";
 import { usePref } from "@/context/PreferencesContext";
+import AnimatedSubmitButton from "../AnimatedSubmitButton";
+import { usePreferences } from "@/hooks";
 
-export interface PreferencesContentProps { }
+export interface PreferencesContentProps {
+	onSuccess?: () => void;
+}
 
-export const PreferencesContent: React.FC<PreferencesContentProps> = () => {
-	const { range, setRange } = usePref();
+export const PreferencesContent: React.FC<PreferencesContentProps> = ({ onSuccess }) => {
+	const { range, setRange, timeRanges } = usePref();
+	const { isSubmitting, error, handleSubmit } = usePreferences(timeRanges, range, onSuccess);
 
 	return (
 		<motion.div
@@ -21,6 +26,17 @@ export const PreferencesContent: React.FC<PreferencesContentProps> = () => {
 				setRange={setRange}
 			/>
 			<PreferencesApply />
+
+			<div className="mt-10 flex justify-center px-4 md:px-0">
+				<AnimatedSubmitButton
+					onClick={handleSubmit}
+					isSubmitting={isSubmitting}
+					text='Create Template'
+					error={error}
+					disabled={false}
+					className="w-full sm:w-auto"
+				/>
+			</div>
 		</motion.div>
 	)
 };
