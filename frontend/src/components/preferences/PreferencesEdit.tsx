@@ -231,9 +231,11 @@ export const PreferencesEdit: React.FC<PreferencesEditProps> = ({
 					>
 						<WeekViewEditor
 							timeRanges={timeRanges}
+							template={selectedTemplate}
 							onAddTimeRange={handleAddTimeRange}
 							onRemoveTimeRange={handleRemoveTimeRange}
 							onUpdateTimeRange={handleUpdateTimeRange}
+							isLoading={loading}
 						/>
 					</motion.div>
 				)}
