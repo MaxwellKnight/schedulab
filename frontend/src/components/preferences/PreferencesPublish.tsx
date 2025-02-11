@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, AlertCircle, Users, Check } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useAuthenticatedFetch } from '@/hooks/useAuthFetch';
 import { format } from 'date-fns';
+import { useTeam } from '@/context';
 
 interface PreferenceTemplate {
 	id: number;
@@ -28,13 +29,16 @@ interface PreferenceTemplate {
 const PreferencesPublish = () => {
 	const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
 	const [isPublishing, setIsPublishing] = useState(false);
+	const { selectedTeam } = useTeam();
 
 	const {
 		data: templates,
 		loading,
 		error,
 		fetchData: refetch
-	} = useAuthenticatedFetch<PreferenceTemplate[]>('/preferences');
+	} = useAuthenticatedFetch<PreferenceTemplate[]>('/preferences', { params: { teamId: selectedTeam?.id } });
+
+	const filtered_templates = templates?.filter(template => template.team_id == selectedTeam?.id);
 
 	const handlePublish = async (templateId: number) => {
 		setIsPublishing(true);
@@ -54,12 +58,6 @@ const PreferencesPublish = () => {
 			setIsPublishing(false);
 			setSelectedTemplate(null);
 		}
-	};
-
-	const getFutureTemplates = () => {
-		if (!templates) return [];
-		const now = new Date();
-		return templates.filter(template => new Date(template.end_date) >= now);
 	};
 
 	if (loading) {
@@ -84,8 +82,6 @@ const PreferencesPublish = () => {
 		);
 	}
 
-	const futureTemplates = getFutureTemplates();
-
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: 20 }}
@@ -98,11 +94,11 @@ const PreferencesPublish = () => {
 					<p className="text-gray-600 mt-1">Manage and publish your preference templates</p>
 				</div>
 				<Badge variant="secondary" className="px-3 py-1 bg-blue-100 text-blue-800">
-					{futureTemplates.length} Templates
+					{templates?.length} Templates
 				</Badge>
 			</div>
 
-			{futureTemplates.length === 0 ? (
+			{filtered_templates?.length === 0 ? (
 				<motion.div
 					initial={{ opacity: 0, scale: 0.95 }}
 					animate={{ opacity: 1, scale: 1 }}
@@ -116,15 +112,15 @@ const PreferencesPublish = () => {
 				</motion.div>
 			) : (
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{futureTemplates.map((template) => (
+					{filtered_templates?.map((template, i) => (
 						<motion.div
 							key={template.id}
-							initial={{ opacity: 0, y: 20 }}
+							initial={{ opacity: 0, y: 30 }}
 							animate={{ opacity: 1, y: 0 }}
-							whileHover={{ y: -4 }}
-							transition={{ duration: 0.2 }}
+							whileHover={{ y: -1 }}
+							transition={{ duration: 0.2 * i }}
 						>
-							<Card className="group relative overflow-hidden border-blue-100 hover:shadow-xl hover:border-blue-200 transition-all duration-300">
+							<Card className="group relative overflow-hidden border-blue-100 hover:shadow-md hover:border-blue-200 transition-all duration-300">
 								<div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-transparent to-blue-50/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
 								<div className="absolute top-4 right-4">
