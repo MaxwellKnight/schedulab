@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, Users, Check, X, CalendarDays, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Calendar, Clock, Users, Check, X, CalendarDays, ChevronRight } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +9,6 @@ import { format } from 'date-fns';
 import { useTeam } from '@/context';
 import { PreferenceTemplate } from './types';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
-import { ScrollArea } from '../ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
 interface ActionState {
@@ -79,19 +78,11 @@ const ViewDetails: React.FC<ViewDetailsProps> = ({
 
 	return (
 		<Dialog open={true} onOpenChange={onClose}>
-			<DialogContent className="max-w-[520px] p-0">
+			<DialogContent className="max-w-[650px] p-0">
 				{/* Compact Header */}
 				<div className="px-4 py-3 border-b border-blue-100">
 					<DialogHeader className="space-y-0">
 						<div className="flex items-center gap-2">
-							<Button
-								variant="ghost"
-								size="icon"
-								onClick={onClose}
-								className="h-8 w-8 hover:bg-blue-50"
-							>
-								<ArrowLeft className="h-4 w-4" />
-							</Button>
 							<div className="flex items-center gap-2">
 								<DialogTitle className="text-lg font-semibold text-blue-900">
 									{template.name}
@@ -184,24 +175,16 @@ const ViewDetails: React.FC<ViewDetailsProps> = ({
 						>
 							Cancel
 						</Button>
-						{isPublished ? (
-							<Button
-								variant="destructive"
-								onClick={onCloseTemplate}
-								className="bg-red-600 hover:bg-red-700"
-							>
-								<X className="w-4 h-4 mr-2" />
-								Close
-							</Button>
-						) : (
-							<Button
-								onClick={onPublish}
-								className="bg-blue-600 hover:bg-blue-700"
-							>
-								<Check className="w-4 h-4 mr-2" />
-								Publish
-							</Button>
-						)}
+						{isPublished ?
+							null : (
+								<Button
+									onClick={onPublish}
+									className="bg-blue-600 hover:bg-blue-700"
+								>
+									<Check className="w-4 h-4 mr-2" />
+									Publish
+								</Button>
+							)}
 					</div>
 				</DialogFooter>
 			</DialogContent>
@@ -307,16 +290,9 @@ const PreferencesPublish = () => {
 		<div className="p-6 max-w-7xl mx-auto">
 			<header className="mb-8">
 				<div className="flex items-center justify-between mb-2">
-					<h1 className="text-2xl font-semibold text-blue-900">Preference Templates</h1>
 					<Badge variant="secondary" className="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200">
 						{filtered_templates?.length} Templates
 					</Badge>
-				</div>
-				<div className="flex items-center text-blue-600 text-sm">
-					<Users className="w-4 h-4 mr-2" />
-					<span>Team {selectedTeam?.id}</span>
-					<ChevronRight className="w-4 h-4 mx-2" />
-					<span>Templates</span>
 				</div>
 			</header>
 

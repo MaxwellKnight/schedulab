@@ -130,7 +130,7 @@ export const PreferencesEdit: React.FC<PreferencesEditProps> = ({
 				className="space-y-8"
 			>
 				{/* Template Selection */}
-				<Card className="p-6 bg-white shadow-sm border-blue-100">
+				<div className="p-6 bg-white">
 					<div className="space-y-4">
 						<div className="flex items-center justify-between mb-2">
 							<div className="flex items-center gap-3">
@@ -221,7 +221,7 @@ export const PreferencesEdit: React.FC<PreferencesEditProps> = ({
 							</Select>
 						)}
 					</div>
-				</Card>
+				</div>
 
 				{selectedTemplate && timeRanges.length > 0 && (
 					<motion.div
@@ -246,7 +246,7 @@ export const PreferencesEdit: React.FC<PreferencesEditProps> = ({
 						<AlertDialogHeader>
 							<AlertDialogTitle>Delete Template</AlertDialogTitle>
 							<AlertDialogDescription>
-								Are you sure you want to delete "{selectedTemplate?.name}"? This action cannot be undone.
+								Are you sure you want to delete `&quot;`{selectedTemplate?.name}`&quot;`? This action cannot be undone.
 							</AlertDialogDescription>
 						</AlertDialogHeader>
 						<AlertDialogFooter>
