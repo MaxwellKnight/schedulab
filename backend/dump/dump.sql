@@ -419,7 +419,37 @@ BEGIN
         SET NEW.display_name = CONCAT(NEW.display_name, ' ', NEW.last_name);
     END IF;
 END$$
+DELIMITER ;
 
+DELIMITER $$
+CREATE PROCEDURE update_template_status(
+    IN template_id INT,
+    IN new_status VARCHAR(10),
+    IN team_id INT
+)
+BEGIN
+    IF new_status = 'published' THEN
+        -- First update all other templates for the team to draft
+        UPDATE preference_templates 
+        SET status = 'draft'
+        WHERE team_id = team_id 
+        AND id != template_id
+        AND status = 'published';
+
+        -- Then update the specified template
+        UPDATE preference_templates 
+        SET status = new_status
+        WHERE id = template_id;
+
+    ELSE 
+        -- Simply update the status if it's draft or closed
+        UPDATE preference_templates 
+        SET status = new_status
+        WHERE id = template_id;
+    END IF;
+
+    COMMIT;
+END$$
 DELIMITER ;
 
 DELIMITER $$

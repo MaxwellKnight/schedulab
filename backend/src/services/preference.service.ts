@@ -1,15 +1,17 @@
-import { PreferenceTemplateData, TimeRangeData, TimeSlotData, MemberPreferenceData } from "../interfaces/dto/preferences.dto";
+import { PreferenceTemplateData, TimeRangeData, TimeSlotData, MemberPreferenceData, PreferenceStatus } from "../interfaces/dto/preferences.dto";
 import { PreferenceTemplate, PreferenceTimeRange, TimeSlot } from "../models";
+import { TeamRepository } from "../repositories";
 import { PreferenceRepository } from "../repositories/preferences.repository";
 
 export class PreferenceService {
 	private readonly repo: PreferenceRepository;
+	private readonly teamRepo: TeamRepository;
 
-	constructor(repo: PreferenceRepository) {
+	constructor(repo: PreferenceRepository, teamRepo: TeamRepository) {
 		this.repo = repo;
+		this.teamRepo = teamRepo;
 	}
 
-	// Transform methods
 	private async transformTimeRange(range: PreferenceTimeRange): Promise<TimeRangeData> {
 		return {
 			id: range.id,
@@ -51,7 +53,6 @@ export class PreferenceService {
 		return await this.repo.getTimeRangesByTeam(teamId, userId);
 	}
 
-	// Template operations
 	public async createTemplate(
 		data: Omit<PreferenceTemplateData, 'id' | 'created_at' | 'updated_at' | 'time_slots'>,
 		userId: number
@@ -72,6 +73,18 @@ export class PreferenceService {
 		const template = await this.repo.getTemplatesByTeam(id, userId);
 		if (!template.length) return null;
 		return this.transformTemplate(template[0]);
+	}
+
+	public async updateStatus(templateId: number, teamId: number, userId: number, status: PreferenceStatus) {
+		const template = await this.getOne(templateId, userId);
+		if (!template || template.team_id !== teamId)
+			throw "access violation, this member cannot update this template";
+
+		const role = await this.teamRepo.getMemberRole(teamId, userId);
+		if (!role || role !== 'admin')
+			throw "access violation, this member is not an admin";
+
+		this.repo.updateStatus(templateId, teamId, status);
 	}
 
 	public async getPublished(userId: number): Promise<PreferenceTemplateData | null> {
@@ -118,7 +131,6 @@ export class PreferenceService {
 		await this.repo.deleteTemplate(id, userId);
 	}
 
-	// Time Range operations
 	public async createTimeRange(
 		data: Omit<TimeRangeData, 'id' | 'created_at'>,
 		userId: number
@@ -145,7 +157,6 @@ export class PreferenceService {
 		await this.repo.deleteTimeRange(id, userId);
 	}
 
-	// Time Slot operations
 	public async createTimeSlot(
 		data: Omit<TimeSlotData, 'id' | 'created_at' | 'time_range'>,
 		userId: number
@@ -184,7 +195,6 @@ export class PreferenceService {
 		await this.repo.deleteTimeSlot(id, userId);
 	}
 
-	// Member Preference operations
 	public async createMemberPreference(
 		data: Omit<MemberPreferenceData, 'id' | 'created_at' | 'updated_at' | 'submitted_at'>,
 		userId: number
@@ -201,7 +211,6 @@ export class PreferenceService {
 		data: Partial<MemberPreferenceData> & { id: number },
 		userId: number
 	): Promise<void> {
-		// Convert the DTO to the database model type
 		const updateData: Partial<MemberPreferenceData> & { id: number } = {
 			id: data.id,
 			...(data.status !== undefined && { status: data.status }),
@@ -220,7 +229,6 @@ export class PreferenceService {
 		return await this.repo.getMemberPreferences(templateId, userId);
 	}
 
-	// Template status management
 	public async publishTemplate(id: number, userId: number): Promise<void> {
 		const template = await this.getOne(id, userId);
 		if (!template) {
@@ -251,7 +259,6 @@ export class PreferenceService {
 		}, userId);
 	}
 
-	// Utility methods
 	public async validateTimeSlots(templateId: number, userId: number): Promise<boolean> {
 		const template = await this.getOne(templateId, userId);
 		if (!template) return false;
@@ -260,7 +267,6 @@ export class PreferenceService {
 			throw new Error('Template must have at least one time slot before publishing');
 		}
 
-		// Add any additional validation logic here
 		return true;
 	}
 }

@@ -1,13 +1,15 @@
 // preferences.dto.ts
 import { PreferenceTimeRange } from "../../models";
 
+export type PreferenceStatus = 'draft' | 'published' | 'closed';
+
 export interface PreferenceTemplateData {
 	id: number;
 	team_id: number;
 	name: string;
 	start_date: Date;
 	end_date: Date;
-	status: 'draft' | 'published' | 'closed';
+	status: PreferenceStatus;
 	creator: number;
 	created_at: Date;
 	updated_at: Date;
