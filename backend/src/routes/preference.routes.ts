@@ -45,7 +45,7 @@ router.route("/published")
 	)
 
 router.route("/status/:templateId")
-	.post(
+	.patch(
 		authController.authenticate,
 		controller.updateStatus
 	)
