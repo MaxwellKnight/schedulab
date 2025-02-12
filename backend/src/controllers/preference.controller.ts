@@ -75,6 +75,23 @@ export class PreferenceController {
 		}
 	}
 
+	public updateStatus = async (req: Request, res: Response) => {
+		const templateId = parseInt(req.params.templateId);
+		const teamId = parseInt(req.query.teamId as string);
+		const status = req.query.status as string;
+
+		if (!status || (status !== 'draft' && status !== 'published' && status !== 'closed')) {
+			return res.status(400).json({ error: 'Invalid status' });
+		}
+
+		try {
+			await this.service.updateStatus(templateId, teamId, req.user!.id, status);
+			res.json({ success: true });
+		} catch (error: any) {
+			res.status(500).json({ error: error.message });
+		}
+	};
+
 	public getPublished = async (req: Request, res: Response): Promise<void> => {
 		try {
 			const template = await this.service.getPublished(req.user!.id);

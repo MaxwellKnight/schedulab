@@ -3,7 +3,7 @@ import { makeSQL } from "../configs/db.config";
 import { makeValidator } from "../middlewares/middlewares";
 import { PreferenceService, UserService } from "../services";
 import { AuthController, PreferenceController } from "../controllers";
-import { PreferenceRepository, UserRepository } from "../repositories";
+import { PreferenceRepository, TeamRepository, UserRepository } from "../repositories";
 import {
 	preferenceTemplateSchema,
 	timeRangeSchema,
@@ -12,7 +12,8 @@ import {
 } from "../validations/preference.validation";
 
 const repository = new PreferenceRepository(makeSQL());
-const service = new PreferenceService(repository);
+const teamRepo = new TeamRepository(makeSQL());
+const service = new PreferenceService(repository, teamRepo);
 const controller = new PreferenceController(service);
 const userRepository = new UserRepository(makeSQL());
 const userService = new UserService(userRepository);
@@ -41,6 +42,12 @@ router.route("/published")
 	.get(
 		authController.authenticate,
 		controller.getPublished
+	)
+
+router.route("/status/:templateId")
+	.post(
+		authController.authenticate,
+		controller.updateStatus
 	)
 
 router.route("/team/:teamId")

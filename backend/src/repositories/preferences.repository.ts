@@ -2,7 +2,7 @@ import { Database } from "../configs/db.config";
 import { PreferenceTemplate, TimeSlot, PreferenceTimeRange } from "../models";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
 import { CreateMemberPreferenceData } from "../models/preference.model";
-import { MemberPreferenceData } from "../interfaces/dto/preferences.dto";
+import { MemberPreferenceData, PreferenceStatus } from "../interfaces/dto/preferences.dto";
 
 interface TimeSlotRow extends RowDataPacket, Omit<TimeSlot, 'date' | 'created_at' | 'time_range'> {
     date: string;
@@ -92,6 +92,13 @@ export class PreferenceRepository {
         `, [userId]);
 
         return this.groupTemplates(rows);
+    }
+
+    public async updateStatus(templateId: number, teamId: number, newStatus: PreferenceStatus): Promise<void> {
+        await this.db.execute(
+            `CALL update_template_status(?, ?, ?)`,
+            [templateId, newStatus, teamId]
+        );
     }
 
     public async getByDates(start_date: Date, end_date: Date, userId: number): Promise<PreferenceTemplate[]> {
