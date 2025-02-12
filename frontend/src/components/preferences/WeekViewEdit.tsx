@@ -8,7 +8,6 @@ import { format } from "date-fns";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PreferenceTemplate } from './types';
 
-// Core Types
 interface TimeRange {
 	start_time: string;
 	end_time: string;
@@ -19,7 +18,6 @@ interface DailyPreference {
 	ranges: TimeRange[];
 }
 
-// Component Props Types
 interface WeekViewEditorProps {
 	timeRanges: DailyPreference[];
 	template: PreferenceTemplate | null;
