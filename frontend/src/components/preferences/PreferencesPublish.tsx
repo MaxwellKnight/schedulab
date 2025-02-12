@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, Users, Check, X, CalendarDays, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, Users, Check, X, CalendarDays, } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,10 +10,11 @@ import { useTeam } from '@/context';
 import { PreferenceTemplate } from './types';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import axios from 'axios';
 
 interface ActionState {
 	templateId: number | null;
-	action: 'publishing' | 'closing' | null;
+	action: 'published' | 'closed' | 'draft' | null;
 }
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -258,20 +259,37 @@ const PreferencesPublish = () => {
 	);
 
 	const handleAction = async (templateId: number, action: 'publish' | 'close') => {
-		setActionState({ templateId, action: action === 'publish' ? 'publishing' : 'closing' });
+		setActionState({ templateId, action: action === 'publish' ? 'published' : 'closed' });
 
 		try {
-			await fetch(`/api/preferences/${templateId}/${action}`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			});
-			await refetch();
+			const _ = await axios.patch<{ success?: string; error?: string }>(
+				`/preferences/status/${templateId}`,
+				{},
+				{
+					params: {
+						teamId: selectedTeam?.id,
+						status: action === 'publish' ? 'published' : 'closed'
+					},
+					headers: {
+						'Accept': 'application/json'
+					},
+					withCredentials: true
+				}
+			);
+
+			refetch();
 			setShowConfirmation(false);
 			setShowDetails(false);
 		} catch (err) {
-			console.error(`Error ${action}ing template:`, err);
+			if (axios.isAxiosError(err)) {
+				console.error(`Error ${action}ing template:`, {
+					status: err.response?.status,
+					data: err.response?.data,
+					message: err.message
+				});
+			} else {
+				console.error(`Error ${action}ing template:`, err);
+			}
 		} finally {
 			setActionState({ templateId: null, action: null });
 		}
