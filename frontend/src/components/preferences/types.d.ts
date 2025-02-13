@@ -49,6 +49,11 @@ export interface TimeRangePreferences {
 	created_at: string;
 }
 
+export interface TimeRange {
+	start_time: string;
+	end_time: string;
+}
+
 export interface TimeSlot {
 	id: number;
 	template_id: number;

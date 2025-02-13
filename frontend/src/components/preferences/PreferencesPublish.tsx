@@ -270,10 +270,6 @@ const PreferencesPublish = () => {
 						teamId: selectedTeam?.id,
 						status: action === 'publish' ? 'published' : 'closed'
 					},
-					headers: {
-						'Accept': 'application/json'
-					},
-					withCredentials: true
 				}
 			);
 
