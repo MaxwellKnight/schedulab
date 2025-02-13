@@ -6,7 +6,7 @@ import { DailyPreference, PreferenceRange } from '@/components/preferences/types
 interface PreferencesContextType {
 	timeRanges: DailyPreference[];
 	range: DateRange | undefined;
-	setRange: (range: DateRange | undefined) => void;
+	setRange: (range: DateRange) => void;
 	handleAddTimeRange: (date: Date) => void;
 	handleRemoveTimeRange: (date: Date, index: number) => void;
 	handleUpdateTimeRange: (date: Date, index: number, field: 'start_time' | 'end_time', value: string) => void;

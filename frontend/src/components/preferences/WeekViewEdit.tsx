@@ -1,40 +1,28 @@
-import React, { useMemo, useCallback, memo } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Plus, X, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { format } from "date-fns";
+import React, { useMemo, useCallback, memo } from 'react';
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { PreferenceTemplate } from './types';
+import { DailyPreference, PreferenceTemplate, TimeRange } from './types';
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-interface TimeRange {
-	start_time: string;
-	end_time: string;
-}
-
-interface DailyPreference {
-	column: Date;
-	ranges: TimeRange[];
-}
+type TimeRangeField = 'start_time' | 'end_time';
+type UpdateRangeFunc = (date: Date, index: number, field: TimeRangeField, value: string) => void;
 
 interface WeekViewEditorProps {
 	timeRanges: DailyPreference[];
 	template: PreferenceTemplate | null;
 	onAddTimeRange: (date: Date) => void;
 	onRemoveTimeRange: (date: Date, index: number) => void;
-	onUpdateTimeRange: (
-		date: Date,
-		index: number,
-		field: 'start_time' | 'end_time',
-		value: string
-	) => void;
+	onUpdateTimeRange: UpdateRangeFunc;
 	isLoading?: boolean;
 }
 
 interface TimeRangeSelectorProps {
 	range: TimeRange;
-	onUpdate: (field: 'start_time' | 'end_time', value: string) => void;
+	onUpdate: (field: TimeRangeField, value: string) => void;
 	isInvalid: boolean;
 }
 
@@ -44,12 +32,7 @@ interface DayCardProps {
 	template: PreferenceTemplate | null;
 	onAddTimeRange: (date: Date) => void;
 	onRemoveTimeRange: (date: Date, index: number) => void;
-	onUpdateTimeRange: (
-		date: Date,
-		index: number,
-		field: 'start_time' | 'end_time',
-		value: string
-	) => void;
+	onUpdateTimeRange: UpdateRangeFunc;
 }
 
 const TIME_OPTIONS: string[] = Array.from({ length: 48 }, (_, i) => {
@@ -181,7 +164,6 @@ TimeRangeSelector.displayName = 'TimeRangeSelector';
 
 const DayCard: React.FC<DayCardProps> = memo(({
 	day,
-	_,
 	template,
 	onAddTimeRange,
 	onRemoveTimeRange,
