@@ -83,19 +83,6 @@ router.route("/:teamId")
 		controller.delete
 	);
 
-// Template status management
-//router.route("/:id/publish")
-//	.post(
-//		authController.authenticate,
-//		controller.publish
-//	);
-//
-//router.route("/:id/close")
-//	.post(
-//		authController.authenticate,
-//		controller.close
-//	);
-
 // Time range routes
 router.route("/:templateId/time-ranges")
 	.post(
