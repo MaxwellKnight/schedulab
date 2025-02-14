@@ -180,8 +180,6 @@ const PreferencesPublish = () => {
 
 	const {
 		data: templates,
-		loading,
-		error,
 		fetchData: refetch,
 		clearCache
 	} = useAuthenticatedFetch<PreferenceTemplate[]>('/preferences', {
