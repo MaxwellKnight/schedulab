@@ -226,9 +226,9 @@ export const useAuthenticatedFetch = <T,>(
 	}, [navigate]);
 
 	const fetchData = useCallback(async () => {
-		if (!mounted.current) return;
-
 		setState(prev => ({ ...prev, loading: true, error: null }));
+
+		if (!mounted.current) return;
 
 		try {
 			// Check cache first
@@ -267,14 +267,11 @@ export const useAuthenticatedFetch = <T,>(
 							if (mounted.current) {
 								setState({ data, loading: false, error: null });
 							}
-						} else {
-							throw new Error('Maximum retry attempts reached');
+							return;
 						}
-					} else {
-						throw error;
+
+						throw new Error('Maximum retry attempts reached');
 					}
-				} else {
-					throw error;
 				}
 			}
 		} catch (err) {
