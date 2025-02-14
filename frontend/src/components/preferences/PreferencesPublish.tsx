@@ -8,9 +8,10 @@ import { useAuthenticatedFetch } from '@/hooks/useAuthFetch';
 import { format } from 'date-fns';
 import { useTeam } from '@/context';
 import { PreferenceTemplate } from './types';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import axios from 'axios';
+import ConfirmationDialog from '../ConfirmationDialog';
 
 interface ActionState {
 	templateId: number | null;
@@ -56,16 +57,12 @@ const EmptyState = () => (
 interface ViewDetailsProps {
 	template: PreferenceTemplate;
 	onClose: () => void;
-	onPublish: () => void;
-	onCloseTemplate: () => void;
 	isPublished: boolean;
 }
 
 const ViewDetails: React.FC<ViewDetailsProps> = ({
 	template,
 	onClose,
-	onPublish,
-	onCloseTemplate,
 	isPublished
 }) => {
 	const timeSlotsByDate = template.time_slots.reduce((acc: Record<string, PreferenceTemplate["time_slots"]>, slot) => {
@@ -165,75 +162,10 @@ const ViewDetails: React.FC<ViewDetailsProps> = ({
 						</div>
 					</TabsContent>
 				</Tabs>
-
-				{/* Footer */}
-				<DialogFooter className="p-3 border-t border-blue-100 bg-gray-50">
-					<div className="w-full flex justify-end gap-2">
-						<Button
-							variant="outline"
-							onClick={onClose}
-							className="border-blue-200"
-						>
-							Cancel
-						</Button>
-						{isPublished ?
-							null : (
-								<Button
-									onClick={onPublish}
-									className="bg-blue-600 hover:bg-blue-700"
-								>
-									<Check className="w-4 h-4 mr-2" />
-									Publish
-								</Button>
-							)}
-					</div>
-				</DialogFooter>
 			</DialogContent>
 		</Dialog>
 	);
 };
-
-interface ConfirmationDialogProps {
-	isOpen: boolean;
-	onClose: () => void;
-	onConfirm: () => void;
-	onRepublish: () => void;
-	templateName: string;
-}
-
-const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
-	isOpen,
-	onClose,
-	onConfirm,
-	templateName,
-}) => (
-	<Dialog open={isOpen} onOpenChange={onClose}>
-		<DialogContent>
-			<DialogHeader>
-				<DialogTitle>Close Template</DialogTitle>
-				<DialogDescription>
-					Are you sure you want to close `&quot;`{templateName}`&quot;`? You can publish it again later.
-				</DialogDescription>
-			</DialogHeader>
-			<DialogFooter className="flex-col sm:flex-row gap-2">
-				<Button
-					variant="outline"
-					onClick={onClose}
-					className="w-full sm:w-auto border-blue-200 text-blue-700 hover:bg-blue-50"
-				>
-					Cancel
-				</Button>
-				<Button
-					variant="destructive"
-					onClick={onConfirm}
-					className="w-full sm:w-auto"
-				>
-					Close Template
-				</Button>
-			</DialogFooter>
-		</DialogContent>
-	</Dialog>
-);
 
 const PreferencesPublish = () => {
 	const [actionState, setActionState] = useState<ActionState>({
@@ -241,6 +173,7 @@ const PreferencesPublish = () => {
 		action: null
 	});
 	const [showConfirmation, setShowConfirmation] = useState(false);
+	const [showPublishConfirm, setShowPublishConfirm] = useState(false);
 	const [selectedTemplate, setSelectedTemplate] = useState<PreferenceTemplate | null>(null);
 	const [showDetails, setShowDetails] = useState(false);
 	const { selectedTeam } = useTeam();
@@ -249,7 +182,8 @@ const PreferencesPublish = () => {
 		data: templates,
 		loading,
 		error,
-		fetchData: refetch
+		fetchData: refetch,
+		clearCache
 	} = useAuthenticatedFetch<PreferenceTemplate[]>('/preferences', {
 		params: { teamId: selectedTeam?.id }
 	});
@@ -262,7 +196,7 @@ const PreferencesPublish = () => {
 		setActionState({ templateId, action: action === 'publish' ? 'published' : 'closed' });
 
 		try {
-			const _ = await axios.patch<{ success?: string; error?: string }>(
+			await axios.patch<{ success?: string; error?: string }>(
 				`/preferences/status/${templateId}`,
 				{},
 				{
@@ -273,8 +207,11 @@ const PreferencesPublish = () => {
 				}
 			);
 
-			refetch();
+			clearCache();
+			await refetch();
+
 			setShowConfirmation(false);
+			setShowPublishConfirm(false);
 			setShowDetails(false);
 		} catch (err) {
 			if (axios.isAxiosError(err)) {
@@ -296,10 +233,16 @@ const PreferencesPublish = () => {
 		setShowConfirmation(true);
 	};
 
+	const handlePublishClick = (template: PreferenceTemplate) => {
+		setSelectedTemplate(template);
+		setShowPublishConfirm(true);
+	}
+
 	const handleViewDetails = (template: PreferenceTemplate) => {
 		setSelectedTemplate(template);
 		setShowDetails(true);
 	};
+
 	return (
 		<div className="p-6 max-w-7xl mx-auto">
 			<header className="mb-8">
@@ -370,7 +313,7 @@ const PreferencesPublish = () => {
 													</Button>
 												) : (
 													<Button
-														onClick={() => handleAction(template.id, 'publish')}
+														onClick={() => handlePublishClick(template)}
 														disabled={actionState.templateId === template.id}
 														className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
 													>
@@ -397,10 +340,24 @@ const PreferencesPublish = () => {
 					{selectedTemplate && showConfirmation && (
 						<ConfirmationDialog
 							isOpen={showConfirmation}
+							title=''
 							onClose={() => setShowConfirmation(false)}
 							onConfirm={() => handleAction(selectedTemplate.id, 'close')}
-							onRepublish={() => handleAction(selectedTemplate.id, 'publish')}
-							templateName={selectedTemplate.name}
+							description={`Are you sure you want to close "${selectedTemplate.name}"? You can publish it again later.`}
+							confirmText="Close"
+						/>
+					)}
+
+					{selectedTemplate && showPublishConfirm && (
+						<ConfirmationDialog
+							isOpen={showPublishConfirm}
+							title=''
+							onClose={() => setShowPublishConfirm(false)}
+							onConfirm={() => handleAction(selectedTemplate.id, 'publish')}
+							description={`Are you sure you want to publish "${selectedTemplate.name}"?`}
+							confirmText="Publish"
+							confirmVariant='secondary'
+							confirmClassName='w-full sm:w-auto bg-blue-600 text-white hover:bg-blue-700'
 						/>
 					)}
 
@@ -409,8 +366,6 @@ const PreferencesPublish = () => {
 						<ViewDetails
 							template={selectedTemplate}
 							onClose={() => setShowDetails(false)}
-							onPublish={() => handleAction(selectedTemplate.id, 'publish')}
-							onCloseTemplate={() => handleCloseClick(selectedTemplate)}
 							isPublished={selectedTemplate.status === 'published'}
 						/>
 					)}
