@@ -70,9 +70,9 @@ export class PreferenceService {
 	}
 
 	public async getOne(id: number, userId: number): Promise<PreferenceTemplateData | null> {
-		const template = await this.repo.getTemplatesByTeam(id, userId);
-		if (!template.length) return null;
-		return this.transformTemplate(template[0]);
+		const template = await this.repo.getOne(id, userId);
+		if (!template) return null;
+		return this.transformTemplate(template);
 	}
 
 	public async updateStatus(templateId: number, teamId: number, userId: number, status: PreferenceStatus) {
