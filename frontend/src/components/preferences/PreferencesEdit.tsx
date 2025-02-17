@@ -59,7 +59,7 @@ export const PreferencesEdit: React.FC<PreferencesEditProps> = ({
 			});
 			setEditedName(selectedTemplate.name);
 		}
-	}, [selectedTemplate, setRange]);
+	}, [selectedTemplate]);
 
 	const handleEditSubmit = async () => {
 		if (!selectedTemplate || !onUpdateName) return;
